@@ -26,12 +26,13 @@ import { Markdown } from "@/components/ui/markdown";
 import type { ImageAttachment } from "@/store/app-store";
 import {
   useKeyboardShortcuts,
-  ACTION_SHORTCUTS,
+  useKeyboardShortcutsConfig,
   KeyboardShortcut,
 } from "@/hooks/use-keyboard-shortcuts";
 
 export function AgentView() {
   const { currentProject, setLastSelectedSession, getLastSelectedSession } = useAppStore();
+  const shortcuts = useKeyboardShortcutsConfig();
   const [input, setInput] = useState("");
   const [selectedImages, setSelectedImages] = useState<ImageAttachment[]>([]);
   const [showImageDropZone, setShowImageDropZone] = useState(false);
@@ -417,12 +418,12 @@ export function AgentView() {
 
   // Keyboard shortcuts for agent view
   const agentShortcuts: KeyboardShortcut[] = useMemo(() => {
-    const shortcuts: KeyboardShortcut[] = [];
+    const shortcutsList: KeyboardShortcut[] = [];
 
     // New session shortcut - only when in agent view with a project
     if (currentProject) {
-      shortcuts.push({
-        key: ACTION_SHORTCUTS.newSession,
+      shortcutsList.push({
+        key: shortcuts.newSession,
         action: () => {
           if (quickCreateSessionRef.current) {
             quickCreateSessionRef.current();
@@ -432,8 +433,8 @@ export function AgentView() {
       });
     }
 
-    return shortcuts;
-  }, [currentProject]);
+    return shortcutsList;
+  }, [currentProject, shortcuts]);
 
   // Register keyboard shortcuts
   useKeyboardShortcuts(agentShortcuts);

@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SessionListItem } from "@/types/electron";
-import { ACTION_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
+import { useKeyboardShortcutsConfig } from "@/hooks/use-keyboard-shortcuts";
+import { useAppStore } from "@/store/app-store";
 
 // Random session name generator
 const adjectives = [
@@ -61,6 +62,7 @@ export function SessionManager({
   isCurrentSessionThinking = false,
   onQuickCreateRef,
 }: SessionManagerProps) {
+  const shortcuts = useKeyboardShortcutsConfig();
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
@@ -246,12 +248,12 @@ export function SessionManager({
               size="sm"
               onClick={handleQuickCreateSession}
               data-testid="new-session-button"
-              title={`New Session (${ACTION_SHORTCUTS.newSession})`}
+              title={`New Session (${shortcuts.newSession})`}
             >
               <Plus className="w-4 h-4 mr-1" />
               New
               <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-mono rounded bg-primary-foreground/20 border border-primary-foreground/30 text-primary-foreground">
-                {ACTION_SHORTCUTS.newSession}
+                {shortcuts.newSession}
               </span>
             </Button>
           )}

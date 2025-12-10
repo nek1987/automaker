@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn, modelSupportsThinking } from "@/lib/utils";
 import {
   useKeyboardShortcuts,
-  ACTION_SHORTCUTS,
+  useKeyboardShortcutsConfig,
   KeyboardShortcut,
 } from "@/hooks/use-keyboard-shortcuts";
 import {
@@ -440,6 +440,7 @@ function ProfileForm({
 export function ProfilesView() {
   const { aiProfiles, addAIProfile, updateAIProfile, removeAIProfile, reorderAIProfiles } =
     useAppStore();
+  const shortcuts = useKeyboardShortcutsConfig();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingProfile, setEditingProfile] = useState<AIProfile | null>(null);
@@ -508,17 +509,17 @@ export function ProfilesView() {
 
   // Build keyboard shortcuts for profiles view
   const profilesShortcuts: KeyboardShortcut[] = useMemo(() => {
-    const shortcuts: KeyboardShortcut[] = [];
+    const shortcutsList: KeyboardShortcut[] = [];
 
     // Add profile shortcut - when in profiles view
-    shortcuts.push({
-      key: ACTION_SHORTCUTS.addProfile,
+    shortcutsList.push({
+      key: shortcuts.addProfile,
       action: () => setShowAddDialog(true),
       description: "Create new profile",
     });
 
-    return shortcuts;
-  }, []);
+    return shortcutsList;
+  }, [shortcuts]);
 
   // Register keyboard shortcuts for profiles view
   useKeyboardShortcuts(profilesShortcuts);
@@ -549,7 +550,7 @@ export function ProfilesView() {
               <Plus className="w-4 h-4 mr-2" />
               New Profile
               <span className="hidden lg:flex items-center justify-center ml-2 px-2 py-0.5 text-[10px] font-mono rounded bg-primary-foreground/20 border border-primary-foreground/30 text-primary-foreground">
-                {ACTION_SHORTCUTS.addProfile}
+                {shortcuts.addProfile}
               </span>
             </Button>
           </div>

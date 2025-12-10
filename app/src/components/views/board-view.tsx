@@ -86,7 +86,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAutoMode } from "@/hooks/use-auto-mode";
 import {
   useKeyboardShortcuts,
-  ACTION_SHORTCUTS,
+  useKeyboardShortcutsConfig,
   KeyboardShortcut,
 } from "@/hooks/use-keyboard-shortcuts";
 import { useWindowState } from "@/hooks/use-window-state";
@@ -189,6 +189,7 @@ export function BoardView() {
     showProfilesOnly,
     aiProfiles,
   } = useAppStore();
+  const shortcuts = useKeyboardShortcutsConfig();
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
   const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -292,14 +293,14 @@ export function BoardView() {
 
   // Keyboard shortcuts for this view
   const boardShortcuts: KeyboardShortcut[] = useMemo(() => {
-    const shortcuts: KeyboardShortcut[] = [
+    const shortcutsList: KeyboardShortcut[] = [
       {
-        key: ACTION_SHORTCUTS.addFeature,
+        key: shortcuts.addFeature,
         action: () => setShowAddDialog(true),
         description: "Add new feature",
       },
       {
-        key: ACTION_SHORTCUTS.startNext,
+        key: shortcuts.startNext,
         action: () => startNextFeaturesRef.current(),
         description: "Start next features from backlog",
       },
@@ -309,7 +310,7 @@ export function BoardView() {
     inProgressFeaturesForShortcuts.slice(0, 10).forEach((feature, index) => {
       // Keys 1-9 for first 9 cards, 0 for 10th card
       const key = index === 9 ? "0" : String(index + 1);
-      shortcuts.push({
+      shortcutsList.push({
         key,
         action: () => {
           setOutputFeature(feature);
@@ -319,8 +320,8 @@ export function BoardView() {
       });
     });
 
-    return shortcuts;
-  }, [inProgressFeaturesForShortcuts]);
+    return shortcutsList;
+  }, [inProgressFeaturesForShortcuts, shortcuts]);
   useKeyboardShortcuts(boardShortcuts);
 
   // Prevent hydration issues
@@ -1567,7 +1568,7 @@ export function BoardView() {
               className="ml-3 px-2 py-0.5 text-[10px] font-mono rounded bg-primary-foreground/20 border border-primary-foreground/30 text-primary-foreground inline-flex items-center justify-center"
               data-testid="shortcut-add-feature"
             >
-              {ACTION_SHORTCUTS.addFeature}
+              {shortcuts.addFeature}
             </span>
           </Button>
         </div>
@@ -1636,7 +1637,7 @@ export function BoardView() {
                               <FastForward className="w-3 h-3 mr-1" />
                               Start Next
                               <span className="ml-1 px-1 py-0.5 text-[9px] font-mono rounded bg-accent border border-border-glass">
-                                {ACTION_SHORTCUTS.startNext}
+                                {shortcuts.startNext}
                               </span>
                             </Button>
                           )}

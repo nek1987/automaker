@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import {
   useKeyboardShortcuts,
-  ACTION_SHORTCUTS,
+  useKeyboardShortcutsConfig,
   KeyboardShortcut,
 } from "@/hooks/use-keyboard-shortcuts";
 import {
@@ -43,6 +43,7 @@ interface ContextFile {
 
 export function ContextView() {
   const { currentProject } = useAppStore();
+  const shortcuts = useKeyboardShortcutsConfig();
   const [contextFiles, setContextFiles] = useState<ContextFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<ContextFile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,12 +64,12 @@ export function ContextView() {
   const contextShortcuts: KeyboardShortcut[] = useMemo(
     () => [
       {
-        key: ACTION_SHORTCUTS.addContextFile,
+        key: shortcuts.addContextFile,
         action: () => setIsAddDialogOpen(true),
         description: "Add new context file",
       },
     ],
-    []
+    [shortcuts]
   );
   useKeyboardShortcuts(contextShortcuts);
 
@@ -374,7 +375,7 @@ export function ContextView() {
               className="ml-2 px-1.5 py-0.5 text-[10px] font-mono rounded bg-secondary border border-border"
               data-testid="shortcut-add-context-file"
             >
-              {ACTION_SHORTCUTS.addContextFile}
+              {shortcuts.addContextFile}
             </span>
           </Button>
         </div>

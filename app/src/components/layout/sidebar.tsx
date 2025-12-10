@@ -64,9 +64,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   useKeyboardShortcuts,
-  NAV_SHORTCUTS,
-  UI_SHORTCUTS,
-  ACTION_SHORTCUTS,
+  useKeyboardShortcutsConfig,
   KeyboardShortcut,
 } from "@/hooks/use-keyboard-shortcuts";
 import { getElectronAPI, Project, TrashedProject } from "@/lib/electron";
@@ -220,6 +218,9 @@ export function Sidebar() {
     setProjectTheme,
     theme: globalTheme,
   } = useAppStore();
+
+  // Get customizable keyboard shortcuts
+  const shortcuts = useKeyboardShortcutsConfig();
 
   // State for project picker dropdown
   const [isProjectPickerOpen, setIsProjectPickerOpen] = useState(false);
@@ -496,13 +497,13 @@ export function Sidebar() {
           id: "board",
           label: "Kanban Board",
           icon: LayoutGrid,
-          shortcut: NAV_SHORTCUTS.board,
+          shortcut: shortcuts.board,
         },
         {
           id: "agent",
           label: "Agent Runner",
           icon: Bot,
-          shortcut: NAV_SHORTCUTS.agent,
+          shortcut: shortcuts.agent,
         },
       ],
     },
@@ -513,25 +514,25 @@ export function Sidebar() {
           id: "spec",
           label: "Spec Editor",
           icon: FileText,
-          shortcut: NAV_SHORTCUTS.spec,
+          shortcut: shortcuts.spec,
         },
         {
           id: "context",
           label: "Context",
           icon: BookOpen,
-          shortcut: NAV_SHORTCUTS.context,
+          shortcut: shortcuts.context,
         },
         {
           id: "tools",
           label: "Agent Tools",
           icon: Wrench,
-          shortcut: NAV_SHORTCUTS.tools,
+          shortcut: shortcuts.tools,
         },
         {
           id: "profiles",
           label: "AI Profiles",
           icon: UserCircle,
-          shortcut: NAV_SHORTCUTS.profiles,
+          shortcut: shortcuts.profiles,
         },
       ],
     },
@@ -573,26 +574,26 @@ export function Sidebar() {
 
   // Build keyboard shortcuts for navigation
   const navigationShortcuts: KeyboardShortcut[] = useMemo(() => {
-    const shortcuts: KeyboardShortcut[] = [];
+    const shortcutsList: KeyboardShortcut[] = [];
 
     // Sidebar toggle shortcut - always available
-    shortcuts.push({
-      key: UI_SHORTCUTS.toggleSidebar,
+    shortcutsList.push({
+      key: shortcuts.toggleSidebar,
       action: () => toggleSidebar(),
       description: "Toggle sidebar",
     });
 
     // Open project shortcut - opens the folder selection dialog directly
-    shortcuts.push({
-      key: ACTION_SHORTCUTS.openProject,
+    shortcutsList.push({
+      key: shortcuts.openProject,
       action: () => handleOpenFolder(),
       description: "Open folder selection dialog",
     });
 
     // Project picker shortcut - only when we have projects
     if (projects.length > 0) {
-      shortcuts.push({
-        key: ACTION_SHORTCUTS.projectPicker,
+      shortcutsList.push({
+        key: shortcuts.projectPicker,
         action: () => setIsProjectPickerOpen((prev) => !prev),
         description: "Toggle project picker",
       });
@@ -600,13 +601,13 @@ export function Sidebar() {
 
     // Project cycling shortcuts - only when we have project history
     if (projectHistory.length > 1) {
-      shortcuts.push({
-        key: ACTION_SHORTCUTS.cyclePrevProject,
+      shortcutsList.push({
+        key: shortcuts.cyclePrevProject,
         action: () => cyclePrevProject(),
         description: "Cycle to previous project (MRU)",
       });
-      shortcuts.push({
-        key: ACTION_SHORTCUTS.cycleNextProject,
+      shortcutsList.push({
+        key: shortcuts.cycleNextProject,
         action: () => cycleNextProject(),
         description: "Cycle to next project (LRU)",
       });
@@ -617,7 +618,7 @@ export function Sidebar() {
       navSections.forEach((section) => {
         section.items.forEach((item) => {
           if (item.shortcut) {
-            shortcuts.push({
+            shortcutsList.push({
               key: item.shortcut,
               action: () => setCurrentView(item.id as any),
               description: `Navigate to ${item.label}`,
@@ -627,15 +628,16 @@ export function Sidebar() {
       });
 
       // Add settings shortcut
-      shortcuts.push({
-        key: NAV_SHORTCUTS.settings,
+      shortcutsList.push({
+        key: shortcuts.settings,
         action: () => setCurrentView("settings"),
         description: "Navigate to Settings",
       });
     }
 
-    return shortcuts;
+    return shortcutsList;
   }, [
+    shortcuts,
     currentProject,
     setCurrentView,
     toggleSidebar,
@@ -644,6 +646,7 @@ export function Sidebar() {
     projectHistory.length,
     cyclePrevProject,
     cycleNextProject,
+    navSections,
   ]);
 
   // Register keyboard shortcuts
@@ -682,7 +685,7 @@ export function Sidebar() {
             className="ml-1 px-1 py-0.5 bg-brand-500/10 border border-brand-500/30 rounded text-[10px] font-mono text-brand-400/70"
             data-testid="sidebar-toggle-shortcut"
           >
-            {UI_SHORTCUTS.toggleSidebar}
+            {shortcuts.toggleSidebar}
           </span>
         </div>
       </button>
@@ -735,12 +738,12 @@ export function Sidebar() {
             <button
               onClick={handleOpenFolder}
               className="group flex items-center justify-center flex-1 px-3 py-2.5 rounded-lg relative overflow-hidden transition-all text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 border border-sidebar-border"
-              title={`Open Folder (${ACTION_SHORTCUTS.openProject})`}
+              title={`Open Folder (${shortcuts.openProject})`}
               data-testid="open-project-button"
             >
               <FolderOpen className="w-4 h-4 shrink-0" />
               <span className="hidden lg:flex items-center justify-center w-5 h-5 text-[10px] font-mono rounded bg-brand-500/10 border border-brand-500/30 text-brand-400/70 ml-2">
-                {ACTION_SHORTCUTS.openProject}
+                {shortcuts.openProject}
               </span>
             </button>
             <button
@@ -782,7 +785,7 @@ export function Sidebar() {
                       className="hidden lg:flex items-center justify-center w-5 h-5 text-[10px] font-mono rounded bg-brand-500/10 border border-brand-500/30 text-brand-400/70"
                       data-testid="project-picker-shortcut"
                     >
-                      {ACTION_SHORTCUTS.projectPicker}
+                      {shortcuts.projectPicker}
                     </span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                   </div>
@@ -889,14 +892,14 @@ export function Sidebar() {
                         <Undo2 className="w-4 h-4 mr-2" />
                         <span className="flex-1">Previous</span>
                         <span className="text-[10px] font-mono text-muted-foreground ml-2">
-                          {ACTION_SHORTCUTS.cyclePrevProject}
+                          {shortcuts.cyclePrevProject}
                         </span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={cycleNextProject} data-testid="cycle-next-project">
                         <Redo2 className="w-4 h-4 mr-2" />
                         <span className="flex-1">Next</span>
                         <span className="text-[10px] font-mono text-muted-foreground ml-2">
-                          {ACTION_SHORTCUTS.cycleNextProject}
+                          {shortcuts.cycleNextProject}
                         </span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={clearProjectHistory} data-testid="clear-project-history">
@@ -1052,7 +1055,7 @@ export function Sidebar() {
                 )}
                 data-testid="shortcut-settings"
               >
-                {NAV_SHORTCUTS.settings}
+                {shortcuts.settings}
               </span>
             )}
             {!sidebarOpen && (

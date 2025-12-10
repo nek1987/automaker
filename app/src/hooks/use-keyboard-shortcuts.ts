@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { useAppStore } from "@/store/app-store";
 
 export interface KeyboardShortcut {
   key: string;
@@ -97,36 +98,10 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
 }
 
 /**
- * Shortcut definitions for navigation
+ * Hook to get current keyboard shortcuts from store
+ * This replaces the static constants and allows customization
  */
-export const NAV_SHORTCUTS: Record<string, string> = {
-  board: "K", // K for Kanban
-  agent: "A", // A for Agent
-  spec: "D", // D for Document (Spec)
-  context: "C", // C for Context
-  tools: "T", // T for Tools
-  settings: "S", // S for Settings
-  profiles: "M", // M for Models/profiles
-};
-
-/**
- * Shortcut definitions for UI controls
- */
-export const UI_SHORTCUTS: Record<string, string> = {
-  toggleSidebar: "`", // Backtick to toggle sidebar
-};
-
-/**
- * Shortcut definitions for add buttons
- */
-export const ACTION_SHORTCUTS: Record<string, string> = {
-  addFeature: "N", // N for New feature
-  addContextFile: "F", // F for File (add context file)
-  startNext: "G", // G for Grab (start next features from backlog)
-  newSession: "N", // N for New session (in agent view)
-  openProject: "O", // O for Open project (navigate to welcome view)
-  projectPicker: "P", // P for Project picker
-  cyclePrevProject: "Q", // Q for previous project (cycle back through MRU)
-  cycleNextProject: "E", // E for next project (cycle forward through MRU)
-  addProfile: "N", // N for New profile (when in profiles view)
-};
+export function useKeyboardShortcutsConfig() {
+  const keyboardShortcuts = useAppStore((state) => state.keyboardShortcuts);
+  return keyboardShortcuts;
+}
