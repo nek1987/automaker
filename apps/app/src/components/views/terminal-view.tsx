@@ -257,7 +257,8 @@ export function TerminalView() {
   };
 
   // Create a new terminal session
-  const createTerminal = async (direction?: "horizontal" | "vertical") => {
+  // targetSessionId: the terminal to split (if splitting an existing terminal)
+  const createTerminal = async (direction?: "horizontal" | "vertical", targetSessionId?: string) => {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -278,7 +279,7 @@ export function TerminalView() {
       const data = await response.json();
 
       if (data.success) {
-        addTerminalToLayout(data.data.id, direction);
+        addTerminalToLayout(data.data.id, direction, targetSessionId);
       } else {
         console.error("[Terminal] Failed to create session:", data.error);
       }
@@ -358,8 +359,8 @@ export function TerminalView() {
           isActive={terminalState.activeSessionId === content.sessionId}
           onFocus={() => setActiveTerminalSession(content.sessionId)}
           onClose={() => killTerminal(content.sessionId)}
-          onSplitHorizontal={() => createTerminal("horizontal")}
-          onSplitVertical={() => createTerminal("vertical")}
+          onSplitHorizontal={() => createTerminal("horizontal", content.sessionId)}
+          onSplitVertical={() => createTerminal("vertical", content.sessionId)}
           isDragging={activeDragId === content.sessionId}
           isDropTarget={activeDragId !== null && activeDragId !== content.sessionId}
           fontSize={terminalFontSize}

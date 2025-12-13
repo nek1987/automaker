@@ -593,7 +593,7 @@ export interface AppActions {
   // Terminal actions
   setTerminalUnlocked: (unlocked: boolean, token?: string) => void;
   setActiveTerminalSession: (sessionId: string | null) => void;
-  addTerminalToLayout: (sessionId: string, direction?: "horizontal" | "vertical") => void;
+  addTerminalToLayout: (sessionId: string, direction?: "horizontal" | "vertical", targetSessionId?: string) => void;
   removeTerminalFromLayout: (sessionId: string) => void;
   swapTerminals: (sessionId1: string, sessionId2: string) => void;
   clearTerminalState: () => void;
@@ -1534,7 +1534,7 @@ export const useAppStore = create<AppState & AppActions>()(
         });
       },
 
-      addTerminalToLayout: (sessionId, direction = "horizontal") => {
+      addTerminalToLayout: (sessionId, direction = "horizontal", targetSessionId) => {
         const current = get().terminalState;
         const newTerminal: TerminalPanelContent = { type: "terminal", sessionId, size: 50 };
 
@@ -1556,7 +1556,33 @@ export const useAppStore = create<AppState & AppActions>()(
         const activeTab = current.tabs.find(t => t.id === current.activeTabId);
         if (!activeTab) return;
 
-        const addToLayout = (
+        // If targetSessionId is provided, find and split that specific terminal
+        const splitTargetTerminal = (
+          node: TerminalPanelContent,
+          targetId: string,
+          targetDirection: "horizontal" | "vertical"
+        ): TerminalPanelContent => {
+          if (node.type === "terminal") {
+            if (node.sessionId === targetId) {
+              // Found the target - split it
+              return {
+                type: "split",
+                direction: targetDirection,
+                panels: [{ ...node, size: 50 }, newTerminal],
+              };
+            }
+            // Not the target, return unchanged
+            return node;
+          }
+          // It's a split - recurse into panels
+          return {
+            ...node,
+            panels: node.panels.map(p => splitTargetTerminal(p, targetId, targetDirection)),
+          };
+        };
+
+        // Legacy behavior: add to root layout (when no targetSessionId)
+        const addToRootLayout = (
           node: TerminalPanelContent,
           targetDirection: "horizontal" | "vertical"
         ): TerminalPanelContent => {
@@ -1583,9 +1609,14 @@ export const useAppStore = create<AppState & AppActions>()(
           };
         };
 
-        const newLayout = activeTab.layout
-          ? addToLayout(activeTab.layout, direction)
-          : { type: "terminal" as const, sessionId, size: 100 };
+        let newLayout: TerminalPanelContent;
+        if (!activeTab.layout) {
+          newLayout = { type: "terminal", sessionId, size: 100 };
+        } else if (targetSessionId) {
+          newLayout = splitTargetTerminal(activeTab.layout, targetSessionId, direction);
+        } else {
+          newLayout = addToRootLayout(activeTab.layout, direction);
+        }
 
         const newTabs = current.tabs.map(t =>
           t.id === current.activeTabId ? { ...t, layout: newLayout } : t
