@@ -43,6 +43,10 @@ b) Licensee may run the Software on personal or organizational infrastructure fo
 
 c) Core Contributors are each individually granted a perpetual, worldwide, royalty-free, non-exclusive license to use, copy, modify, distribute, and sublicense the Software for any purpose, including Monetization, without payment of any fees or royalties. Each Core Contributor may exercise these rights independently and does not require permission, consent, or approval from any other Core Contributor to Monetize the Software in any way they see fit.
 
+d) Commercial licenses for the Software may be discussed and issued to external parties or companies seeking to use the Software for financial gain or Monetization purposes. Core Contributors already have full rights under section 2(c) and do not require commercial licenses. Any commercial license issued to external parties shall require a unanimous vote by all Core Contributors and shall be granted in writing and signed by all Core Contributors.
+
+e) The list of individuals defined as "Core Contributors" in Section 1 shall be amended to reflect any revocation or reinstatement of status made under this section.
+
 3. RESTRICTIONS
 
 Licensee may NOT:
@@ -63,7 +67,24 @@ Licensee MAY:
 - Use the Software to build other commercial products (products that do NOT contain the Software or Derivative Works)
 - Modify the Software for internal use within their organization (commercial or non-profit)
 
-4. CONTRIBUTIONS AND RIGHTS ASSIGNMENT
+4. CORE CONTRIBUTOR STATUS MANAGEMENT
+
+a) Core Contributor status may be revoked indefinitely by the remaining Core Contributors if:
+
+- A Core Contributor cannot be reached for a period of one (1) month through reasonable means of communication (including but not limited to email, Discord, GitHub, or other project communication channels)
+- AND the Core Contributor has not contributed to the project during that one-month period. For purposes of this section, "contributed" means at least one of the following activities:
+  - Discussing the Software through project communication channels
+  - Committing code changes to the project repository
+  - Submitting bug fixes or patches
+  - Participating in project-related discussions or decision-making
+
+b) Revocation of Core Contributor status requires a unanimous vote by all other Core Contributors (excluding the Core Contributor whose status is being considered for revocation).
+
+c) Upon revocation of Core Contributor status, the individual shall no longer be considered a Core Contributor and shall lose the rights granted under section 2(c) of this Agreement. However, any Contributions made prior to revocation shall remain subject to the terms of section 5 (CONTRIBUTIONS AND RIGHTS ASSIGNMENT).
+
+d) A revoked Core Contributor may be reinstated to Core Contributor status with a unanimous vote by all current Core Contributors. Upon reinstatement, the individual shall regain all rights granted under section 2(c) of this Agreement.
+
+5. CONTRIBUTIONS AND RIGHTS ASSIGNMENT
 
 By submitting, pushing, or contributing any code, documentation, pull requests, issues, or other materials ("Contributions") to the Automaker project, you agree to the following terms without reservation:
 
@@ -75,11 +96,11 @@ c) **Waiver of Moral Rights:** You waive any "moral rights" or other rights with
 
 d) **Right to Contribute:** You represent and warrant that you are the original author of the Contributions, or that you have sufficient rights to grant the rights conveyed by this section, and that your Contributions do not infringe upon the rights of any third party.
 
-5. TERMINATION
+6. TERMINATION
 
 This license will terminate automatically if Licensee breaches any term of this Agreement. Upon termination, Licensee must immediately cease all use of the Software and destroy all copies in their possession.
 
-6. HIGH RISK DISCLAIMER AND LIMITATION OF LIABILITY
+7. HIGH RISK DISCLAIMER AND LIMITATION OF LIABILITY
 
 a) **AI RISKS:** THE SOFTWARE UTILIZES ARTIFICIAL INTELLIGENCE TO GENERATE CODE, EXECUTE COMMANDS, AND INTERACT WITH YOUR FILE SYSTEM. YOU ACKNOWLEDGE THAT AI SYSTEMS CAN BE UNPREDICTABLE, MAY GENERATE INCORRECT, INSECURE, OR DESTRUCTIVE CODE, AND MAY TAKE ACTIONS THAT COULD DAMAGE YOUR SYSTEM, FILES, OR HARDWARE.
 
@@ -95,7 +116,11 @@ d) **LIMITATION OF LIABILITY:** IN NO EVENT SHALL THE CORE CONTRIBUTORS, LICENSO
 - FINANCIAL LOSSES
 - BUSINESS INTERRUPTION
 
-7. CONTACT
+8. LICENSE AMENDMENTS
+
+Any amendment, modification, or update to this License Agreement must be agreed upon unanimously by all Core Contributors. No changes to this Agreement shall be effective unless all Core Contributors have provided their written consent or approval through a unanimous vote.
+
+9. CONTACT
 
 For inquiries regarding this license or permissions for Monetization, please contact the Core Contributors through the official project channels:
 
@@ -105,7 +130,7 @@ For inquiries regarding this license or permissions for Monetization, please con
 
 Any permission for Monetization requires the unanimous written consent of all Core Contributors.
 
-8. GOVERNING LAW
+10. GOVERNING LAW
 
 This Agreement shall be governed by and construed in accordance with the laws of the State of Tennessee, USA, without regard to conflict of law principles.
 
