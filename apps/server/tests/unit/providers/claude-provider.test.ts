@@ -12,7 +12,6 @@ describe("claude-provider.ts", () => {
     vi.clearAllMocks();
     provider = new ClaudeProvider();
     delete process.env.ANTHROPIC_API_KEY;
-    delete process.env.CLAUDE_CODE_OAUTH_TOKEN;
   });
 
   describe("getName", () => {
@@ -247,15 +246,6 @@ describe("claude-provider.ts", () => {
 
     it("should detect ANTHROPIC_API_KEY", async () => {
       process.env.ANTHROPIC_API_KEY = "test-key";
-
-      const result = await provider.detectInstallation();
-
-      expect(result.hasApiKey).toBe(true);
-      expect(result.authenticated).toBe(true);
-    });
-
-    it("should detect CLAUDE_CODE_OAUTH_TOKEN", async () => {
-      process.env.CLAUDE_CODE_OAUTH_TOKEN = "oauth-token";
 
       const result = await provider.detectInstallation();
 

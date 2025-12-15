@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const { apiKey } = await request.json();
 
     // Use provided API key or fall back to environment variable
-    const effectiveApiKey = apiKey || process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_CODE_OAUTH_TOKEN;
+    const effectiveApiKey = apiKey || process.env.ANTHROPIC_API_KEY;
 
     if (!effectiveApiKey) {
       return NextResponse.json(

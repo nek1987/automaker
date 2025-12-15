@@ -33,25 +33,15 @@ cd automaker
 npm install
 ```
 
-**Step 3:** Get your Claude subscription token:
+**Step 3:** Set your Anthropic API key (optional - you can also enter it in the app's setup wizard):
 
 ```bash
-claude setup-token
+export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-This command will authenticate you via your browser and print a token to your terminal.
+Alternatively, you can enter your API key directly in the Automaker setup wizard when you launch the app.
 
-> **⚠️ Warning:** This command will print your token to your terminal. Be careful if you're streaming or sharing your screen, as the token will be visible to anyone watching.
-
-**Step 4:** Export the Claude Code OAuth token in your shell (optional - you can also enter it in the app's setup wizard):
-
-```bash
-export CLAUDE_CODE_OAUTH_TOKEN="your-token-here"
-```
-
-Alternatively, you can enter your token directly in the Automaker setup wizard when you launch the app.
-
-**Step 5:** Start the development server:
+**Step 4:** Start the development server:
 
 ```bash
 npm run dev:electron

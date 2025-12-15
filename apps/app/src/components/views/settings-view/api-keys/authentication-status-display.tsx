@@ -55,9 +55,7 @@ export function AuthenticationStatusDisplay({
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Info className="w-3 h-3 shrink-0" />
                   <span>
-                    {claudeAuthStatus.method === "oauth_token_env"
-                      ? "Using CLAUDE_CODE_OAUTH_TOKEN"
-                      : claudeAuthStatus.method === "oauth_token"
+                    {claudeAuthStatus.method === "oauth_token"
                       ? "Using stored OAuth token (subscription)"
                       : claudeAuthStatus.method === "api_key_env"
                       ? "Using ANTHROPIC_API_KEY"

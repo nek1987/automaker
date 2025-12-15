@@ -179,9 +179,8 @@ Routes models that:
 
 #### Authentication
 
-Requires one of:
+Requires:
 - `ANTHROPIC_API_KEY` environment variable
-- `CLAUDE_CODE_OAUTH_TOKEN` environment variable
 
 #### Example Usage
 
@@ -704,9 +703,8 @@ describe("Provider Integration", () => {
 ### Claude Provider
 
 ```bash
-# Required (one of):
+# Required:
 ANTHROPIC_API_KEY=sk-ant-...
-CLAUDE_CODE_OAUTH_TOKEN=...
 ```
 
 ### Codex Provider

@@ -74,7 +74,6 @@ export async function getClaudeStatus() {
     hasStoredOAuthToken: !!getApiKey("anthropic_oauth_token"),
     hasStoredApiKey: !!getApiKey("anthropic"),
     hasEnvApiKey: !!process.env.ANTHROPIC_API_KEY,
-    hasEnvOAuthToken: !!process.env.CLAUDE_CODE_OAUTH_TOKEN,
     // Additional fields for detailed status
     oauthTokenValid: false,
     apiKeyValid: false,
@@ -148,11 +147,7 @@ export async function getClaudeStatus() {
   }
 
   // Environment variables override stored credentials (higher priority)
-  if (auth.hasEnvOAuthToken) {
-    auth.authenticated = true;
-    auth.oauthTokenValid = true;
-    auth.method = "oauth_token_env";
-  } else if (auth.hasEnvApiKey) {
+  if (auth.hasEnvApiKey) {
     auth.authenticated = true;
     auth.apiKeyValid = true;
     auth.method = "api_key_env"; // API key from ANTHROPIC_API_KEY env var

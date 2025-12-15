@@ -150,21 +150,17 @@ npm run lint
 
 Automaker supports multiple authentication methods (in order of priority):
 
-| Method               | Environment Variable      | Description                                               |
-| -------------------- | ------------------------- | --------------------------------------------------------- |
-| OAuth Token (env)    | `CLAUDE_CODE_OAUTH_TOKEN` | From `claude setup-token` - uses your Claude subscription |
-| OAuth Token (stored) | —                         | Stored in app credentials file                            |
-| API Key (stored)     | —                         | Anthropic API key stored in app                           |
-| API Key (env)        | `ANTHROPIC_API_KEY`       | Pay-per-use API key                                       |
-
-**Recommended:** Use `CLAUDE_CODE_OAUTH_TOKEN` if you have a Claude subscription.
+| Method           | Environment Variable | Description                     |
+| ---------------- | -------------------- | ------------------------------- |
+| API Key (env)    | `ANTHROPIC_API_KEY`  | Anthropic API key               |
+| API Key (stored) | —                    | Anthropic API key stored in app |
 
 ### Persistent Setup (Optional)
 
 Add to your `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-export CLAUDE_CODE_OAUTH_TOKEN="YOUR_TOKEN_HERE"
+export ANTHROPIC_API_KEY="YOUR_API_KEY_HERE"
 ```
 
 Then restart your terminal or run `source ~/.bashrc`.

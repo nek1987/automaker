@@ -31,16 +31,8 @@ export function createStoreApiKeyHandler() {
       setApiKey(provider, apiKey);
 
       // Also set as environment variable and persist to .env
-      // IMPORTANT: OAuth tokens and API keys must be stored separately
-      // - OAuth tokens (subscription auth) -> CLAUDE_CODE_OAUTH_TOKEN
-      // - API keys (pay-per-use) -> ANTHROPIC_API_KEY
-      if (provider === "anthropic_oauth_token") {
-        // OAuth token from claude setup-token (subscription-based auth)
-        process.env.CLAUDE_CODE_OAUTH_TOKEN = apiKey;
-        await persistApiKeyToEnv("CLAUDE_CODE_OAUTH_TOKEN", apiKey);
-        logger.info("[Setup] Stored OAuth token as CLAUDE_CODE_OAUTH_TOKEN");
-      } else if (provider === "anthropic") {
-        // Direct API key (pay-per-use)
+      if (provider === "anthropic" || provider === "anthropic_oauth_token") {
+        // Both API key and OAuth token use ANTHROPIC_API_KEY
         process.env.ANTHROPIC_API_KEY = apiKey;
         await persistApiKeyToEnv("ANTHROPIC_API_KEY", apiKey);
         logger.info("[Setup] Stored API key as ANTHROPIC_API_KEY");

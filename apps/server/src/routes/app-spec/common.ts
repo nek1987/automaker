@@ -35,19 +35,9 @@ export function setRunningState(
  * Helper to log authentication status
  */
 export function logAuthStatus(context: string): void {
-  const hasOAuthToken = !!process.env.CLAUDE_CODE_OAUTH_TOKEN;
   const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
 
   logger.info(`${context} - Auth Status:`);
-  logger.info(
-    `  CLAUDE_CODE_OAUTH_TOKEN: ${
-      hasOAuthToken
-        ? "SET (" +
-          process.env.CLAUDE_CODE_OAUTH_TOKEN?.substring(0, 20) +
-          "...)"
-        : "NOT SET"
-    }`
-  );
   logger.info(
     `  ANTHROPIC_API_KEY: ${
       hasApiKey
@@ -56,7 +46,7 @@ export function logAuthStatus(context: string): void {
     }`
   );
 
-  if (!hasOAuthToken && !hasApiKey) {
+  if (!hasApiKey) {
     logger.warn("⚠️  WARNING: No authentication configured! SDK will fail.");
   }
 }

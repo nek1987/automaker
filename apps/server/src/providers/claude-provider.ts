@@ -112,9 +112,7 @@ export class ClaudeProvider extends BaseProvider {
    */
   async detectInstallation(): Promise<InstallationStatus> {
     // Claude SDK is always available since it's a dependency
-    const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
-    const hasOAuthToken = !!process.env.CLAUDE_CODE_OAUTH_TOKEN;
-    const hasApiKey = hasAnthropicKey || hasOAuthToken;
+    const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
 
     const status: InstallationStatus = {
       installed: true,

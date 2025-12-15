@@ -50,30 +50,21 @@ const DATA_DIR = process.env.DATA_DIR || "./data";
 const ENABLE_REQUEST_LOGGING = process.env.ENABLE_REQUEST_LOGGING !== "false"; // Default to true
 
 // Check for required environment variables
-// Claude Agent SDK supports EITHER OAuth token (subscription) OR API key (pay-per-use)
 const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
-const hasOAuthToken = !!process.env.CLAUDE_CODE_OAUTH_TOKEN;
 
-if (!hasAnthropicKey && !hasOAuthToken) {
+if (!hasAnthropicKey) {
   console.warn(`
 ╔═══════════════════════════════════════════════════════════════════════╗
 ║  ⚠️  WARNING: No Claude authentication configured                      ║
 ║                                                                       ║
 ║  The Claude Agent SDK requires authentication to function.            ║
 ║                                                                       ║
-║  Option 1 - Subscription (OAuth Token):                               ║
-║    export CLAUDE_CODE_OAUTH_TOKEN="your-oauth-token"                  ║
-║                                                                       ║
-║  Option 2 - Pay-per-use (API Key):                                    ║
+║  Set your Anthropic API key:                                          ║
 ║    export ANTHROPIC_API_KEY="sk-ant-..."                              ║
 ║                                                                       ║
 ║  Or use the setup wizard in Settings to configure authentication.     ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 `);
-} else if (hasOAuthToken) {
-  console.log(
-    "[Server] ✓ CLAUDE_CODE_OAUTH_TOKEN detected (subscription auth)"
-  );
 } else {
   console.log("[Server] ✓ ANTHROPIC_API_KEY detected (API key auth)");
 }
