@@ -5,18 +5,47 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+// Type-safe wrappers for Radix UI primitives (React 19 compatibility)
+const TooltipTriggerPrimitive = TooltipPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger> & {
+    children?: React.ReactNode;
+    asChild?: boolean;
+  } & React.RefAttributes<HTMLButtonElement>
+>;
+
+const TooltipContentPrimitive = TooltipPrimitive.Content as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & {
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
 const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root
 
-const TooltipTrigger = TooltipPrimitive.Trigger
+function TooltipTrigger({
+  children,
+  asChild,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Trigger> & {
+  children?: React.ReactNode;
+  asChild?: boolean;
+}) {
+  return (
+    <TooltipTriggerPrimitive asChild={asChild} {...props}>
+      {children}
+    </TooltipTriggerPrimitive>
+  )
+}
 
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & {
+    className?: string;
+  }
 >(({ className, sideOffset = 6, ...props }, ref) => (
   <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
+    <TooltipContentPrimitive
       ref={ref}
       sideOffset={sideOffset}
       className={cn(

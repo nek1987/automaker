@@ -58,7 +58,7 @@ export function FollowUpDialog({
       <DialogContent
         compact={!isMaximized}
         data-testid="follow-up-dialog"
-        onKeyDown={(e) => {
+        onKeyDown={(e: React.KeyboardEvent) => {
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && prompt.trim()) {
             e.preventDefault();
             onSend();

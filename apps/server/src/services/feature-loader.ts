@@ -24,7 +24,24 @@ export interface Feature {
   spec?: string;
   model?: string;
   imagePaths?: Array<string | { path: string; [key: string]: unknown }>;
-  [key: string]: unknown;
+  skipTests?: boolean;
+  thinkingLevel?: string;
+  planningMode?: 'skip' | 'lite' | 'spec' | 'full';
+  requirePlanApproval?: boolean;
+  planSpec?: {
+    status: 'pending' | 'generating' | 'generated' | 'approved' | 'rejected';
+    content?: string;
+    version: number;
+    generatedAt?: string;
+    approvedAt?: string;
+    reviewedByUser: boolean;
+    tasksCompleted?: number;
+    tasksTotal?: number;
+  };
+  error?: string;
+  summary?: string;
+  startedAt?: string;
+  [key: string]: unknown;  // Keep catch-all for extensibility
 }
 
 export class FeatureLoader {

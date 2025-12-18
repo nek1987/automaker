@@ -47,6 +47,8 @@ interface KanbanBoardProps {
   onCommit: (feature: Feature) => void;
   onComplete: (feature: Feature) => void;
   onImplement: (feature: Feature) => void;
+  onViewPlan: (feature: Feature) => void;
+  onApprovePlan: (feature: Feature) => void;
   featuresWithContext: Set<string>;
   runningAutoTasks: string[];
   shortcuts: ReturnType<typeof useKeyboardShortcutsConfig>;
@@ -77,6 +79,8 @@ export function KanbanBoard({
   onCommit,
   onComplete,
   onImplement,
+  onViewPlan,
+  onApprovePlan,
   featuresWithContext,
   runningAutoTasks,
   shortcuts,
@@ -189,6 +193,8 @@ export function KanbanBoard({
                         onCommit={() => onCommit(feature)}
                         onComplete={() => onComplete(feature)}
                         onImplement={() => onImplement(feature)}
+                        onViewPlan={() => onViewPlan(feature)}
+                        onApprovePlan={() => onApprovePlan(feature)}
                         hasContext={featuresWithContext.has(feature.id)}
                         isCurrentAutoTask={runningAutoTasks.includes(
                           feature.id

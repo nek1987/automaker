@@ -30,6 +30,7 @@ import {
   EditFeatureDialog,
   FeatureSuggestionsDialog,
   FollowUpDialog,
+  PlanApprovalDialog,
 } from "./board-view/dialogs";
 import { CreateWorktreeDialog } from "./board-view/dialogs/create-worktree-dialog";
 import { DeleteWorktreeDialog } from "./board-view/dialogs/delete-worktree-dialog";
@@ -68,6 +69,9 @@ export function BoardView() {
     setKanbanCardDetailLevel,
     specCreatingForProject,
     setSpecCreatingForProject,
+    pendingPlanApproval,
+    setPendingPlanApproval,
+    updateFeature,
     getCurrentWorktree,
     setCurrentWorktree,
     getWorktrees,
@@ -96,6 +100,8 @@ export function BoardView() {
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [deleteCompletedFeature, setDeleteCompletedFeature] =
     useState<Feature | null>(null);
+  // State for viewing plan in read-only mode
+  const [viewPlanFeature, setViewPlanFeature] = useState<Feature | null>(null);
 
   // Worktree dialog states
   const [showCreateWorktreeDialog, setShowCreateWorktreeDialog] =
@@ -145,6 +151,8 @@ export function BoardView() {
   } = useSuggestionsState();
   // Search filter for Kanban cards
   const [searchQuery, setSearchQuery] = useState("");
+  // Plan approval loading state
+  const [isPlanApprovalLoading, setIsPlanApprovalLoading] = useState(false);
   // Derive spec creation state from store - check if current project is the one being created
   const isCreatingSpec = specCreatingForProject === currentProject?.path;
   const creatingSpecProjectPath = specCreatingForProject ?? undefined;
@@ -389,6 +397,130 @@ export function BoardView() {
     currentProject,
   });
 
+  // Find feature for pending plan approval
+  const pendingApprovalFeature = useMemo(() => {
+    if (!pendingPlanApproval) return null;
+    return hookFeatures.find((f) => f.id === pendingPlanApproval.featureId) || null;
+  }, [pendingPlanApproval, hookFeatures]);
+
+  // Handle plan approval
+  const handlePlanApprove = useCallback(
+    async (editedPlan?: string) => {
+      if (!pendingPlanApproval || !currentProject) return;
+
+      const featureId = pendingPlanApproval.featureId;
+      setIsPlanApprovalLoading(true);
+      try {
+        const api = getElectronAPI();
+        if (!api?.autoMode?.approvePlan) {
+          throw new Error("Plan approval API not available");
+        }
+
+        const result = await api.autoMode.approvePlan(
+          pendingPlanApproval.projectPath,
+          pendingPlanApproval.featureId,
+          true,
+          editedPlan
+        );
+
+        if (result.success) {
+          // Immediately update local feature state to hide "Approve Plan" button
+          // Get current feature to preserve version
+          const currentFeature = hookFeatures.find(f => f.id === featureId);
+          updateFeature(featureId, {
+            planSpec: {
+              status: 'approved',
+              content: editedPlan || pendingPlanApproval.planContent,
+              version: currentFeature?.planSpec?.version || 1,
+              approvedAt: new Date().toISOString(),
+              reviewedByUser: true,
+            },
+          });
+          // Reload features from server to ensure sync
+          loadFeatures();
+        } else {
+          console.error("[Board] Failed to approve plan:", result.error);
+        }
+      } catch (error) {
+        console.error("[Board] Error approving plan:", error);
+      } finally {
+        setIsPlanApprovalLoading(false);
+        setPendingPlanApproval(null);
+      }
+    },
+    [pendingPlanApproval, currentProject, setPendingPlanApproval, updateFeature, loadFeatures, hookFeatures]
+  );
+
+  // Handle plan rejection
+  const handlePlanReject = useCallback(
+    async (feedback?: string) => {
+      if (!pendingPlanApproval || !currentProject) return;
+
+      const featureId = pendingPlanApproval.featureId;
+      setIsPlanApprovalLoading(true);
+      try {
+        const api = getElectronAPI();
+        if (!api?.autoMode?.approvePlan) {
+          throw new Error("Plan approval API not available");
+        }
+
+        const result = await api.autoMode.approvePlan(
+          pendingPlanApproval.projectPath,
+          pendingPlanApproval.featureId,
+          false,
+          undefined,
+          feedback
+        );
+
+        if (result.success) {
+          // Immediately update local feature state
+          // Get current feature to preserve version
+          const currentFeature = hookFeatures.find(f => f.id === featureId);
+          updateFeature(featureId, {
+            status: 'backlog',
+            planSpec: {
+              status: 'rejected',
+              content: pendingPlanApproval.planContent,
+              version: currentFeature?.planSpec?.version || 1,
+              reviewedByUser: true,
+            },
+          });
+          // Reload features from server to ensure sync
+          loadFeatures();
+        } else {
+          console.error("[Board] Failed to reject plan:", result.error);
+        }
+      } catch (error) {
+        console.error("[Board] Error rejecting plan:", error);
+      } finally {
+        setIsPlanApprovalLoading(false);
+        setPendingPlanApproval(null);
+      }
+    },
+    [pendingPlanApproval, currentProject, setPendingPlanApproval, updateFeature, loadFeatures, hookFeatures]
+  );
+
+  // Handle opening approval dialog from feature card button
+  const handleOpenApprovalDialog = useCallback(
+    (feature: Feature) => {
+      if (!feature.planSpec?.content || !currentProject) return;
+
+      // Determine the planning mode for approval (skip should never have a plan requiring approval)
+      const mode = feature.planningMode;
+      const approvalMode: "lite" | "spec" | "full" =
+        mode === 'lite' || mode === 'spec' || mode === 'full' ? mode : 'spec';
+
+      // Re-open the approval dialog with the feature's plan data
+      setPendingPlanApproval({
+        featureId: feature.id,
+        projectPath: currentProject.path,
+        planContent: feature.planSpec.content,
+        planningMode: approvalMode,
+      });
+    },
+    [currentProject, setPendingPlanApproval]
+  );
+
   if (!currentProject) {
     return (
       <div
@@ -506,6 +638,8 @@ export function BoardView() {
           onCommit={handleCommitFeature}
           onComplete={handleCompleteFeature}
           onImplement={handleStartImplementation}
+          onViewPlan={(feature) => setViewPlanFeature(feature)}
+          onApprovePlan={handleOpenApprovalDialog}
           featuresWithContext={featuresWithContext}
           runningAutoTasks={runningAutoTasks}
           shortcuts={shortcuts}
@@ -616,6 +750,34 @@ export function BoardView() {
         isGenerating={isGeneratingSuggestions}
         setIsGenerating={setIsGeneratingSuggestions}
       />
+
+      {/* Plan Approval Dialog */}
+      <PlanApprovalDialog
+        open={pendingPlanApproval !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingPlanApproval(null);
+          }
+        }}
+        feature={pendingApprovalFeature}
+        planContent={pendingPlanApproval?.planContent || ""}
+        onApprove={handlePlanApprove}
+        onReject={handlePlanReject}
+        isLoading={isPlanApprovalLoading}
+      />
+
+      {/* View Plan Dialog (read-only) */}
+      {viewPlanFeature && viewPlanFeature.planSpec?.content && (
+        <PlanApprovalDialog
+          open={true}
+          onOpenChange={(open) => !open && setViewPlanFeature(null)}
+          feature={viewPlanFeature}
+          planContent={viewPlanFeature.planSpec.content}
+          onApprove={() => setViewPlanFeature(null)}
+          onReject={() => setViewPlanFeature(null)}
+          viewOnly={true}
+        />
+      )}
 
       {/* Create Worktree Dialog */}
       <CreateWorktreeDialog

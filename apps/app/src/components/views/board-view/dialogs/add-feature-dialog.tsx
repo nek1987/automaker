@@ -23,6 +23,7 @@ import {
 import {
   MessageSquare,
   Settings2,
+  SlidersHorizontal,
   FlaskConical,
   Sparkles,
   ChevronDown,
@@ -36,6 +37,7 @@ import {
   ThinkingLevel,
   FeatureImage,
   AIProfile,
+  PlanningMode,
 } from "@/store/app-store";
 import {
   ModelSelector,
@@ -43,6 +45,7 @@ import {
   ProfileQuickSelect,
   TestingTabContent,
   PrioritySelector,
+  PlanningModeSelector,
 } from "../shared";
 import {
   DropdownMenu,
@@ -65,6 +68,8 @@ interface AddFeatureDialogProps {
     thinkingLevel: ThinkingLevel;
     branchName: string;
     priority: number;
+    planningMode: PlanningMode;
+    requirePlanApproval: boolean;
   }) => void;
   categorySuggestions: string[];
   branchSuggestions: string[];
@@ -107,9 +112,11 @@ export function AddFeatureDialog({
   const [enhancementMode, setEnhancementMode] = useState<
     "improve" | "technical" | "simplify" | "acceptance"
   >("improve");
+  const [planningMode, setPlanningMode] = useState<PlanningMode>('skip');
+  const [requirePlanApproval, setRequirePlanApproval] = useState(false);
 
-  // Get enhancement model and worktrees setting from store
-  const { enhancementModel, useWorktrees } = useAppStore();
+  // Get enhancement model, planning mode defaults, and worktrees setting from store
+  const { enhancementModel, defaultPlanningMode, defaultRequirePlanApproval, useWorktrees } = useAppStore();
 
   // Sync defaults when dialog opens
   useEffect(() => {
@@ -119,8 +126,10 @@ export function AddFeatureDialog({
         skipTests: defaultSkipTests,
         branchName: defaultBranch,
       }));
+      setPlanningMode(defaultPlanningMode);
+      setRequirePlanApproval(defaultRequirePlanApproval);
     }
-  }, [open, defaultSkipTests, defaultBranch]);
+  }, [open, defaultSkipTests, defaultBranch, defaultPlanningMode, defaultRequirePlanApproval]);
 
   const handleAdd = () => {
     if (!newFeature.description.trim()) {
@@ -145,6 +154,8 @@ export function AddFeatureDialog({
       thinkingLevel: normalizedThinking,
       branchName: newFeature.branchName,
       priority: newFeature.priority,
+      planningMode,
+      requirePlanApproval,
     });
 
     // Reset form
@@ -160,6 +171,8 @@ export function AddFeatureDialog({
       thinkingLevel: "none",
       branchName: defaultBranch,
     });
+    setPlanningMode(defaultPlanningMode);
+    setRequirePlanApproval(defaultRequirePlanApproval);
     setNewFeaturePreviewMap(new Map());
     setShowAdvancedOptions(false);
     setDescriptionError(false);
@@ -230,13 +243,13 @@ export function AddFeatureDialog({
       <DialogContent
         compact={!isMaximized}
         data-testid="add-feature-dialog"
-        onPointerDownOutside={(e) => {
+        onPointerDownOutside={(e: CustomEvent) => {
           const target = e.target as HTMLElement;
           if (target.closest('[data-testid="category-autocomplete-list"]')) {
             e.preventDefault();
           }
         }}
-        onInteractOutside={(e) => {
+        onInteractOutside={(e: CustomEvent) => {
           const target = e.target as HTMLElement;
           if (target.closest('[data-testid="category-autocomplete-list"]')) {
             e.preventDefault();
@@ -262,9 +275,9 @@ export function AddFeatureDialog({
               <Settings2 className="w-4 h-4 mr-2" />
               Model
             </TabsTrigger>
-            <TabsTrigger value="testing" data-testid="tab-testing">
-              <FlaskConical className="w-4 h-4 mr-2" />
-              Testing
+            <TabsTrigger value="options" data-testid="tab-options">
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
+              Options
             </TabsTrigger>
           </TabsList>
 
@@ -453,11 +466,22 @@ export function AddFeatureDialog({
             )}
           </TabsContent>
 
-          {/* Testing Tab */}
-          <TabsContent
-            value="testing"
-            className="space-y-4 overflow-y-auto cursor-default"
-          >
+          {/* Options Tab */}
+          <TabsContent value="options" className="space-y-4 overflow-y-auto cursor-default">
+            {/* Planning Mode Section */}
+            <PlanningModeSelector
+              mode={planningMode}
+              onModeChange={setPlanningMode}
+              requireApproval={requirePlanApproval}
+              onRequireApprovalChange={setRequirePlanApproval}
+              featureDescription={newFeature.description}
+              testIdPrefix="add-feature"
+              compact
+            />
+
+            <div className="border-t border-border my-4" />
+
+            {/* Testing Section */}
             <TestingTabContent
               skipTests={newFeature.skipTests}
               onSkipTestsChange={(skipTests) =>

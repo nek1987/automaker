@@ -258,6 +258,13 @@ export interface AutoModeAPI {
     featureId: string,
     worktreePath?: string
   ) => Promise<{ success: boolean; error?: string }>;
+  approvePlan: (
+    projectPath: string,
+    featureId: string,
+    approved: boolean,
+    editedPlan?: string,
+    feedback?: string
+  ) => Promise<{ success: boolean; error?: string }>;
   onEvent: (callback: (event: AutoModeEvent) => void) => () => void;
 }
 
@@ -1693,6 +1700,23 @@ function createMockAutoModeAPI(): AutoModeAPI {
         message: "Changes committed successfully",
       });
 
+      return { success: true };
+    },
+
+    approvePlan: async (
+      projectPath: string,
+      featureId: string,
+      approved: boolean,
+      editedPlan?: string,
+      feedback?: string
+    ) => {
+      console.log("[Mock] Plan approval:", {
+        projectPath,
+        featureId,
+        approved,
+        editedPlan: editedPlan ? "[edited]" : undefined,
+        feedback,
+      });
       return { success: true };
     },
 

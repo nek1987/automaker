@@ -40,6 +40,10 @@ export function SettingsView() {
     setMuteDoneSound,
     currentProject,
     moveProjectToTrash,
+    defaultPlanningMode,
+    setDefaultPlanningMode,
+    defaultRequirePlanApproval,
+    setDefaultRequirePlanApproval,
   } = useAppStore();
 
   // Convert electron Project to settings-view Project type
@@ -122,10 +126,14 @@ export function SettingsView() {
             defaultSkipTests={defaultSkipTests}
             enableDependencyBlocking={enableDependencyBlocking}
             useWorktrees={useWorktrees}
+            defaultPlanningMode={defaultPlanningMode}
+            defaultRequirePlanApproval={defaultRequirePlanApproval}
             onShowProfilesOnlyChange={setShowProfilesOnly}
             onDefaultSkipTestsChange={setDefaultSkipTests}
             onEnableDependencyBlockingChange={setEnableDependencyBlocking}
             onUseWorktreesChange={setUseWorktrees}
+            onDefaultPlanningModeChange={setDefaultPlanningMode}
+            onDefaultRequirePlanApprovalChange={setDefaultRequirePlanApproval}
           />
         );
       case "danger":

@@ -4,6 +4,11 @@ import { useAppStore } from "@/store/app-store";
 import { getElectronAPI } from "@/lib/electron";
 import type { AutoModeEvent } from "@/types/electron";
 
+// Type guard for plan_approval_required event
+function isPlanApprovalEvent(event: AutoModeEvent): event is Extract<AutoModeEvent, { type: "plan_approval_required" }> {
+  return event.type === "plan_approval_required";
+}
+
 /**
  * Hook for managing auto mode (scoped per project)
  */
@@ -18,6 +23,7 @@ export function useAutoMode() {
     addAutoModeActivity,
     maxConcurrency,
     projects,
+    setPendingPlanApproval,
   } = useAppStore(
     useShallow((state) => ({
       autoModeByProject: state.autoModeByProject,
@@ -29,6 +35,7 @@ export function useAutoMode() {
       addAutoModeActivity: state.addAutoModeActivity,
       maxConcurrency: state.maxConcurrency,
       projects: state.projects,
+      setPendingPlanApproval: state.setPendingPlanApproval,
     }))
   );
 
@@ -147,8 +154,26 @@ export function useAutoMode() {
           break;
 
         case "auto_mode_error":
-          console.error("[AutoMode Error]", event.error);
           if (event.featureId && event.error) {
+            // Check if this is a user-initiated cancellation (not a real error)
+            const isCancellation =
+              event.error.includes("cancelled") ||
+              event.error.includes("stopped") ||
+              event.error.includes("aborted");
+
+            if (isCancellation) {
+              // User cancelled the feature - just log as info, not an error
+              console.log("[AutoMode] Feature cancelled:", event.error);
+              // Remove from running tasks
+              if (eventProjectId) {
+                removeRunningTask(eventProjectId, event.featureId);
+              }
+              break;
+            }
+
+            // Real error - log and show to user
+            console.error("[AutoMode Error]", event.error);
+
             // Check for authentication errors and provide a more helpful message
             const isAuthError =
               event.errorType === "authentication" ||
@@ -210,6 +235,124 @@ export function useAutoMode() {
             });
           }
           break;
+
+        case "plan_approval_required":
+          // Plan requires user approval before proceeding
+          if (isPlanApprovalEvent(event)) {
+            console.log(
+              `[AutoMode] Plan approval required for ${event.featureId}`
+            );
+            setPendingPlanApproval({
+              featureId: event.featureId,
+              projectPath: event.projectPath || currentProject?.path || "",
+              planContent: event.planContent,
+              planningMode: event.planningMode,
+            });
+          }
+          break;
+
+        case "planning_started":
+          // Log when planning phase begins
+          if (event.featureId && event.mode && event.message) {
+            console.log(
+              `[AutoMode] Planning started (${event.mode}) for ${event.featureId}`
+            );
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "planning",
+              message: event.message,
+              phase: "planning",
+            });
+          }
+          break;
+
+        case "plan_approved":
+          // Log when plan is approved by user
+          if (event.featureId) {
+            console.log(`[AutoMode] Plan approved for ${event.featureId}`);
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "action",
+              message: event.hasEdits
+                ? "Plan approved with edits, starting implementation..."
+                : "Plan approved, starting implementation...",
+              phase: "action",
+            });
+          }
+          break;
+
+        case "plan_auto_approved":
+          // Log when plan is auto-approved (requirePlanApproval=false)
+          if (event.featureId) {
+            console.log(`[AutoMode] Plan auto-approved for ${event.featureId}`);
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "action",
+              message: "Plan auto-approved, starting implementation...",
+              phase: "action",
+            });
+          }
+          break;
+
+        case "plan_revision_requested":
+          // Log when user requests plan revision with feedback
+          if (event.featureId) {
+            const revisionEvent = event as Extract<AutoModeEvent, { type: "plan_revision_requested" }>;
+            console.log(`[AutoMode] Plan revision requested for ${event.featureId} (v${revisionEvent.planVersion})`);
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "planning",
+              message: `Revising plan based on feedback (v${revisionEvent.planVersion})...`,
+              phase: "planning",
+            });
+          }
+          break;
+
+        case "auto_mode_task_started":
+          // Task started - show which task is being worked on
+          if (event.featureId && "taskId" in event && "taskDescription" in event) {
+            const taskEvent = event as Extract<AutoModeEvent, { type: "auto_mode_task_started" }>;
+            console.log(
+              `[AutoMode] Task ${taskEvent.taskId} started for ${event.featureId}: ${taskEvent.taskDescription}`
+            );
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "progress",
+              message: `▶ Starting ${taskEvent.taskId}: ${taskEvent.taskDescription}`,
+            });
+          }
+          break;
+
+        case "auto_mode_task_complete":
+          // Task completed - show progress
+          if (event.featureId && "taskId" in event) {
+            const taskEvent = event as Extract<AutoModeEvent, { type: "auto_mode_task_complete" }>;
+            console.log(
+              `[AutoMode] Task ${taskEvent.taskId} completed for ${event.featureId} (${taskEvent.tasksCompleted}/${taskEvent.tasksTotal})`
+            );
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "progress",
+              message: `✓ ${taskEvent.taskId} done (${taskEvent.tasksCompleted}/${taskEvent.tasksTotal})`,
+            });
+          }
+          break;
+
+        case "auto_mode_phase_complete":
+          // Phase completed (for full mode with phased tasks)
+          if (event.featureId && "phaseNumber" in event) {
+            const phaseEvent = event as Extract<AutoModeEvent, { type: "auto_mode_phase_complete" }>;
+            console.log(
+              `[AutoMode] Phase ${phaseEvent.phaseNumber} completed for ${event.featureId}`
+            );
+            addAutoModeActivity({
+              featureId: event.featureId,
+              type: "action",
+              message: `Phase ${phaseEvent.phaseNumber} completed`,
+              phase: "action",
+            });
+          }
+          break;
       }
     });
 
@@ -222,6 +365,8 @@ export function useAutoMode() {
     setAutoModeRunning,
     addAutoModeActivity,
     getProjectIdFromPath,
+    setPendingPlanApproval,
+    currentProject?.path,
   ]);
 
   // Restore auto mode for all projects that were running when app was closed

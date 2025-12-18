@@ -5,6 +5,20 @@ import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
+// Type-safe wrappers for Radix UI primitives (React 19 compatibility)
+const PopoverTriggerPrimitive = PopoverPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger> & {
+    children?: React.ReactNode;
+    asChild?: boolean;
+  } & React.RefAttributes<HTMLButtonElement>
+>;
+
+const PopoverContentPrimitive = PopoverPrimitive.Content as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
@@ -12,9 +26,18 @@ function Popover({
 }
 
 function PopoverTrigger({
+  children,
+  asChild,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+}: React.ComponentProps<typeof PopoverPrimitive.Trigger> & {
+  children?: React.ReactNode;
+  asChild?: boolean;
+}) {
+  return (
+    <PopoverTriggerPrimitive data-slot="popover-trigger" asChild={asChild} {...props}>
+      {children}
+    </PopoverTriggerPrimitive>
+  )
 }
 
 function PopoverContent({
@@ -22,10 +45,12 @@ function PopoverContent({
   align = "center",
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Content> & {
+  className?: string;
+}) {
   return (
     <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content
+      <PopoverContentPrimitive
         data-slot="popover-content"
         align={align}
         sideOffset={sideOffset}

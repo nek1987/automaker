@@ -6,3 +6,4 @@ export { DeleteCompletedFeatureDialog } from "./delete-completed-feature-dialog"
 export { EditFeatureDialog } from "./edit-feature-dialog";
 export { FeatureSuggestionsDialog } from "./feature-suggestions-dialog";
 export { FollowUpDialog } from "./follow-up-dialog";
+export { PlanApprovalDialog } from "./plan-approval-dialog";

@@ -6,6 +6,36 @@ import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+// Type-safe wrappers for Radix UI primitives (React 19 compatibility)
+const DialogContentPrimitive = DialogPrimitive.Content as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
+const DialogClosePrimitive = DialogPrimitive.Close as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLButtonElement>
+>;
+
+const DialogTitlePrimitive = DialogPrimitive.Title as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLHeadingElement>
+>;
+
+const DialogDescriptionPrimitive = DialogPrimitive.Description as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description> & {
+    children?: React.ReactNode;
+    className?: string;
+    title?: string;
+  } & React.RefAttributes<HTMLParagraphElement>
+>;
+
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -30,12 +60,20 @@ function DialogClose({
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+const DialogOverlayPrimitive = DialogPrimitive.Overlay as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
 function DialogOverlay({
   className,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay> & {
+  className?: string;
+}) {
   return (
-    <DialogPrimitive.Overlay
+    <DialogOverlayPrimitive
       data-slot="dialog-overlay"
       className={cn(
         "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
@@ -66,7 +104,7 @@ function DialogContent({
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
-      <DialogPrimitive.Content
+      <DialogContentPrimitive
         data-slot="dialog-content"
         className={cn(
           "fixed top-[50%] left-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
@@ -91,7 +129,7 @@ function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
+          <DialogClosePrimitive
             data-slot="dialog-close"
             className={cn(
               "absolute rounded-lg opacity-60 transition-all duration-200 cursor-pointer",
@@ -105,9 +143,9 @@ function DialogContent({
           >
             <XIcon />
             <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+          </DialogClosePrimitive>
         )}
-      </DialogPrimitive.Content>
+      </DialogContentPrimitive>
     </DialogPortal>
   );
 }
@@ -137,27 +175,42 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 function DialogTitle({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+}: React.ComponentProps<typeof DialogPrimitive.Title> & {
+  children?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <DialogPrimitive.Title
+    <DialogTitlePrimitive
       data-slot="dialog-title"
       className={cn("text-lg leading-none font-semibold tracking-tight", className)}
       {...props}
-    />
+    >
+      {children}
+    </DialogTitlePrimitive>
   );
 }
 
 function DialogDescription({
   className,
+  children,
+  title,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
+}: React.ComponentProps<typeof DialogPrimitive.Description> & {
+  children?: React.ReactNode;
+  className?: string;
+  title?: string;
+}) {
   return (
-    <DialogPrimitive.Description
+    <DialogDescriptionPrimitive
       data-slot="dialog-description"
       className={cn("text-muted-foreground text-sm leading-relaxed", className)}
+      title={title}
       {...props}
-    />
+    >
+      {children}
+    </DialogDescriptionPrimitive>
   );
 }
 

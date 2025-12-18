@@ -210,6 +210,11 @@ export function useBoardFeatures({ currentProject }: UseBoardFeaturesProps) {
             .play()
             .catch((err) => console.warn("Could not play ding sound:", err));
         }
+      } else if (event.type === "plan_approval_required") {
+        // Reload features when plan is generated and requires approval
+        // This ensures the feature card shows the "Approve Plan" button
+        console.log("[Board] Plan approval required, reloading features...");
+        loadFeatures();
       } else if (event.type === "auto_mode_error") {
         // Reload features when an error occurs (feature moved to waiting_approval)
         console.log(

@@ -105,6 +105,8 @@ interface KanbanCardProps {
   onCommit?: () => void;
   onImplement?: () => void;
   onComplete?: () => void;
+  onViewPlan?: () => void;
+  onApprovePlan?: () => void;
   hasContext?: boolean;
   isCurrentAutoTask?: boolean;
   shortcutKey?: string;
@@ -130,6 +132,8 @@ export const KanbanCard = memo(function KanbanCard({
   onCommit,
   onImplement,
   onComplete,
+  onViewPlan,
+  onApprovePlan,
   hasContext,
   isCurrentAutoTask,
   shortcutKey,
@@ -876,9 +880,26 @@ export const KanbanCard = memo(function KanbanCard({
         )}
 
         {/* Actions */}
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {isCurrentAutoTask && (
             <>
+              {/* Approve Plan button - PRIORITY: shows even when agent is "running" (paused for approval) */}
+              {feature.planSpec?.status === 'generated' && onApprovePlan && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1 min-w-0 h-7 text-[11px] bg-purple-600 hover:bg-purple-700 text-white animate-pulse"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApprovePlan();
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  data-testid={`approve-plan-running-${feature.id}`}
+                >
+                  <FileText className="w-3 h-3 mr-1 shrink-0" />
+                  <span className="truncate">Approve Plan</span>
+                </Button>
+              )}
               {onViewOutput && (
                 <Button
                   variant="secondary"
@@ -891,8 +912,8 @@ export const KanbanCard = memo(function KanbanCard({
                   onPointerDown={(e) => e.stopPropagation()}
                   data-testid={`view-output-${feature.id}`}
                 >
-                  <FileText className="w-3 h-3 mr-1" />
-                  Logs
+                  <FileText className="w-3 h-3 mr-1 shrink-0" />
+                  <span className="truncate">Logs</span>
                   {shortcutKey && (
                     <span
                       className="ml-1.5 px-1 py-0.5 text-[9px] font-mono rounded bg-foreground/10"
@@ -907,7 +928,7 @@ export const KanbanCard = memo(function KanbanCard({
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="h-7 text-[11px] px-2"
+                  className="h-7 text-[11px] px-2 shrink-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     onForceStop();
@@ -922,6 +943,23 @@ export const KanbanCard = memo(function KanbanCard({
           )}
           {!isCurrentAutoTask && feature.status === "in_progress" && (
             <>
+              {/* Approve Plan button - shows when plan is generated and waiting for approval */}
+              {feature.planSpec?.status === 'generated' && onApprovePlan && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1 h-7 text-[11px] bg-purple-600 hover:bg-purple-700 text-white animate-pulse"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApprovePlan();
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  data-testid={`approve-plan-${feature.id}`}
+                >
+                  <FileText className="w-3 h-3 mr-1" />
+                  Approve Plan
+                </Button>
+              )}
               {feature.skipTests && onManualVerify ? (
                 <Button
                   variant="default"
@@ -1076,6 +1114,22 @@ export const KanbanCard = memo(function KanbanCard({
                 <Edit className="w-3 h-3 mr-1" />
                 Edit
               </Button>
+              {feature.planSpec?.content && onViewPlan && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs px-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewPlan();
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  data-testid={`view-plan-${feature.id}`}
+                  title="View Plan"
+                >
+                  <Eye className="w-3 h-3" />
+                </Button>
+              )}
               {onImplement && (
                 <Button
                   variant="default"

@@ -4,6 +4,7 @@ import {
   FeatureImage,
   AgentModel,
   ThinkingLevel,
+  PlanningMode,
   useAppStore,
 } from "@/store/app-store";
 import { FeatureImagePath as DescriptionImagePath } from "@/components/ui/description-image-dropzone";
@@ -150,6 +151,8 @@ export function useBoardActions({
       thinkingLevel: ThinkingLevel;
       branchName: string;
       priority: number;
+      planningMode: PlanningMode;
+      requirePlanApproval: boolean;
     }) => {
       let worktreePath: string | undefined;
 
@@ -194,6 +197,8 @@ export function useBoardActions({
         imagePaths: DescriptionImagePath[];
         branchName: string;
         priority: number;
+        planningMode?: PlanningMode;
+        requirePlanApproval?: boolean;
       }
     ) => {
       // Get the current feature to check if branch is changing

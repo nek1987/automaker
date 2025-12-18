@@ -12,6 +12,7 @@ import { Loader2, List, FileText, GitBranch } from "lucide-react";
 import { getElectronAPI } from "@/lib/electron";
 import { LogViewer } from "@/components/ui/log-viewer";
 import { GitDiffPanel } from "@/components/ui/git-diff-panel";
+import { TaskProgressPanel } from "@/components/ui/task-progress-panel";
 import { useAppStore } from "@/store/app-store";
 import type { AutoModeEvent } from "@/types/electron";
 
@@ -169,6 +170,64 @@ export function AgentOutputModal({
 
           newContent = prepContent;
           break;
+        case "planning_started":
+          // Show when planning mode begins
+          if ("mode" in event && "message" in event) {
+            const modeLabel =
+              event.mode === "lite"
+                ? "Lite"
+                : event.mode === "spec"
+                ? "Spec"
+                : "Full";
+            newContent = `\n📋 Planning Mode: ${modeLabel}\n${event.message}\n`;
+          }
+          break;
+        case "plan_approval_required":
+          // Show when plan requires approval
+          if ("planningMode" in event) {
+            newContent = `\n⏸️ Plan generated - waiting for your approval...\n`;
+          }
+          break;
+        case "plan_approved":
+          // Show when plan is manually approved
+          if ("hasEdits" in event) {
+            newContent = event.hasEdits
+              ? `\n✅ Plan approved (with edits) - continuing to implementation...\n`
+              : `\n✅ Plan approved - continuing to implementation...\n`;
+          }
+          break;
+        case "plan_auto_approved":
+          // Show when plan is auto-approved
+          newContent = `\n✅ Plan auto-approved - continuing to implementation...\n`;
+          break;
+        case "plan_revision_requested":
+          // Show when user requests plan revision
+          if ("planVersion" in event) {
+            const revisionEvent = event as Extract<AutoModeEvent, { type: "plan_revision_requested" }>;
+            newContent = `\n🔄 Revising plan based on your feedback (v${revisionEvent.planVersion})...\n`;
+          }
+          break;
+        case "auto_mode_task_started":
+          // Show when a task starts
+          if ("taskId" in event && "taskDescription" in event) {
+            const taskEvent = event as Extract<AutoModeEvent, { type: "auto_mode_task_started" }>;
+            newContent = `\n▶ Starting ${taskEvent.taskId}: ${taskEvent.taskDescription}\n`;
+          }
+          break;
+        case "auto_mode_task_complete":
+          // Show task completion progress
+          if ("taskId" in event && "tasksCompleted" in event && "tasksTotal" in event) {
+            const taskEvent = event as Extract<AutoModeEvent, { type: "auto_mode_task_complete" }>;
+            newContent = `\n✓ ${taskEvent.taskId} completed (${taskEvent.tasksCompleted}/${taskEvent.tasksTotal})\n`;
+          }
+          break;
+        case "auto_mode_phase_complete":
+          // Show phase completion for full mode
+          if ("phaseNumber" in event) {
+            const phaseEvent = event as Extract<AutoModeEvent, { type: "auto_mode_phase_complete" }>;
+            newContent = `\n🏁 Phase ${phaseEvent.phaseNumber} complete\n`;
+          }
+          break;
         case "auto_mode_feature_complete":
           const emoji = event.passes ? "✅" : "⚠️";
           newContent = `\n${emoji} Task completed: ${event.message}\n`;
@@ -287,6 +346,13 @@ export function AgentOutputModal({
             {featureDescription}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Task Progress Panel - shows when tasks are being executed */}
+        <TaskProgressPanel
+          featureId={featureId}
+          projectPath={projectPath}
+          className="flex-shrink-0 mx-1"
+        />
 
         {viewMode === "changes" ? (
           <div className="flex-1 min-h-[400px] max-h-[60vh] overflow-y-auto scrollbar-visible">

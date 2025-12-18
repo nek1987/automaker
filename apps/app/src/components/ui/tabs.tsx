@@ -5,41 +5,86 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+// Type-safe wrappers for Radix UI primitives (React 19 compatibility)
+const TabsRootPrimitive = TabsPrimitive.Root as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
+const TabsListPrimitive = TabsPrimitive.List as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
+const TabsTriggerPrimitive = TabsPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLButtonElement>
+>;
+
+const TabsContentPrimitive = TabsPrimitive.Content as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLDivElement>
+>;
+
 function Tabs({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+}: React.ComponentProps<typeof TabsPrimitive.Root> & {
+  children?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <TabsPrimitive.Root
+    <TabsRootPrimitive
       data-slot="tabs"
       className={cn("flex flex-col gap-2", className)}
       {...props}
-    />
+    >
+      {children}
+    </TabsRootPrimitive>
   )
 }
 
 function TabsList({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & {
+  children?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <TabsPrimitive.List
+    <TabsListPrimitive
       data-slot="tabs-list"
       className={cn(
         "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] border border-border",
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </TabsListPrimitive>
   )
 }
 
 function TabsTrigger({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+}: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
+  children?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <TabsPrimitive.Trigger
+    <TabsTriggerPrimitive
       data-slot="tabs-trigger"
       className={cn(
         "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer",
@@ -51,20 +96,28 @@ function TabsTrigger({
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </TabsTriggerPrimitive>
   )
 }
 
 function TabsContent({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+}: React.ComponentProps<typeof TabsPrimitive.Content> & {
+  children?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <TabsPrimitive.Content
+    <TabsContentPrimitive
       data-slot="tabs-content"
       className={cn("flex-1 outline-none", className)}
       {...props}
-    />
+    >
+      {children}
+    </TabsContentPrimitive>
   )
 }
 

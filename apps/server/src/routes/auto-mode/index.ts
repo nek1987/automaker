@@ -17,6 +17,7 @@ import { createContextExistsHandler } from "./routes/context-exists.js";
 import { createAnalyzeProjectHandler } from "./routes/analyze-project.js";
 import { createFollowUpFeatureHandler } from "./routes/follow-up-feature.js";
 import { createCommitFeatureHandler } from "./routes/commit-feature.js";
+import { createApprovePlanHandler } from "./routes/approve-plan.js";
 
 export function createAutoModeRoutes(autoModeService: AutoModeService): Router {
   const router = Router();
@@ -35,6 +36,7 @@ export function createAutoModeRoutes(autoModeService: AutoModeService): Router {
     createFollowUpFeatureHandler(autoModeService)
   );
   router.post("/commit-feature", createCommitFeatureHandler(autoModeService));
+  router.post("/approve-plan", createApprovePlanHandler(autoModeService));
 
   return router;
 }

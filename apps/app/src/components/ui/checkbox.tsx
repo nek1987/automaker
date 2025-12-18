@@ -13,9 +13,23 @@ interface CheckboxProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElemen
   required?: boolean;
 }
 
+const CheckboxRoot = CheckboxPrimitive.Root as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLButtonElement>
+>;
+
+const CheckboxIndicator = CheckboxPrimitive.Indicator as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Indicator> & {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.RefAttributes<HTMLSpanElement>
+>;
+
 const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
-  ({ className, onCheckedChange, ...props }, ref) => (
-    <CheckboxPrimitive.Root
+  ({ className, onCheckedChange, children: _children, ...props }, ref) => (
+    <CheckboxRoot
       ref={ref}
       className={cn(
         "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground hover:border-primary/80",
@@ -29,12 +43,12 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
       }}
       {...props}
     >
-      <CheckboxPrimitive.Indicator
+      <CheckboxIndicator
         className={cn("flex items-center justify-center text-current")}
       >
         <Check className="h-4 w-4" />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
+      </CheckboxIndicator>
+    </CheckboxRoot>
   )
 );
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;

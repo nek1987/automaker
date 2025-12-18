@@ -576,6 +576,20 @@ export class HttpApiClient implements ElectronAPI {
         featureId,
         worktreePath,
       }),
+    approvePlan: (
+      projectPath: string,
+      featureId: string,
+      approved: boolean,
+      editedPlan?: string,
+      feedback?: string
+    ) =>
+      this.post("/api/auto-mode/approve-plan", {
+        projectPath,
+        featureId,
+        approved,
+        editedPlan,
+        feedback,
+      }),
     onEvent: (callback: (event: AutoModeEvent) => void) => {
       return this.subscribeToEvent(
         "auto-mode:event",
