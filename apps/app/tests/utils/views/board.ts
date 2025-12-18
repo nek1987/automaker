@@ -120,7 +120,9 @@ export async function getDragHandleForFeature(
  */
 export async function clickAddFeature(page: Page): Promise<void> {
   await page.click('[data-testid="add-feature-button"]');
-  await page.waitForSelector('[data-testid="add-feature-dialog"]', { timeout: 5000 });
+  await page.waitForSelector('[data-testid="add-feature-dialog"]', {
+    timeout: 5000,
+  });
 }
 
 /**
@@ -132,18 +134,22 @@ export async function fillAddFeatureDialog(
   options?: { branch?: string; category?: string }
 ): Promise<void> {
   // Fill description (using the dropzone textarea)
-  const descriptionInput = page.locator('[data-testid="add-feature-dialog"] textarea').first();
+  const descriptionInput = page
+    .locator('[data-testid="add-feature-dialog"] textarea')
+    .first();
   await descriptionInput.fill(description);
 
   // Fill branch if provided (it's a combobox autocomplete)
   if (options?.branch) {
     // First, select "Other branch" radio option if not already selected
-    const otherBranchRadio = page.locator('[data-testid="feature-radio-group"]').locator('[id="feature-other"]');
+    const otherBranchRadio = page
+      .locator('[data-testid="feature-radio-group"]')
+      .locator('[id="feature-other"]');
     await otherBranchRadio.waitFor({ state: "visible", timeout: 5000 });
     await otherBranchRadio.click();
     // Wait for the branch input to appear
     await page.waitForTimeout(300);
-    
+
     // Now click on the branch input (autocomplete)
     const branchInput = page.locator('[data-testid="feature-input"]');
     await branchInput.waitFor({ state: "visible", timeout: 5000 });
@@ -151,7 +157,7 @@ export async function fillAddFeatureDialog(
     // Wait for the popover to open
     await page.waitForTimeout(300);
     // Type in the command input
-    const commandInput = page.locator('[cmdk-input]');
+    const commandInput = page.locator("[cmdk-input]");
     await commandInput.fill(options.branch);
     // Press Enter to select/create the branch
     await commandInput.press("Enter");
@@ -161,10 +167,12 @@ export async function fillAddFeatureDialog(
 
   // Fill category if provided (it's also a combobox autocomplete)
   if (options?.category) {
-    const categoryButton = page.locator('[data-testid="feature-category-input"]');
+    const categoryButton = page.locator(
+      '[data-testid="feature-category-input"]'
+    );
     await categoryButton.click();
     await page.waitForTimeout(300);
-    const commandInput = page.locator('[cmdk-input]');
+    const commandInput = page.locator("[cmdk-input]");
     await commandInput.fill(options.category);
     await commandInput.press("Enter");
     await page.waitForTimeout(200);
@@ -210,8 +218,13 @@ export async function getWorktreeSelector(page: Page): Promise<Locator> {
 /**
  * Click on a branch button in the worktree selector
  */
-export async function selectWorktreeBranch(page: Page, branchName: string): Promise<void> {
-  const branchButton = page.getByRole("button", { name: new RegExp(branchName, "i") });
+export async function selectWorktreeBranch(
+  page: Page,
+  branchName: string
+): Promise<void> {
+  const branchButton = page.getByRole("button", {
+    name: new RegExp(branchName, "i"),
+  });
   await branchButton.click();
   await page.waitForTimeout(500); // Wait for UI to update
 }
@@ -219,9 +232,13 @@ export async function selectWorktreeBranch(page: Page, branchName: string): Prom
 /**
  * Get the currently selected branch in the worktree selector
  */
-export async function getSelectedWorktreeBranch(page: Page): Promise<string | null> {
+export async function getSelectedWorktreeBranch(
+  page: Page
+): Promise<string | null> {
   // The main branch button has aria-pressed="true" when selected
-  const selectedButton = page.locator('[data-testid="worktree-selector"] button[aria-pressed="true"]');
+  const selectedButton = page.locator(
+    '[data-testid="worktree-selector"] button[aria-pressed="true"]'
+  );
   const text = await selectedButton.textContent().catch(() => null);
   return text?.trim() || null;
 }
@@ -229,7 +246,12 @@ export async function getSelectedWorktreeBranch(page: Page): Promise<string | nu
 /**
  * Check if a branch button is visible in the worktree selector
  */
-export async function isWorktreeBranchVisible(page: Page, branchName: string): Promise<boolean> {
-  const branchButton = page.getByRole("button", { name: new RegExp(branchName, "i") });
+export async function isWorktreeBranchVisible(
+  page: Page,
+  branchName: string
+): Promise<boolean> {
+  const branchButton = page.getByRole("button", {
+    name: new RegExp(branchName, "i"),
+  });
   return await branchButton.isVisible().catch(() => false);
 }

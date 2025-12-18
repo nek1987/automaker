@@ -21,6 +21,7 @@ import { resolveModelString, DEFAULT_MODELS } from "../lib/model-resolver.js";
 import { createAutoModeOptions } from "../lib/sdk-options.js";
 import { isAbortError, classifyError } from "../lib/error-handler.js";
 import type { Feature } from "./feature-loader.js";
+import { FeatureLoader } from "./feature-loader.js";
 import { getFeatureDir, getAutomakerDir } from "../lib/automaker-paths.js";
 
 const execAsync = promisify(exec);
@@ -35,9 +36,18 @@ interface RunningFeature {
   startTime: number;
 }
 
+interface AutoLoopState {
+  projectPath: string;
+  maxConcurrency: number;
+  abortController: AbortController;
+  isRunning: boolean;
+}
+
 export class AutoModeService {
   private events: EventEmitter;
   private runningFeatures = new Map<string, RunningFeature>();
+  private autoLoop: AutoLoopState | null = null;
+  private featureLoader = new FeatureLoader();
 
   constructor(events: EventEmitter) {
     this.events = events;
@@ -57,32 +67,47 @@ export class AutoModeService {
     isAutoMode = false
   ): Promise<void> {
     if (this.runningFeatures.has(featureId)) {
-      throw new Error(`Feature ${featureId} is already running`);
+      throw new Error("already running");
     }
 
-    // Check if feature has existing context - if so, resume instead of starting fresh
-    const hasExistingContext = await this.contextExists(projectPath, featureId);
-    if (hasExistingContext) {
-      console.log(
-        `[AutoMode] Feature ${featureId} has existing context, resuming instead of starting fresh`
-      );
-      return this.resumeFeature(projectPath, featureId, useWorktrees);
-    }
-
+    // Add to running features immediately to prevent race conditions
     const abortController = new AbortController();
-
-    // Emit feature start event early
-    this.emitAutoModeEvent("auto_mode_feature_start", {
+    const tempRunningFeature: RunningFeature = {
       featureId,
       projectPath,
-      feature: {
-        id: featureId,
-        title: "Loading...",
-        description: "Feature is starting",
-      },
-    });
+      worktreePath: null,
+      branchName: null,
+      abortController,
+      isAutoMode,
+      startTime: Date.now(),
+    };
+    this.runningFeatures.set(featureId, tempRunningFeature);
 
     try {
+      // Check if feature has existing context - if so, resume instead of starting fresh
+      const hasExistingContext = await this.contextExists(
+        projectPath,
+        featureId
+      );
+      if (hasExistingContext) {
+        console.log(
+          `[AutoMode] Feature ${featureId} has existing context, resuming instead of starting fresh`
+        );
+        // Remove from running features temporarily, resumeFeature will add it back
+        this.runningFeatures.delete(featureId);
+        return this.resumeFeature(projectPath, featureId, useWorktrees);
+      }
+
+      // Emit feature start event early
+      this.emitAutoModeEvent("auto_mode_feature_start", {
+        featureId,
+        projectPath,
+        feature: {
+          id: featureId,
+          title: "Loading...",
+          description: "Feature is starting",
+        },
+      });
       // Load feature details FIRST to get branchName
       const feature = await this.loadFeature(projectPath, featureId);
       if (!feature) {
@@ -90,9 +115,9 @@ export class AutoModeService {
       }
 
       // Derive workDir from feature.branchName
-      // If no branchName, use the project path directly
+      // If no branchName, derive from feature ID: feature/{featureId}
       let worktreePath: string | null = null;
-      const branchName = feature.branchName || null;
+      const branchName = feature.branchName || `feature/${featureId}`;
 
       if (useWorktrees && branchName) {
         // Try to find existing worktree for this branch
@@ -120,15 +145,9 @@ export class AutoModeService {
         ? path.resolve(worktreePath)
         : path.resolve(projectPath);
 
-      this.runningFeatures.set(featureId, {
-        featureId,
-        projectPath,
-        worktreePath,
-        branchName,
-        abortController,
-        isAutoMode,
-        startTime: Date.now(),
-      });
+      // Update running feature with actual worktree info
+      tempRunningFeature.worktreePath = worktreePath;
+      tempRunningFeature.branchName = branchName;
 
       // Update feature status to in_progress
       await this.updateFeatureStatus(projectPath, featureId, "in_progress");
@@ -169,7 +188,7 @@ export class AutoModeService {
         featureId,
         passes: true,
         message: `Feature completed in ${Math.round(
-          (Date.now() - this.runningFeatures.get(featureId)!.startTime) / 1000
+          (Date.now() - tempRunningFeature.startTime) / 1000
         )}s`,
         projectPath,
       });
@@ -219,6 +238,10 @@ export class AutoModeService {
     featureId: string,
     useWorktrees = false
   ): Promise<void> {
+    if (this.runningFeatures.has(featureId)) {
+      throw new Error("already running");
+    }
+
     // Check if context exists in .automaker directory
     const featureDir = getFeatureDir(projectPath, featureId);
     const contextPath = path.join(featureDir, "agent-output.md");
@@ -242,7 +265,9 @@ export class AutoModeService {
       );
     }
 
-    // No context, start fresh
+    // No context, start fresh - executeFeature will handle adding to runningFeatures
+    // Remove the temporary entry we added
+    this.runningFeatures.delete(featureId);
     return this.executeFeature(projectPath, featureId, useWorktrees, false);
   }
 
@@ -266,9 +291,10 @@ export class AutoModeService {
     const feature = await this.loadFeature(projectPath, featureId);
 
     // Derive workDir from feature.branchName
+    // If no branchName, derive from feature ID: feature/{featureId}
     let workDir = path.resolve(projectPath);
     let worktreePath: string | null = null;
-    const branchName = feature?.branchName || null;
+    const branchName = feature?.branchName || `feature/${featureId}`;
 
     if (useWorktrees && branchName) {
       // Try to find existing worktree for this branch
@@ -701,6 +727,61 @@ Format your response as a structured markdown document.`;
   }
 
   /**
+   * Start the auto loop to process pending features
+   * @param projectPath - The project path
+   * @param maxConcurrency - Maximum number of features to process concurrently
+   * @returns Promise that resolves when the loop stops
+   */
+  async startAutoLoop(
+    projectPath: string,
+    maxConcurrency: number
+  ): Promise<void> {
+    if (this.autoLoop?.isRunning) {
+      throw new Error("Auto mode is already running");
+    }
+
+    const abortController = new AbortController();
+    this.autoLoop = {
+      projectPath,
+      maxConcurrency,
+      abortController,
+      isRunning: true,
+    };
+
+    // Emit start event
+    this.emitAutoModeEvent("auto_mode_started", {
+      projectPath,
+      message: `Auto mode started with max concurrency: ${maxConcurrency}`,
+    });
+
+    // Start the loop
+    return this.runAutoLoop();
+  }
+
+  /**
+   * Stop the auto loop
+   * @returns Number of running features (should be 0 after stopping)
+   */
+  async stopAutoLoop(): Promise<number> {
+    if (!this.autoLoop?.isRunning) {
+      return 0;
+    }
+
+    const runningCount = this.runningFeatures.size;
+    this.autoLoop.abortController.abort();
+    this.autoLoop.isRunning = false;
+    this.autoLoop = null;
+
+    // Emit stop event
+    this.emitAutoModeEvent("auto_mode_stopped", {
+      message: "Auto mode stopped",
+      runningCount,
+    });
+
+    return runningCount;
+  }
+
+  /**
    * Get current status
    */
   getStatus(): {
@@ -733,6 +814,89 @@ Format your response as a structured markdown document.`;
   }
 
   // Private helpers
+
+  /**
+   * Run the auto loop to process pending features
+   */
+  private async runAutoLoop(): Promise<void> {
+    if (!this.autoLoop) {
+      return;
+    }
+
+    const { projectPath, maxConcurrency, abortController } = this.autoLoop;
+    const runningPromises = new Map<string, Promise<void>>();
+
+    try {
+      while (!abortController.signal.aborted && this.autoLoop.isRunning) {
+        // Get all features
+        const allFeatures = await this.featureLoader.getAll(projectPath);
+
+        // Filter to pending features that aren't already running
+        const pendingFeatures = allFeatures.filter(
+          (feature) =>
+            feature.status === "pending" &&
+            !this.runningFeatures.has(feature.id) &&
+            !runningPromises.has(feature.id)
+        );
+
+        // Start new features up to max concurrency
+        while (
+          runningPromises.size < maxConcurrency &&
+          pendingFeatures.length > 0 &&
+          !abortController.signal.aborted
+        ) {
+          const feature = pendingFeatures.shift();
+          if (!feature) break;
+
+          const promise = this.executeFeature(
+            projectPath,
+            feature.id,
+            true, // useWorktrees
+            true // isAutoMode
+          )
+            .catch((error) => {
+              console.error(
+                `[AutoMode] Feature ${feature.id} failed in auto loop:`,
+                error
+              );
+            })
+            .finally(() => {
+              runningPromises.delete(feature.id);
+            });
+
+          runningPromises.set(feature.id, promise);
+        }
+
+        // Wait a bit before checking again
+        if (runningPromises.size > 0) {
+          await Promise.race([
+            Promise.allSettled(Array.from(runningPromises.values())),
+            new Promise<void>((resolve) => {
+              abortController.signal.addEventListener(
+                "abort",
+                () => resolve(),
+                {
+                  once: true,
+                }
+              );
+            }),
+          ]);
+        } else {
+          // No features running, wait before checking again
+          await this.sleep(1000, abortController.signal);
+        }
+      }
+    } catch (error) {
+      if (!isAbortError(error)) {
+        console.error("[AutoMode] Auto loop error:", error);
+      }
+    } finally {
+      // Wait for all running features to complete
+      if (runningPromises.size > 0) {
+        await Promise.allSettled(Array.from(runningPromises.values()));
+      }
+    }
+  }
 
   /**
    * Find an existing worktree for a given branch by checking git worktree list
@@ -1209,31 +1373,42 @@ This mock response was generated because AUTOMAKER_MOCK_AGENT=true was set.
     useWorktrees: boolean
   ): Promise<void> {
     if (this.runningFeatures.has(featureId)) {
-      throw new Error(`Feature ${featureId} is already running`);
+      throw new Error("already running");
     }
 
     const abortController = new AbortController();
-
-    // Emit feature start event early
-    this.emitAutoModeEvent("auto_mode_feature_start", {
+    // Add to running features immediately
+    const tempRunningFeature: RunningFeature = {
       featureId,
       projectPath,
-      feature: {
-        id: featureId,
-        title: "Resuming...",
-        description: "Feature is resuming from previous context",
-      },
-    });
+      worktreePath: null,
+      branchName: null,
+      abortController,
+      isAutoMode: false,
+      startTime: Date.now(),
+    };
+    this.runningFeatures.set(featureId, tempRunningFeature);
 
     try {
+      // Emit feature start event early
+      this.emitAutoModeEvent("auto_mode_feature_start", {
+        featureId,
+        projectPath,
+        feature: {
+          id: featureId,
+          title: "Resuming...",
+          description: "Feature is resuming from previous context",
+        },
+      });
       const feature = await this.loadFeature(projectPath, featureId);
       if (!feature) {
         throw new Error(`Feature ${featureId} not found`);
       }
 
       // Derive workDir from feature.branchName
+      // If no branchName, derive from feature ID: feature/{featureId}
       let worktreePath: string | null = null;
-      const branchName = feature.branchName || null;
+      const branchName = feature.branchName || `feature/${featureId}`;
 
       if (useWorktrees && branchName) {
         worktreePath = await this.findExistingWorktreeForBranch(
@@ -1256,15 +1431,9 @@ This mock response was generated because AUTOMAKER_MOCK_AGENT=true was set.
         ? path.resolve(worktreePath)
         : path.resolve(projectPath);
 
-      this.runningFeatures.set(featureId, {
-        featureId,
-        projectPath,
-        worktreePath,
-        branchName,
-        abortController,
-        isAutoMode: false,
-        startTime: Date.now(),
-      });
+      // Update running feature with actual worktree info
+      tempRunningFeature.worktreePath = worktreePath;
+      tempRunningFeature.branchName = branchName;
 
       // Update feature status to in_progress
       await this.updateFeatureStatus(projectPath, featureId, "in_progress");
@@ -1315,7 +1484,7 @@ Review the previous work and continue the implementation. If the feature appears
         featureId,
         passes: true,
         message: `Feature resumed and completed in ${Math.round(
-          (Date.now() - this.runningFeatures.get(featureId)!.startTime) / 1000
+          (Date.now() - tempRunningFeature.startTime) / 1000
         )}s`,
         projectPath,
       });
