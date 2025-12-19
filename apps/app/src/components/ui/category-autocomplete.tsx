@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { Tag } from "lucide-react";
 import { Autocomplete } from "@/components/ui/autocomplete";
 
 interface CategoryAutocompleteProps {
@@ -10,6 +10,7 @@ interface CategoryAutocompleteProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  error?: boolean;
   "data-testid"?: string;
 }
 
@@ -20,6 +21,7 @@ export function CategoryAutocomplete({
   placeholder = "Select or type a category...",
   className,
   disabled = false,
+  error = false,
   "data-testid": testId,
 }: CategoryAutocompleteProps) {
   return (
@@ -28,10 +30,14 @@ export function CategoryAutocomplete({
       onChange={onChange}
       options={suggestions}
       placeholder={placeholder}
-      searchPlaceholder="Search category..."
+      searchPlaceholder="Search or type new category..."
       emptyMessage="No category found."
       className={className}
       disabled={disabled}
+      error={error}
+      icon={Tag}
+      allowCreate
+      createLabel={(v) => `Create "${v}"`}
       data-testid={testId}
       itemTestIdPrefix="category-option"
     />
