@@ -60,7 +60,7 @@ import {
 } from "lucide-react";
 import { CountUpTimer } from "@/components/ui/count-up-timer";
 import { getElectronAPI } from "@/lib/electron";
-import { getBlockingDependencies } from "@/lib/dependency-resolver";
+import { getBlockingDependencies } from "@automaker/dependency-resolver";
 import {
   parseAgentContext,
   AgentTaskInfo,

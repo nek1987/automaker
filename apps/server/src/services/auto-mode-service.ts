@@ -10,20 +10,18 @@
  */
 
 import { ProviderFactory } from "../providers/provider-factory.js";
-import type { ExecuteOptions } from "../providers/types.js";
+import type { ExecuteOptions, Feature } from "@automaker/types";
+import { buildPromptWithImages, isAbortError, classifyError } from "@automaker/utils";
+import { resolveModelString, DEFAULT_MODELS } from "@automaker/model-resolver";
+import { resolveDependencies, areDependenciesSatisfied } from "@automaker/dependency-resolver";
+import { getFeatureDir, getAutomakerDir, getFeaturesDir, getContextDir } from "@automaker/platform";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import fs from "fs/promises";
 import type { EventEmitter } from "../lib/events.js";
-import { buildPromptWithImages } from "../lib/prompt-builder.js";
-import { resolveModelString, DEFAULT_MODELS } from "../lib/model-resolver.js";
 import { createAutoModeOptions } from "../lib/sdk-options.js";
-import { isAbortError, classifyError } from "../lib/error-handler.js";
-import { resolveDependencies, areDependenciesSatisfied } from "../lib/dependency-resolver.js";
-import type { Feature } from "./feature-loader.js";
 import { FeatureLoader } from "./feature-loader.js";
-import { getFeatureDir, getAutomakerDir, getFeaturesDir, getContextDir } from "../lib/automaker-paths.js";
 
 const execAsync = promisify(exec);
 
@@ -1606,7 +1604,7 @@ Format your response as a structured markdown document.`;
       const { orderedFeatures } = resolveDependencies(pendingFeatures);
 
       // Filter to only features with satisfied dependencies
-      const readyFeatures = orderedFeatures.filter(feature =>
+      const readyFeatures = orderedFeatures.filter((feature: Feature) =>
         areDependenciesSatisfied(feature, allFeatures)
       );
 

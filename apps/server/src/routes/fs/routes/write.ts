@@ -5,7 +5,7 @@
 import type { Request, Response } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { validatePath } from "../../../lib/security.js";
+import { validatePath } from "@automaker/platform";
 import { getErrorMessage, logError } from "../common.js";
 import { mkdirSafe } from "../../../lib/fs-utils.js";
 

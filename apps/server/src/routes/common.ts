@@ -2,7 +2,7 @@
  * Common utilities shared across all route modules
  */
 
-import { createLogger } from "../lib/logger.js";
+import { createLogger } from "@automaker/utils";
 import fs from "fs/promises";
 import path from "path";
 import { exec } from "child_process";

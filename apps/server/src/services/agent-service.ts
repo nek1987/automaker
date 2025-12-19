@@ -7,12 +7,10 @@ import { AbortError } from "@anthropic-ai/claude-agent-sdk";
 import path from "path";
 import fs from "fs/promises";
 import type { EventEmitter } from "../lib/events.js";
+import type { ExecuteOptions } from "@automaker/types";
+import { readImageAsBase64, buildPromptWithImages, isAbortError } from "@automaker/utils";
 import { ProviderFactory } from "../providers/provider-factory.js";
-import type { ExecuteOptions } from "../providers/types.js";
-import { readImageAsBase64 } from "../lib/image-handler.js";
-import { buildPromptWithImages } from "../lib/prompt-builder.js";
 import { createChatOptions } from "../lib/sdk-options.js";
-import { isAbortError } from "../lib/error-handler.js";
 
 interface Message {
   id: string;

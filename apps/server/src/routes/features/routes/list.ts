@@ -4,7 +4,7 @@
 
 import type { Request, Response } from "express";
 import { FeatureLoader } from "../../../services/feature-loader.js";
-import { addAllowedPath } from "../../../lib/security.js";
+import { addAllowedPath } from "@automaker/platform";
 import { getErrorMessage, logError } from "../common.js";
 
 export function createListHandler(featureLoader: FeatureLoader) {
