@@ -12,6 +12,7 @@ import { createMergeHandler } from "./routes/merge.js";
 import { createCreateHandler } from "./routes/create.js";
 import { createDeleteHandler } from "./routes/delete.js";
 import { createCreatePRHandler } from "./routes/create-pr.js";
+import { createPRInfoHandler } from "./routes/pr-info.js";
 import { createCommitHandler } from "./routes/commit.js";
 import { createPushHandler } from "./routes/push.js";
 import { createPullHandler } from "./routes/pull.js";
@@ -40,6 +41,7 @@ export function createWorktreeRoutes(): Router {
   router.post("/create", createCreateHandler());
   router.post("/delete", createDeleteHandler());
   router.post("/create-pr", createCreatePRHandler());
+  router.post("/pr-info", createPRInfoHandler());
   router.post("/commit", createCommitHandler());
   router.post("/push", createPushHandler());
   router.post("/pull", createPullHandler());

@@ -208,13 +208,31 @@ export function FileBrowserDialog({
     }
   };
 
-  const handleSelect = () => {
+  const handleSelect = useCallback(() => {
     if (currentPath) {
       addRecentFolder(currentPath);
       onSelect(currentPath);
       onOpenChange(false);
     }
-  };
+  }, [currentPath, onSelect, onOpenChange]);
+
+  // Handle Command/Ctrl+Enter keyboard shortcut to select current folder
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (currentPath && !loading) {
+          handleSelect();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, currentPath, loading, handleSelect]);
 
   // Helper to get folder name from path
   const getFolderName = (path: string) => {
@@ -399,9 +417,12 @@ export function FileBrowserDialog({
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button size="sm" onClick={handleSelect} disabled={!currentPath || loading}>
+          <Button size="sm" onClick={handleSelect} disabled={!currentPath || loading} title="Select current folder (Cmd+Enter / Ctrl+Enter)">
             <FolderOpen className="w-3.5 h-3.5 mr-1.5" />
             Select Current Folder
+            <kbd className="ml-2 px-1.5 py-0.5 text-[10px] bg-background/50 rounded border border-border">
+              {typeof navigator !== "undefined" && navigator.platform?.includes("Mac") ? "⌘" : "Ctrl"}+↵
+            </kbd>
           </Button>
         </DialogFooter>
       </DialogContent>

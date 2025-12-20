@@ -304,6 +304,20 @@ function createWindow(): void {
 
 // App lifecycle
 app.whenReady().then(async () => {
+  // Ensure userData path is consistent across dev/prod so files land in Automaker dir
+  try {
+    const desiredUserDataPath = path.join(app.getPath("appData"), "Automaker");
+    if (app.getPath("userData") !== desiredUserDataPath) {
+      app.setPath("userData", desiredUserDataPath);
+      console.log("[Electron] userData path set to:", desiredUserDataPath);
+    }
+  } catch (error) {
+    console.warn(
+      "[Electron] Failed to set userData path:",
+      (error as Error).message
+    );
+  }
+
   if (process.platform === "darwin" && app.dock) {
     const iconPath = getIconPath();
     if (iconPath) {

@@ -19,9 +19,11 @@ import {
   Play,
   Square,
   Globe,
+  MessageSquare,
+  GitMerge,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { WorktreeInfo, DevServerInfo } from "../types";
+import type { WorktreeInfo, DevServerInfo, PRInfo } from "../types";
 
 interface WorktreeActionsDropdownProps {
   worktree: WorktreeInfo;
@@ -40,6 +42,8 @@ interface WorktreeActionsDropdownProps {
   onOpenInEditor: (worktree: WorktreeInfo) => void;
   onCommit: (worktree: WorktreeInfo) => void;
   onCreatePR: (worktree: WorktreeInfo) => void;
+  onAddressPRComments: (worktree: WorktreeInfo, prInfo: PRInfo) => void;
+  onResolveConflicts: (worktree: WorktreeInfo) => void;
   onDeleteWorktree: (worktree: WorktreeInfo) => void;
   onStartDevServer: (worktree: WorktreeInfo) => void;
   onStopDevServer: (worktree: WorktreeInfo) => void;
@@ -63,11 +67,16 @@ export function WorktreeActionsDropdown({
   onOpenInEditor,
   onCommit,
   onCreatePR,
+  onAddressPRComments,
+  onResolveConflicts,
   onDeleteWorktree,
   onStartDevServer,
   onStopDevServer,
   onOpenDevServerUrl,
 }: WorktreeActionsDropdownProps) {
+  // Check if there's a PR associated with this worktree from stored metadata
+  const hasPR = !!worktree.pr;
+
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
@@ -154,6 +163,15 @@ export function WorktreeActionsDropdown({
             </span>
           )}
         </DropdownMenuItem>
+        {!worktree.isMain && (
+          <DropdownMenuItem
+            onClick={() => onResolveConflicts(worktree)}
+            className="text-xs text-purple-500 focus:text-purple-600"
+          >
+            <GitMerge className="w-3.5 h-3.5 mr-2" />
+            Pull & Resolve Conflicts
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => onOpenInEditor(worktree)}
@@ -170,11 +188,49 @@ export function WorktreeActionsDropdown({
           </DropdownMenuItem>
         )}
         {/* Show PR option for non-primary worktrees, or primary worktree with changes */}
-        {(!worktree.isMain || worktree.hasChanges) && (
+        {(!worktree.isMain || worktree.hasChanges) && !hasPR && (
           <DropdownMenuItem onClick={() => onCreatePR(worktree)} className="text-xs">
             <GitPullRequest className="w-3.5 h-3.5 mr-2" />
             Create Pull Request
           </DropdownMenuItem>
+        )}
+        {/* Show PR info and Address Comments button if PR exists */}
+        {!worktree.isMain && hasPR && worktree.pr && (
+          <>
+            <DropdownMenuItem
+              onClick={() => {
+                window.open(worktree.pr!.url, "_blank");
+              }}
+              className="text-xs"
+            >
+              <GitPullRequest className="w-3 h-3 mr-2" />
+              PR #{worktree.pr.number}
+              <span className="ml-auto text-[10px] bg-green-500/20 text-green-600 px-1.5 py-0.5 rounded uppercase">
+                {worktree.pr.state}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                // Convert stored PR info to the full PRInfo format for the handler
+                // The handler will fetch full comments from GitHub
+                const prInfo: PRInfo = {
+                  number: worktree.pr!.number,
+                  title: worktree.pr!.title,
+                  url: worktree.pr!.url,
+                  state: worktree.pr!.state,
+                  author: "", // Will be fetched
+                  body: "",   // Will be fetched
+                  comments: [],
+                  reviewComments: [],
+                };
+                onAddressPRComments(worktree, prInfo);
+              }}
+              className="text-xs text-blue-500 focus:text-blue-600"
+            >
+              <MessageSquare className="w-3.5 h-3.5 mr-2" />
+              Address PR Comments
+            </DropdownMenuItem>
+          </>
         )}
         {!worktree.isMain && (
           <>

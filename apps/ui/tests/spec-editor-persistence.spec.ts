@@ -53,13 +53,14 @@ test.describe("Spec Editor Persistence", () => {
     // Step 6: Wait for CodeMirror to initialize (it has a .cm-content element)
     await specEditor.locator(".cm-content").waitFor({ state: "visible", timeout: 10000 });
 
-    // Small delay to ensure editor is fully initialized
-    await page.waitForTimeout(500);
-
     // Step 7: Modify the editor content to "hello world"
     await setEditorContent(page, "hello world");
 
-    // Step 8: Click the save button
+    // Verify content was set before saving
+    const contentBeforeSave = await getEditorContent(page);
+    expect(contentBeforeSave.trim()).toBe("hello world");
+
+    // Step 8: Click the save button and wait for save to complete
     await clickSaveButton(page);
 
     // Step 9: Refresh the page
@@ -77,8 +78,43 @@ test.describe("Spec Editor Persistence", () => {
     const specEditorAfterReload = await getByTestId(page, "spec-editor");
     await specEditorAfterReload.locator(".cm-content").waitFor({ state: "visible", timeout: 10000 });
 
-    // Small delay to ensure editor content is loaded
-    await page.waitForTimeout(500);
+    // Wait for CodeMirror content to update with the loaded spec
+    // The spec might need time to load into the editor after page reload
+    let contentMatches = false;
+    let attempts = 0;
+    const maxAttempts = 30; // Try for up to 30 seconds with 1-second intervals
+
+    while (!contentMatches && attempts < maxAttempts) {
+      try {
+        const contentElement = page.locator('[data-testid="spec-editor"] .cm-content');
+        const text = await contentElement.textContent();
+        if (text && text.trim() === "hello world") {
+          contentMatches = true;
+          break;
+        }
+      } catch (e) {
+        // Element might not be ready yet, continue
+      }
+
+      if (!contentMatches) {
+        await page.waitForTimeout(1000);
+        attempts++;
+      }
+    }
+
+    // If we didn't get the right content with our polling, use the fallback
+    if (!contentMatches) {
+      await page.waitForFunction(
+        (expectedContent) => {
+          const contentElement = document.querySelector('[data-testid="spec-editor"] .cm-content');
+          if (!contentElement) return false;
+          const text = (contentElement.textContent || "").trim();
+          return text === expectedContent;
+        },
+        "hello world",
+        { timeout: 10000 }
+      );
+    }
 
     // Step 11: Verify the content was persisted
     const persistedContent = await getEditorContent(page);

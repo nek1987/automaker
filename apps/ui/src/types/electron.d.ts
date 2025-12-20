@@ -667,6 +667,13 @@ export interface WorktreeAPI {
       hasWorktree: boolean; // Does this branch have an active worktree?
       hasChanges?: boolean;
       changedFilesCount?: number;
+      pr?: {
+        number: number;
+        url: string;
+        title: string;
+        state: string;
+        createdAt: string;
+      };
     }>;
     removedWorktrees?: Array<{
       path: string;
@@ -737,6 +744,7 @@ export interface WorktreeAPI {
   createPR: (
     worktreePath: string,
     options?: {
+      projectPath?: string;
       commitMessage?: string;
       prTitle?: string;
       prBody?: string;
@@ -751,7 +759,9 @@ export interface WorktreeAPI {
       commitHash?: string;
       pushed: boolean;
       prUrl?: string;
+      prNumber?: number;
       prCreated: boolean;
+      prAlreadyExisted?: boolean;
       prError?: string;
       browserUrl?: string;
       ghCliAvailable?: boolean;
@@ -891,6 +901,44 @@ export interface WorktreeAPI {
         port: number;
         url: string;
       }>;
+    };
+    error?: string;
+  }>;
+
+  // Get PR info and comments for a branch
+  getPRInfo: (
+    worktreePath: string,
+    branchName: string
+  ) => Promise<{
+    success: boolean;
+    result?: {
+      hasPR: boolean;
+      ghCliAvailable: boolean;
+      prInfo?: {
+        number: number;
+        title: string;
+        url: string;
+        state: string;
+        author: string;
+        body: string;
+        comments: Array<{
+          id: number;
+          author: string;
+          body: string;
+          createdAt: string;
+          isReviewComment: boolean;
+        }>;
+        reviewComments: Array<{
+          id: number;
+          author: string;
+          body: string;
+          path?: string;
+          line?: number;
+          createdAt: string;
+          isReviewComment: boolean;
+        }>;
+      };
+      error?: string;
     };
     error?: string;
   }>;

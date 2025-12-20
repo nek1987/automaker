@@ -1,7 +1,27 @@
 # Automaker Docker Compose
-# For self-hosting the Automaker backend server
+# Runs Automaker in complete isolation from your host filesystem.
+# The container cannot access any files on your laptop - only Docker-managed volumes.
+#
+# Usage:
+#   docker-compose up -d
+#   Then open http://localhost:3007
+#
+# See docs/docker-isolation.md for full documentation.
 
 services:
+  # Frontend UI
+  ui:
+    build:
+      context: .
+      dockerfile: apps/ui/Dockerfile
+    container_name: automaker-ui
+    restart: unless-stopped
+    ports:
+      - "3007:80"
+    depends_on:
+      - server
+
+  # Backend API Server
   server:
     build:
       context: .
@@ -17,10 +37,11 @@ services:
       # Optional - authentication (leave empty to disable)
       - AUTOMAKER_API_KEY=${AUTOMAKER_API_KEY:-}
 
-      # Optional - restrict to specific directories (comma-separated)
+      # Optional - restrict to specific directories within container only
+      # These paths are INSIDE the container, not on your host
       - ALLOWED_PROJECT_DIRS=${ALLOWED_PROJECT_DIRS:-/projects}
 
-      # Optional - data directory for sessions, etc.
+      # Optional - data directory for sessions, etc. (container-only)
       - DATA_DIR=/data
 
       # Optional - CORS origin (default allows all)
@@ -30,11 +51,20 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
     volumes:
-      # Persist data between restarts
+      # ONLY named volumes - these are isolated from your host filesystem
+      # This volume persists data between restarts but is container-managed
       - automaker-data:/data
 
-      # Mount your projects directory (read-write access)
-      - ${PROJECTS_DIR:-./projects}:/projects
+      # NO host directory mounts - container cannot access your laptop files
+      # If you need to work on a project, create it INSIDE the container
+      # or use a separate docker-compose override file
+
+    # Security: Server runs as non-root user (already set in Dockerfile)
+    # Security: No privileged mode
+    # Security: No host network access
+    # Security: No host filesystem mounts
 
 volumes:
   automaker-data:
+    name: automaker-data
+    # Named volume - completely isolated from host filesystem

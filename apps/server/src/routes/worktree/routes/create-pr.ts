@@ -3,53 +3,22 @@
  */
 
 import type { Request, Response } from "express";
-import { exec } from "child_process";
-import { promisify } from "util";
-import { getErrorMessage, logError } from "../common.js";
-
-const execAsync = promisify(exec);
-
-// Extended PATH to include common tool installation locations
-// This is needed because Electron apps don't inherit the user's shell PATH
-const pathSeparator = process.platform === "win32" ? ";" : ":";
-const additionalPaths: string[] = [];
-
-if (process.platform === "win32") {
-  // Windows paths
-  if (process.env.LOCALAPPDATA) {
-    additionalPaths.push(`${process.env.LOCALAPPDATA}\\Programs\\Git\\cmd`);
-  }
-  if (process.env.PROGRAMFILES) {
-    additionalPaths.push(`${process.env.PROGRAMFILES}\\Git\\cmd`);
-  }
-  if (process.env["ProgramFiles(x86)"]) {
-    additionalPaths.push(`${process.env["ProgramFiles(x86)"]}\\Git\\cmd`);
-  }
-} else {
-  // Unix/Mac paths
-  additionalPaths.push(
-    "/opt/homebrew/bin",        // Homebrew on Apple Silicon
-    "/usr/local/bin",           // Homebrew on Intel Mac, common Linux location
-    "/home/linuxbrew/.linuxbrew/bin", // Linuxbrew
-    `${process.env.HOME}/.local/bin`, // pipx, other user installs
-  );
-}
-
-const extendedPath = [
-  process.env.PATH,
-  ...additionalPaths.filter(Boolean),
-].filter(Boolean).join(pathSeparator);
-
-const execEnv = {
-  ...process.env,
-  PATH: extendedPath,
-};
+import {
+  getErrorMessage,
+  logError,
+  execAsync,
+  execEnv,
+  isValidBranchName,
+  isGhCliAvailable,
+} from "../common.js";
+import { updateWorktreePRInfo } from "../../../lib/worktree-metadata.js";
 
 export function createCreatePRHandler() {
   return async (req: Request, res: Response): Promise<void> => {
     try {
-      const { worktreePath, commitMessage, prTitle, prBody, baseBranch, draft } = req.body as {
+      const { worktreePath, projectPath, commitMessage, prTitle, prBody, baseBranch, draft } = req.body as {
         worktreePath: string;
+        projectPath?: string;
         commitMessage?: string;
         prTitle?: string;
         prBody?: string;
@@ -65,12 +34,25 @@ export function createCreatePRHandler() {
         return;
       }
 
+      // Use projectPath if provided, otherwise derive from worktreePath
+      // For worktrees, projectPath is needed to store metadata in the main project's .automaker folder
+      const effectiveProjectPath = projectPath || worktreePath;
+
       // Get current branch name
       const { stdout: branchOutput } = await execAsync(
         "git rev-parse --abbrev-ref HEAD",
         { cwd: worktreePath, env: execEnv }
       );
       const branchName = branchOutput.trim();
+
+      // Validate branch name for security
+      if (!isValidBranchName(branchName)) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid branch name contains unsafe characters",
+        });
+        return;
+      }
 
       // Check for uncommitted changes
       const { stdout: status } = await execAsync("git status --porcelain", {
@@ -143,18 +125,8 @@ export function createCreatePRHandler() {
       let browserUrl: string | null = null;
       let ghCliAvailable = false;
 
-      // Check if gh CLI is available (cross-platform)
-      try {
-        const checkCommand = process.platform === "win32" 
-          ? "where gh" 
-          : "command -v gh";
-        await execAsync(checkCommand, { env: execEnv });
-        ghCliAvailable = true;
-      } catch {
-        ghCliAvailable = false;
-      }
-
-      // Get repository URL for browser fallback
+      // Get repository URL and detect fork workflow FIRST
+      // This is needed for both the existing PR check and PR creation
       let repoUrl: string | null = null;
       let upstreamRepo: string | null = null;
       let originOwner: string | null = null;
@@ -180,7 +152,7 @@ export function createCreatePRHandler() {
             // Try HTTPS format: https://github.com/owner/repo.git
             match = line.match(/^(\w+)\s+https?:\/\/[^/]+\/([^/]+)\/([^\s]+?)(?:\.git)?\s+\(fetch\)/);
           }
-          
+
           if (match) {
             const [, remoteName, owner, repo] = match;
             if (remoteName === "upstream") {
@@ -206,7 +178,7 @@ export function createCreatePRHandler() {
             env: execEnv,
           });
           const url = originUrl.trim();
-          
+
           // Parse URL to extract owner/repo
           // Handle both SSH (git@github.com:owner/repo.git) and HTTPS (https://github.com/owner/repo.git)
           let match = url.match(/[:/]([^/]+)\/([^/\s]+?)(?:\.git)?$/);
@@ -219,6 +191,9 @@ export function createCreatePRHandler() {
           // Failed to get repo URL from config
         }
       }
+
+      // Check if gh CLI is available (cross-platform)
+      ghCliAvailable = await isGhCliAvailable();
 
       // Construct browser URL for PR creation
       if (repoUrl) {
@@ -234,32 +209,136 @@ export function createCreatePRHandler() {
         }
       }
 
+      let prNumber: number | undefined;
+      let prAlreadyExisted = false;
+
       if (ghCliAvailable) {
+        // First, check if a PR already exists for this branch using gh pr list
+        // This is more reliable than gh pr view as it explicitly searches by branch name
+        // For forks, we need to use owner:branch format for the head parameter
+        const headRef = upstreamRepo && originOwner ? `${originOwner}:${branchName}` : branchName;
+        const repoArg = upstreamRepo ? ` --repo "${upstreamRepo}"` : "";
+
+        console.log(`[CreatePR] Checking for existing PR for branch: ${branchName} (headRef: ${headRef})`);
         try {
-          // Build gh pr create command
-          let prCmd = `gh pr create --base "${base}"`;
-
-          // If this is a fork (has upstream remote), specify the repo and head
-          if (upstreamRepo && originOwner) {
-            // For forks: --repo specifies where to create PR, --head specifies source
-            prCmd += ` --repo "${upstreamRepo}" --head "${originOwner}:${branchName}"`;
-          } else {
-            // Not a fork, just specify the head branch
-            prCmd += ` --head "${branchName}"`;
-          }
-
-          prCmd += ` --title "${title.replace(/"/g, '\\"')}" --body "${body.replace(/"/g, '\\"')}" ${draftFlag}`;
-          prCmd = prCmd.trim();
-
-          const { stdout: prOutput } = await execAsync(prCmd, {
+          const listCmd = `gh pr list${repoArg} --head "${headRef}" --json number,title,url,state --limit 1`;
+          console.log(`[CreatePR] Running: ${listCmd}`);
+          const { stdout: existingPrOutput } = await execAsync(listCmd, {
             cwd: worktreePath,
             env: execEnv,
           });
-          prUrl = prOutput.trim();
-        } catch (ghError: unknown) {
-          // gh CLI failed
-          const err = ghError as { stderr?: string; message?: string };
-          prError = err.stderr || err.message || "PR creation failed";
+          console.log(`[CreatePR] gh pr list output: ${existingPrOutput}`);
+
+          const existingPrs = JSON.parse(existingPrOutput);
+
+          if (Array.isArray(existingPrs) && existingPrs.length > 0) {
+            const existingPr = existingPrs[0];
+            // PR already exists - use it and store metadata
+            console.log(`[CreatePR] PR already exists for branch ${branchName}: PR #${existingPr.number}`);
+            prUrl = existingPr.url;
+            prNumber = existingPr.number;
+            prAlreadyExisted = true;
+
+            // Store the existing PR info in metadata
+            await updateWorktreePRInfo(effectiveProjectPath, branchName, {
+              number: existingPr.number,
+              url: existingPr.url,
+              title: existingPr.title || title,
+              state: existingPr.state || "open",
+              createdAt: new Date().toISOString(),
+            });
+            console.log(`[CreatePR] Stored existing PR info for branch ${branchName}: PR #${existingPr.number}`);
+          } else {
+            console.log(`[CreatePR] No existing PR found for branch ${branchName}`);
+          }
+        } catch (listError) {
+          // gh pr list failed - log but continue to try creating
+          console.log(`[CreatePR] gh pr list failed (this is ok, will try to create):`, listError);
+        }
+
+        // Only create a new PR if one doesn't already exist
+        if (!prUrl) {
+          try {
+            // Build gh pr create command
+            let prCmd = `gh pr create --base "${base}"`;
+
+            // If this is a fork (has upstream remote), specify the repo and head
+            if (upstreamRepo && originOwner) {
+              // For forks: --repo specifies where to create PR, --head specifies source
+              prCmd += ` --repo "${upstreamRepo}" --head "${originOwner}:${branchName}"`;
+            } else {
+              // Not a fork, just specify the head branch
+              prCmd += ` --head "${branchName}"`;
+            }
+
+            prCmd += ` --title "${title.replace(/"/g, '\\"')}" --body "${body.replace(/"/g, '\\"')}" ${draftFlag}`;
+            prCmd = prCmd.trim();
+
+            console.log(`[CreatePR] Creating PR with command: ${prCmd}`);
+            const { stdout: prOutput } = await execAsync(prCmd, {
+              cwd: worktreePath,
+              env: execEnv,
+            });
+            prUrl = prOutput.trim();
+            console.log(`[CreatePR] PR created: ${prUrl}`);
+
+            // Extract PR number and store metadata for newly created PR
+            if (prUrl) {
+              const prMatch = prUrl.match(/\/pull\/(\d+)/);
+              prNumber = prMatch ? parseInt(prMatch[1], 10) : undefined;
+
+              if (prNumber) {
+                try {
+                  await updateWorktreePRInfo(effectiveProjectPath, branchName, {
+                    number: prNumber,
+                    url: prUrl,
+                    title,
+                    state: draft ? "draft" : "open",
+                    createdAt: new Date().toISOString(),
+                  });
+                  console.log(`[CreatePR] Stored PR info for branch ${branchName}: PR #${prNumber}`);
+                } catch (metadataError) {
+                  console.error("[CreatePR] Failed to store PR metadata:", metadataError);
+                }
+              }
+            }
+          } catch (ghError: unknown) {
+            // gh CLI failed - check if it's "already exists" error and try to fetch the PR
+            const err = ghError as { stderr?: string; message?: string };
+            const errorMessage = err.stderr || err.message || "PR creation failed";
+            console.log(`[CreatePR] gh pr create failed: ${errorMessage}`);
+
+            // If error indicates PR already exists, try to fetch it
+            if (errorMessage.toLowerCase().includes("already exists")) {
+              console.log(`[CreatePR] PR already exists error - trying to fetch existing PR`);
+              try {
+                const { stdout: viewOutput } = await execAsync(
+                  `gh pr view --json number,title,url,state`,
+                  { cwd: worktreePath, env: execEnv }
+                );
+                const existingPr = JSON.parse(viewOutput);
+                if (existingPr.url) {
+                  prUrl = existingPr.url;
+                  prNumber = existingPr.number;
+                  prAlreadyExisted = true;
+
+                  await updateWorktreePRInfo(effectiveProjectPath, branchName, {
+                    number: existingPr.number,
+                    url: existingPr.url,
+                    title: existingPr.title || title,
+                    state: existingPr.state || "open",
+                    createdAt: new Date().toISOString(),
+                  });
+                  console.log(`[CreatePR] Fetched and stored existing PR: #${existingPr.number}`);
+                }
+              } catch (viewError) {
+                console.error("[CreatePR] Failed to fetch existing PR:", viewError);
+                prError = errorMessage;
+              }
+            } else {
+              prError = errorMessage;
+            }
+          }
         }
       } else {
         prError = "gh_cli_not_available";
@@ -274,7 +353,9 @@ export function createCreatePRHandler() {
           commitHash,
           pushed: true,
           prUrl,
+          prNumber,
           prCreated: !!prUrl,
+          prAlreadyExisted,
           prError: prError || undefined,
           browserUrl: browserUrl || undefined,
           ghCliAvailable,

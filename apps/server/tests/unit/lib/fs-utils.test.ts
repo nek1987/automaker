@@ -65,6 +65,47 @@ describe("fs-utils.ts", () => {
       // Should not throw
       await expect(mkdirSafe(symlinkPath)).resolves.toBeUndefined();
     });
+
+    it("should handle ELOOP error gracefully when checking path", async () => {
+      // Mock lstat to throw ELOOP error
+      const originalLstat = fs.lstat;
+      const mkdirSafePath = path.join(testDir, "eloop-path");
+      
+      vi.spyOn(fs, "lstat").mockRejectedValueOnce({ code: "ELOOP" });
+
+      // Should not throw, should return gracefully
+      await expect(mkdirSafe(mkdirSafePath)).resolves.toBeUndefined();
+
+      vi.restoreAllMocks();
+    });
+
+    it("should handle EEXIST error gracefully when creating directory", async () => {
+      const newDir = path.join(testDir, "race-condition-dir");
+      
+      // Mock lstat to return ENOENT (path doesn't exist)
+      // Then mock mkdir to throw EEXIST (race condition)
+      vi.spyOn(fs, "lstat").mockRejectedValueOnce({ code: "ENOENT" });
+      vi.spyOn(fs, "mkdir").mockRejectedValueOnce({ code: "EEXIST" });
+
+      // Should not throw, should return gracefully
+      await expect(mkdirSafe(newDir)).resolves.toBeUndefined();
+
+      vi.restoreAllMocks();
+    });
+
+    it("should handle ELOOP error gracefully when creating directory", async () => {
+      const newDir = path.join(testDir, "eloop-create-dir");
+      
+      // Mock lstat to return ENOENT (path doesn't exist)
+      // Then mock mkdir to throw ELOOP
+      vi.spyOn(fs, "lstat").mockRejectedValueOnce({ code: "ENOENT" });
+      vi.spyOn(fs, "mkdir").mockRejectedValueOnce({ code: "ELOOP" });
+
+      // Should not throw, should return gracefully
+      await expect(mkdirSafe(newDir)).resolves.toBeUndefined();
+
+      vi.restoreAllMocks();
+    });
   });
 
   describe("existsSafe", () => {
@@ -108,6 +149,25 @@ describe("fs-utils.ts", () => {
 
       const exists = await existsSafe(symlinkPath);
       expect(exists).toBe(true);
+    });
+
+    it("should return true for ELOOP error (symlink loop)", async () => {
+      // Mock lstat to throw ELOOP error
+      vi.spyOn(fs, "lstat").mockRejectedValueOnce({ code: "ELOOP" });
+
+      const exists = await existsSafe("/some/path/with/loop");
+      expect(exists).toBe(true);
+
+      vi.restoreAllMocks();
+    });
+
+    it("should throw for other errors", async () => {
+      // Mock lstat to throw a non-ENOENT, non-ELOOP error
+      vi.spyOn(fs, "lstat").mockRejectedValueOnce({ code: "EACCES" });
+
+      await expect(existsSafe("/some/path")).rejects.toMatchObject({ code: "EACCES" });
+
+      vi.restoreAllMocks();
     });
   });
 });

@@ -280,6 +280,8 @@ export interface AIProfile {
 
 export interface Feature {
   id: string;
+  title?: string;
+  titleGenerating?: boolean;
   category: string;
   description: string;
   steps: string[];
@@ -305,6 +307,7 @@ export interface Feature {
   planningMode?: PlanningMode; // Planning mode for this feature
   planSpec?: PlanSpec; // Generated spec/plan data
   requirePlanApproval?: boolean; // Whether to pause and require manual approval before implementation
+  prUrl?: string; // Pull request URL when a PR has been created for this feature
 }
 
 // Parsed task from spec (for spec and full planning modes)
@@ -494,6 +497,7 @@ export interface AppState {
 
   defaultPlanningMode: PlanningMode;
   defaultRequirePlanApproval: boolean;
+  defaultAIProfileId: string | null;
 
   // Plan Approval State
   // When a plan requires user approval, this holds the pending approval details
@@ -742,6 +746,7 @@ export interface AppActions {
 
   setDefaultPlanningMode: (mode: PlanningMode) => void;
   setDefaultRequirePlanApproval: (require: boolean) => void;
+  setDefaultAIProfileId: (profileId: string | null) => void;
 
   // Plan Approval actions
   setPendingPlanApproval: (approval: {
@@ -841,6 +846,7 @@ const initialState: AppState = {
   specCreatingForProject: null,
   defaultPlanningMode: 'skip' as PlanningMode,
   defaultRequirePlanApproval: false,
+  defaultAIProfileId: null,
   pendingPlanApproval: null,
 };
 
@@ -1510,6 +1516,10 @@ export const useAppStore = create<AppState & AppActions>()(
         // Only allow removing non-built-in profiles
         const profile = get().aiProfiles.find((p) => p.id === id);
         if (profile && !profile.isBuiltIn) {
+          // Clear default if this profile was selected
+          if (get().defaultAIProfileId === id) {
+            set({ defaultAIProfileId: null });
+          }
           set({ aiProfiles: get().aiProfiles.filter((p) => p.id !== id) });
         }
       },
@@ -2265,6 +2275,7 @@ export const useAppStore = create<AppState & AppActions>()(
 
       setDefaultPlanningMode: (mode) => set({ defaultPlanningMode: mode }),
       setDefaultRequirePlanApproval: (require) => set({ defaultRequirePlanApproval: require }),
+      setDefaultAIProfileId: (profileId) => set({ defaultAIProfileId: profileId }),
 
       // Plan Approval actions
       setPendingPlanApproval: (approval) => set({ pendingPlanApproval: approval }),
@@ -2340,7 +2351,210 @@ export const useAppStore = create<AppState & AppActions>()(
         boardBackgroundByProject: state.boardBackgroundByProject,
         defaultPlanningMode: state.defaultPlanningMode,
         defaultRequirePlanApproval: state.defaultRequirePlanApproval,
+        defaultAIProfileId: state.defaultAIProfileId,
       }),
     }
   )
 );
+
+// ============================================================================
+// Settings Sync to Server (file-based storage)
+// ============================================================================
+
+// Debounced sync function to avoid excessive server calls
+let syncTimeoutId: NodeJS.Timeout | null = null;
+const SYNC_DEBOUNCE_MS = 2000; // Wait 2 seconds after last change before syncing
+
+/**
+ * Schedule a sync of current settings to the server
+ * This is debounced to avoid excessive API calls
+ */
+function scheduleSyncToServer() {
+  // Only sync in Electron mode
+  if (typeof window === "undefined") return;
+
+  // Clear any pending sync
+  if (syncTimeoutId) {
+    clearTimeout(syncTimeoutId);
+  }
+
+  // Schedule new sync
+  syncTimeoutId = setTimeout(async () => {
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { syncSettingsToServer } = await import(
+        "@/hooks/use-settings-migration"
+      );
+      await syncSettingsToServer();
+    } catch (error) {
+      console.error("[AppStore] Failed to sync settings to server:", error);
+    }
+  }, SYNC_DEBOUNCE_MS);
+}
+
+// Subscribe to store changes and sync to server
+// Only sync when important settings change (not every state change)
+let previousState: Partial<AppState> | null = null;
+let previousProjectSettings: Record<
+  string,
+  {
+    theme?: string;
+    boardBackground?: typeof initialState.boardBackgroundByProject[string];
+    currentWorktree?: typeof initialState.currentWorktreeByProject[string];
+    worktrees?: typeof initialState.worktreesByProject[string];
+  }
+> = {};
+
+// Track pending project syncs (debounced per project)
+const projectSyncTimeouts: Record<string, NodeJS.Timeout> = {};
+const PROJECT_SYNC_DEBOUNCE_MS = 2000;
+
+/**
+ * Schedule sync of project settings to server
+ */
+function scheduleProjectSettingsSync(
+  projectPath: string,
+  updates: Record<string, unknown>
+) {
+  // Only sync in Electron mode
+  if (typeof window === "undefined") return;
+
+  // Clear any pending sync for this project
+  if (projectSyncTimeouts[projectPath]) {
+    clearTimeout(projectSyncTimeouts[projectPath]);
+  }
+
+  // Schedule new sync
+  projectSyncTimeouts[projectPath] = setTimeout(async () => {
+    try {
+      const { syncProjectSettingsToServer } = await import(
+        "@/hooks/use-settings-migration"
+      );
+      await syncProjectSettingsToServer(projectPath, updates);
+    } catch (error) {
+      console.error(
+        `[AppStore] Failed to sync project settings for ${projectPath}:`,
+        error
+      );
+    }
+    delete projectSyncTimeouts[projectPath];
+  }, PROJECT_SYNC_DEBOUNCE_MS);
+}
+
+useAppStore.subscribe((state) => {
+  // Skip if this is the initial load
+  if (!previousState) {
+    previousState = {
+      theme: state.theme,
+      projects: state.projects,
+      trashedProjects: state.trashedProjects,
+      keyboardShortcuts: state.keyboardShortcuts,
+      aiProfiles: state.aiProfiles,
+      maxConcurrency: state.maxConcurrency,
+      defaultSkipTests: state.defaultSkipTests,
+      enableDependencyBlocking: state.enableDependencyBlocking,
+      useWorktrees: state.useWorktrees,
+      showProfilesOnly: state.showProfilesOnly,
+      muteDoneSound: state.muteDoneSound,
+      enhancementModel: state.enhancementModel,
+      defaultPlanningMode: state.defaultPlanningMode,
+      defaultRequirePlanApproval: state.defaultRequirePlanApproval,
+      defaultAIProfileId: state.defaultAIProfileId,
+    };
+    // Initialize project settings tracking
+    for (const project of state.projects) {
+      previousProjectSettings[project.path] = {
+        theme: project.theme,
+        boardBackground: state.boardBackgroundByProject[project.path],
+        currentWorktree: state.currentWorktreeByProject[project.path],
+        worktrees: state.worktreesByProject[project.path],
+      };
+    }
+    return;
+  }
+
+  // Check if any important global settings changed
+  const importantSettingsChanged =
+    state.theme !== previousState.theme ||
+    state.projects !== previousState.projects ||
+    state.trashedProjects !== previousState.trashedProjects ||
+    state.keyboardShortcuts !== previousState.keyboardShortcuts ||
+    state.aiProfiles !== previousState.aiProfiles ||
+    state.maxConcurrency !== previousState.maxConcurrency ||
+    state.defaultSkipTests !== previousState.defaultSkipTests ||
+    state.enableDependencyBlocking !== previousState.enableDependencyBlocking ||
+    state.useWorktrees !== previousState.useWorktrees ||
+    state.showProfilesOnly !== previousState.showProfilesOnly ||
+    state.muteDoneSound !== previousState.muteDoneSound ||
+    state.enhancementModel !== previousState.enhancementModel ||
+    state.defaultPlanningMode !== previousState.defaultPlanningMode ||
+    state.defaultRequirePlanApproval !== previousState.defaultRequirePlanApproval ||
+    state.defaultAIProfileId !== previousState.defaultAIProfileId;
+
+  if (importantSettingsChanged) {
+    // Update previous state
+    previousState = {
+      theme: state.theme,
+      projects: state.projects,
+      trashedProjects: state.trashedProjects,
+      keyboardShortcuts: state.keyboardShortcuts,
+      aiProfiles: state.aiProfiles,
+      maxConcurrency: state.maxConcurrency,
+      defaultSkipTests: state.defaultSkipTests,
+      enableDependencyBlocking: state.enableDependencyBlocking,
+      useWorktrees: state.useWorktrees,
+      showProfilesOnly: state.showProfilesOnly,
+      muteDoneSound: state.muteDoneSound,
+      enhancementModel: state.enhancementModel,
+      defaultPlanningMode: state.defaultPlanningMode,
+      defaultRequirePlanApproval: state.defaultRequirePlanApproval,
+      defaultAIProfileId: state.defaultAIProfileId,
+    };
+
+    // Schedule sync to server
+    scheduleSyncToServer();
+  }
+
+  // Check for per-project settings changes
+  for (const project of state.projects) {
+    const projectPath = project.path;
+    const prev = previousProjectSettings[projectPath] || {};
+    const updates: Record<string, unknown> = {};
+
+    // Check if project theme changed
+    if (project.theme !== prev.theme) {
+      updates.theme = project.theme;
+    }
+
+    // Check if board background changed
+    const currentBg = state.boardBackgroundByProject[projectPath];
+    if (currentBg !== prev.boardBackground) {
+      updates.boardBackground = currentBg;
+    }
+
+    // Check if current worktree changed
+    const currentWt = state.currentWorktreeByProject[projectPath];
+    if (currentWt !== prev.currentWorktree) {
+      updates.currentWorktree = currentWt;
+    }
+
+    // Check if worktrees list changed
+    const worktrees = state.worktreesByProject[projectPath];
+    if (worktrees !== prev.worktrees) {
+      updates.worktrees = worktrees;
+    }
+
+    // If any project settings changed, sync them
+    if (Object.keys(updates).length > 0) {
+      scheduleProjectSettingsSync(projectPath, updates);
+
+      // Update tracking
+      previousProjectSettings[projectPath] = {
+        theme: project.theme,
+        boardBackground: currentBg,
+        currentWorktree: currentWt,
+        worktrees: worktrees,
+      };
+    }
+  }
+});

@@ -16,6 +16,10 @@ export {
   getAppSpecPath,
   getBranchTrackingPath,
   ensureAutomakerDir,
+  getGlobalSettingsPath,
+  getCredentialsPath,
+  getProjectSettingsPath,
+  ensureDataDir,
 } from './paths';
 
 // Subprocess management

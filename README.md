@@ -8,7 +8,7 @@
 >
 > Automaker itself was built by a group of engineers using AI and agentic coding techniques to build features faster than ever. By leveraging tools like Cursor IDE and Claude Code CLI, the team orchestrated AI agents to implement complex functionality in days instead of weeks.
 >
-> **Learn how:** Master these same techniques and workflows in the [Agentic Jumpstart course](https://agenticjumpstart.com/?utm=automaker).
+> **Learn how:** Master these same techniques and workflows in the [Agentic Jumpstart course](https://agenticjumpstart.com/?utm=automaker-gh).
 
 # Automaker
 
@@ -79,7 +79,7 @@ The future of software development is **agentic coding**—where developers beco
 >
 > **We do not recommend running Automaker directly on your local computer** due to the risk of AI agents having access to your entire file system. Please sandbox this application using Docker or a virtual machine.
 >
-> **[Read the full disclaimer](../DISCLAIMER.md)**
+> **[Read the full disclaimer](./DISCLAIMER.md)**
 
 ---
 

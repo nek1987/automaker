@@ -203,6 +203,9 @@ export interface FeaturesAPI {
     projectPath: string,
     featureId: string
   ) => Promise<{ success: boolean; content?: string | null; error?: string }>;
+  generateTitle: (
+    description: string
+  ) => Promise<{ success: boolean; title?: string; error?: string }>;
 }
 
 export interface AutoModeAPI {
@@ -505,7 +508,15 @@ const mockFileSystem: Record<string, string> = {};
 
 // Check if we're in Electron (for UI indicators only)
 export const isElectron = (): boolean => {
-  return typeof window !== "undefined" && window.isElectron === true;
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if ((window as any).isElectron === true) {
+    return true;
+  }
+
+  return window.electronAPI?.isElectron === true;
 };
 
 // Check if backend server is available
@@ -1350,6 +1361,17 @@ function createMockWorktreeAPI(): WorktreeAPI {
         success: true,
         result: {
           servers: [],
+        },
+      };
+    },
+
+    getPRInfo: async (worktreePath: string, branchName: string) => {
+      console.log("[Mock] Getting PR info:", { worktreePath, branchName });
+      return {
+        success: true,
+        result: {
+          hasPR: false,
+          ghCliAvailable: false,
         },
       };
     },
@@ -2594,6 +2616,14 @@ function createMockFeaturesAPI(): FeaturesAPI {
       const agentOutputPath = `${projectPath}/.automaker/features/${featureId}/agent-output.md`;
       const content = mockFileSystem[agentOutputPath];
       return { success: true, content: content || null };
+    },
+
+    generateTitle: async (description: string) => {
+      console.log("[Mock] Generating title for:", description.substring(0, 50));
+      // Mock title generation - just take first few words
+      const words = description.split(/\s+/).slice(0, 6).join(" ");
+      const title = words.length > 40 ? words.substring(0, 40) + "..." : words;
+      return { success: true, title: `Add ${title}` };
     },
   };
 }

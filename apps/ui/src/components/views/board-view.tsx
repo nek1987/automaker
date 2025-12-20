@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   PointerSensor,
@@ -39,6 +38,7 @@ import { CommitWorktreeDialog } from "./board-view/dialogs/commit-worktree-dialo
 import { CreatePRDialog } from "./board-view/dialogs/create-pr-dialog";
 import { CreateBranchDialog } from "./board-view/dialogs/create-branch-dialog";
 import { WorktreePanel } from "./board-view/worktree-panel";
+import type { PRInfo, WorktreeInfo } from "./board-view/worktree-panel/types";
 import { COLUMNS } from "./board-view/constants";
 import {
   useBoardFeatures,
@@ -57,6 +57,9 @@ import {
 const EMPTY_WORKTREES: ReturnType<
   ReturnType<typeof useAppStore.getState>["getWorktrees"]
 > = [];
+
+/** Delay before starting a newly created feature to allow state to settle */
+const FEATURE_CREATION_SETTLE_DELAY_MS = 500;
 
 export function BoardView() {
   const {
@@ -271,13 +274,16 @@ export function BoardView() {
 
   // Calculate unarchived card counts per branch
   const branchCardCounts = useMemo(() => {
-    return hookFeatures.reduce((counts, feature) => {
-      if (feature.status !== "completed") {
-        const branch = feature.branchName ?? "main";
-        counts[branch] = (counts[branch] || 0) + 1;
-      }
-      return counts;
-    }, {} as Record<string, number>);
+    return hookFeatures.reduce(
+      (counts, feature) => {
+        if (feature.status !== "completed") {
+          const branch = feature.branchName ?? "main";
+          counts[branch] = (counts[branch] || 0) + 1;
+        }
+        return counts;
+      },
+      {} as Record<string, number>
+    );
   }, [hookFeatures]);
 
   // Custom collision detection that prioritizes columns over cards
@@ -340,7 +346,7 @@ export function BoardView() {
   const worktrees = useMemo(
     () =>
       currentProject
-        ? worktreesByProject[currentProject.path] ?? EMPTY_WORKTREES
+        ? (worktreesByProject[currentProject.path] ?? EMPTY_WORKTREES)
         : EMPTY_WORKTREES,
     [currentProject, worktreesByProject]
   );
@@ -412,8 +418,123 @@ export function BoardView() {
     outputFeature,
     projectPath: currentProject?.path || null,
     onWorktreeCreated: () => setWorktreeRefreshKey((k) => k + 1),
+    onWorktreeAutoSelect: (newWorktree) => {
+      if (!currentProject) return;
+      // Check if worktree already exists in the store (by branch name)
+      const currentWorktrees = getWorktrees(currentProject.path);
+      const existingWorktree = currentWorktrees.find(
+        (w) => w.branch === newWorktree.branch
+      );
+
+      // Only add if it doesn't already exist (to avoid duplicates)
+      if (!existingWorktree) {
+        const newWorktreeInfo = {
+          path: newWorktree.path,
+          branch: newWorktree.branch,
+          isMain: false,
+          isCurrent: false,
+          hasWorktree: true,
+        };
+        setWorktrees(currentProject.path, [
+          ...currentWorktrees,
+          newWorktreeInfo,
+        ]);
+      }
+      // Select the worktree (whether it existed or was just added)
+      setCurrentWorktree(
+        currentProject.path,
+        newWorktree.path,
+        newWorktree.branch
+      );
+    },
     currentWorktreeBranch,
   });
+
+  // Handler for addressing PR comments - creates a feature and starts it automatically
+  const handleAddressPRComments = useCallback(
+    async (worktree: WorktreeInfo, prInfo: PRInfo) => {
+      // Use a simple prompt that instructs the agent to read and address PR feedback
+      // The agent will fetch the PR comments directly, which is more reliable and up-to-date
+      const prNumber = prInfo.number;
+      const description = `Read the review requests on PR #${prNumber} and address any feedback the best you can.`;
+
+      // Create the feature
+      const featureData = {
+        category: "PR Review",
+        description,
+        steps: [],
+        images: [],
+        imagePaths: [],
+        skipTests: defaultSkipTests,
+        model: "opus" as const,
+        thinkingLevel: "none" as const,
+        branchName: worktree.branch,
+        priority: 1, // High priority for PR feedback
+        planningMode: "skip" as const,
+        requirePlanApproval: false,
+      };
+
+      await handleAddFeature(featureData);
+
+      // Find the newly created feature and start it
+      // We need to wait a moment for the feature to be created
+      setTimeout(async () => {
+        const latestFeatures = useAppStore.getState().features;
+        const newFeature = latestFeatures.find(
+          (f) =>
+            f.branchName === worktree.branch &&
+            f.status === "backlog" &&
+            f.description.includes(`PR #${prNumber}`)
+        );
+
+        if (newFeature) {
+          await handleStartImplementation(newFeature);
+        }
+      }, FEATURE_CREATION_SETTLE_DELAY_MS);
+    },
+    [handleAddFeature, handleStartImplementation, defaultSkipTests]
+  );
+
+  // Handler for resolving conflicts - creates a feature to pull from origin/main and resolve conflicts
+  const handleResolveConflicts = useCallback(
+    async (worktree: WorktreeInfo) => {
+      const description = `Pull latest from origin/main and resolve conflicts. Merge origin/main into the current branch (${worktree.branch}), resolving any merge conflicts that arise. After resolving conflicts, ensure the code compiles and tests pass.`;
+
+      // Create the feature
+      const featureData = {
+        category: "Maintenance",
+        description,
+        steps: [],
+        images: [],
+        imagePaths: [],
+        skipTests: defaultSkipTests,
+        model: "opus" as const,
+        thinkingLevel: "none" as const,
+        branchName: worktree.branch,
+        priority: 1, // High priority for conflict resolution
+        planningMode: "skip" as const,
+        requirePlanApproval: false,
+      };
+
+      await handleAddFeature(featureData);
+
+      // Find the newly created feature and start it
+      setTimeout(async () => {
+        const latestFeatures = useAppStore.getState().features;
+        const newFeature = latestFeatures.find(
+          (f) =>
+            f.branchName === worktree.branch &&
+            f.status === "backlog" &&
+            f.description.includes("Pull latest from origin/main")
+        );
+
+        if (newFeature) {
+          await handleStartImplementation(newFeature);
+        }
+      }, FEATURE_CREATION_SETTLE_DELAY_MS);
+    },
+    [handleAddFeature, handleStartImplementation, defaultSkipTests]
+  );
 
   // Client-side auto mode: periodically check for backlog items and move them to in-progress
   // Use a ref to track the latest auto mode state so async operations always check the current value
@@ -835,6 +956,7 @@ export function BoardView() {
       <BoardHeader
         projectName={currentProject.name}
         maxConcurrency={maxConcurrency}
+        runningAgentsCount={runningAutoTasks.length}
         onConcurrencyChange={setMaxConcurrency}
         isAutoModeRunning={autoMode.isRunning}
         onAutoModeToggle={(enabled) => {
@@ -874,6 +996,8 @@ export function BoardView() {
           setSelectedWorktreeForAction(worktree);
           setShowCreateBranchDialog(true);
         }}
+        onAddressPRComments={handleAddressPRComments}
+        onResolveConflicts={handleResolveConflicts}
         onRemovedWorktrees={handleRemovedWorktrees}
         runningFeatureIds={runningAutoTasks}
         branchCardCounts={branchCardCounts}
@@ -1153,7 +1277,25 @@ export function BoardView() {
         open={showCreatePRDialog}
         onOpenChange={setShowCreatePRDialog}
         worktree={selectedWorktreeForAction}
-        onCreated={() => {
+        projectPath={currentProject?.path || null}
+        onCreated={(prUrl) => {
+          // If a PR was created and we have the worktree branch, update all features on that branch with the PR URL
+          if (prUrl && selectedWorktreeForAction?.branch) {
+            const branchName = selectedWorktreeForAction.branch;
+            const featuresToUpdate = hookFeatures.filter((f) => f.branchName === branchName);
+
+            // Update local state synchronously
+            featuresToUpdate.forEach((feature) => {
+              updateFeature(feature.id, { prUrl });
+            });
+
+            // Persist changes asynchronously and in parallel
+            Promise.all(
+              featuresToUpdate.map((feature) =>
+                persistFeatureUpdate(feature.id, { prUrl })
+              )
+            ).catch(console.error);
+          }
           setWorktreeRefreshKey((k) => k + 1);
           setSelectedWorktreeForAction(null);
         }}

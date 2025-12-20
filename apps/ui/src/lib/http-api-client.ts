@@ -512,6 +512,8 @@ export class HttpApiClient implements ElectronAPI {
       this.post("/api/features/delete", { projectPath, featureId }),
     getAgentOutput: (projectPath: string, featureId: string) =>
       this.post("/api/features/agent-output", { projectPath, featureId }),
+    generateTitle: (description: string) =>
+      this.post("/api/features/generate-title", { description }),
   };
 
   // Auto Mode API
@@ -672,6 +674,8 @@ export class HttpApiClient implements ElectronAPI {
     stopDevServer: (worktreePath: string) =>
       this.post("/api/worktree/stop-dev", { worktreePath }),
     listDevServers: () => this.post("/api/worktree/list-dev-servers", {}),
+    getPRInfo: (worktreePath: string, branchName: string) =>
+      this.post("/api/worktree/pr-info", { worktreePath, branchName }),
   };
 
   // Git API
@@ -831,6 +835,135 @@ export class HttpApiClient implements ElectronAPI {
       error?: string;
     }> =>
       this.post("/api/templates/clone", { repoUrl, projectName, parentDir }),
+  };
+
+  // Settings API - persistent file-based settings
+  settings = {
+    // Get settings status (check if migration needed)
+    getStatus: (): Promise<{
+      success: boolean;
+      hasGlobalSettings: boolean;
+      hasCredentials: boolean;
+      dataDir: string;
+      needsMigration: boolean;
+    }> => this.get("/api/settings/status"),
+
+    // Global settings
+    getGlobal: (): Promise<{
+      success: boolean;
+      settings?: {
+        version: number;
+        theme: string;
+        sidebarOpen: boolean;
+        chatHistoryOpen: boolean;
+        kanbanCardDetailLevel: string;
+        maxConcurrency: number;
+        defaultSkipTests: boolean;
+        enableDependencyBlocking: boolean;
+        useWorktrees: boolean;
+        showProfilesOnly: boolean;
+        defaultPlanningMode: string;
+        defaultRequirePlanApproval: boolean;
+        defaultAIProfileId: string | null;
+        muteDoneSound: boolean;
+        enhancementModel: string;
+        keyboardShortcuts: Record<string, string>;
+        aiProfiles: unknown[];
+        projects: unknown[];
+        trashedProjects: unknown[];
+        projectHistory: string[];
+        projectHistoryIndex: number;
+        lastProjectDir?: string;
+        recentFolders: string[];
+        worktreePanelCollapsed: boolean;
+        lastSelectedSessionByProject: Record<string, string>;
+      };
+      error?: string;
+    }> => this.get("/api/settings/global"),
+
+    updateGlobal: (updates: Record<string, unknown>): Promise<{
+      success: boolean;
+      settings?: Record<string, unknown>;
+      error?: string;
+    }> => this.put("/api/settings/global", updates),
+
+    // Credentials (masked for security)
+    getCredentials: (): Promise<{
+      success: boolean;
+      credentials?: {
+        anthropic: { configured: boolean; masked: string };
+        google: { configured: boolean; masked: string };
+        openai: { configured: boolean; masked: string };
+      };
+      error?: string;
+    }> => this.get("/api/settings/credentials"),
+
+    updateCredentials: (updates: {
+      apiKeys?: { anthropic?: string; google?: string; openai?: string };
+    }): Promise<{
+      success: boolean;
+      credentials?: {
+        anthropic: { configured: boolean; masked: string };
+        google: { configured: boolean; masked: string };
+        openai: { configured: boolean; masked: string };
+      };
+      error?: string;
+    }> => this.put("/api/settings/credentials", updates),
+
+    // Project settings
+    getProject: (projectPath: string): Promise<{
+      success: boolean;
+      settings?: {
+        version: number;
+        theme?: string;
+        useWorktrees?: boolean;
+        currentWorktree?: { path: string | null; branch: string };
+        worktrees?: Array<{
+          path: string;
+          branch: string;
+          isMain: boolean;
+          hasChanges?: boolean;
+          changedFilesCount?: number;
+        }>;
+        boardBackground?: {
+          imagePath: string | null;
+          imageVersion?: number;
+          cardOpacity: number;
+          columnOpacity: number;
+          columnBorderEnabled: boolean;
+          cardGlassmorphism: boolean;
+          cardBorderEnabled: boolean;
+          cardBorderOpacity: number;
+          hideScrollbar: boolean;
+        };
+        lastSelectedSessionId?: string;
+      };
+      error?: string;
+    }> => this.post("/api/settings/project", { projectPath }),
+
+    updateProject: (
+      projectPath: string,
+      updates: Record<string, unknown>
+    ): Promise<{
+      success: boolean;
+      settings?: Record<string, unknown>;
+      error?: string;
+    }> => this.put("/api/settings/project", { projectPath, updates }),
+
+    // Migration from localStorage
+    migrate: (data: {
+      "automaker-storage"?: string;
+      "automaker-setup"?: string;
+      "worktree-panel-collapsed"?: string;
+      "file-browser-recent-folders"?: string;
+      "automaker:lastProjectDir"?: string;
+    }): Promise<{
+      success: boolean;
+      migratedGlobalSettings: boolean;
+      migratedCredentials: boolean;
+      migratedProjectCount: number;
+      errors: string[];
+    }> => this.post("/api/settings/migrate", { data }),
   };
 
   // Sessions API

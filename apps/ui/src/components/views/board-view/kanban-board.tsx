@@ -194,7 +194,6 @@ export function KanbanBoard({
                           onMoveBackToInProgress(feature)
                         }
                         onFollowUp={() => onFollowUp(feature)}
-                        onCommit={() => onCommit(feature)}
                         onComplete={() => onComplete(feature)}
                         onImplement={() => onImplement(feature)}
                         onViewPlan={() => onViewPlan(feature)}

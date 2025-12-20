@@ -14,8 +14,86 @@ import {
 import { FeatureLoader } from "../../services/feature-loader.js";
 
 const logger = createLogger("Worktree");
-const execAsync = promisify(exec);
+export const execAsync = promisify(exec);
 const featureLoader = new FeatureLoader();
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Maximum allowed length for git branch names */
+export const MAX_BRANCH_NAME_LENGTH = 250;
+
+// ============================================================================
+// Extended PATH configuration for Electron apps
+// ============================================================================
+
+const pathSeparator = process.platform === "win32" ? ";" : ":";
+const additionalPaths: string[] = [];
+
+if (process.platform === "win32") {
+  // Windows paths
+  if (process.env.LOCALAPPDATA) {
+    additionalPaths.push(`${process.env.LOCALAPPDATA}\\Programs\\Git\\cmd`);
+  }
+  if (process.env.PROGRAMFILES) {
+    additionalPaths.push(`${process.env.PROGRAMFILES}\\Git\\cmd`);
+  }
+  if (process.env["ProgramFiles(x86)"]) {
+    additionalPaths.push(`${process.env["ProgramFiles(x86)"]}\\Git\\cmd`);
+  }
+} else {
+  // Unix/Mac paths
+  additionalPaths.push(
+    "/opt/homebrew/bin",        // Homebrew on Apple Silicon
+    "/usr/local/bin",           // Homebrew on Intel Mac, common Linux location
+    "/home/linuxbrew/.linuxbrew/bin", // Linuxbrew
+    `${process.env.HOME}/.local/bin`, // pipx, other user installs
+  );
+}
+
+const extendedPath = [
+  process.env.PATH,
+  ...additionalPaths.filter(Boolean),
+].filter(Boolean).join(pathSeparator);
+
+/**
+ * Environment variables with extended PATH for executing shell commands.
+ * Electron apps don't inherit the user's shell PATH, so we need to add
+ * common tool installation locations.
+ */
+export const execEnv = {
+  ...process.env,
+  PATH: extendedPath,
+};
+
+// ============================================================================
+// Validation utilities
+// ============================================================================
+
+/**
+ * Validate branch name to prevent command injection.
+ * Git branch names cannot contain: space, ~, ^, :, ?, *, [, \, or control chars.
+ * We also reject shell metacharacters for safety.
+ */
+export function isValidBranchName(name: string): boolean {
+  return /^[a-zA-Z0-9._\-/]+$/.test(name) && name.length < MAX_BRANCH_NAME_LENGTH;
+}
+
+/**
+ * Check if gh CLI is available on the system
+ */
+export async function isGhCliAvailable(): Promise<boolean> {
+  try {
+    const checkCommand = process.platform === "win32"
+      ? "where gh"
+      : "command -v gh";
+    await execAsync(checkCommand, { env: execEnv });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const AUTOMAKER_INITIAL_COMMIT_MESSAGE =
   "chore: automaker initial commit";

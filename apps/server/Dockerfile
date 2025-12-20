@@ -4,11 +4,15 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Install build dependencies for native modules (node-pty)
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
-# Copy package files
+# Copy package files and scripts needed for postinstall
 COPY package*.json ./
 COPY apps/server/package*.json ./apps/server/
+COPY scripts ./scripts
 
 # Install dependencies
 RUN npm ci --workspace=apps/server

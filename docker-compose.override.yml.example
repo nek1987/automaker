@@ -1,0 +1,10 @@
+services:
+  server:
+    volumes:
+      # Mount your workspace directory to /projects inside the container
+      - /Users/webdevcody/Workspace/automaker-workspace:/projects:rw
+    environment:
+      # Set workspace directory so the UI can discover projects
+      - WORKSPACE_DIR=/projects
+      # Ensure /projects is in allowed directories
+      - ALLOWED_PROJECT_DIRS=/projects

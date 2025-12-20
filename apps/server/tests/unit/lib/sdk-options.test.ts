@@ -144,6 +144,40 @@ describe("sdk-options.ts", () => {
       expect(options.maxTurns).toBe(MAX_TURNS.extended);
       expect(options.allowedTools).toEqual([...TOOL_PRESETS.readOnly]);
     });
+
+    it("should include systemPrompt when provided", async () => {
+      const { createSuggestionsOptions } = await import("@/lib/sdk-options.js");
+
+      const options = createSuggestionsOptions({
+        cwd: "/test/path",
+        systemPrompt: "Custom prompt",
+      });
+
+      expect(options.systemPrompt).toBe("Custom prompt");
+    });
+
+    it("should include abortController when provided", async () => {
+      const { createSuggestionsOptions } = await import("@/lib/sdk-options.js");
+
+      const abortController = new AbortController();
+      const options = createSuggestionsOptions({
+        cwd: "/test/path",
+        abortController,
+      });
+
+      expect(options.abortController).toBe(abortController);
+    });
+
+    it("should include outputFormat when provided", async () => {
+      const { createSuggestionsOptions } = await import("@/lib/sdk-options.js");
+
+      const options = createSuggestionsOptions({
+        cwd: "/test/path",
+        outputFormat: { type: "json" },
+      });
+
+      expect(options.outputFormat).toEqual({ type: "json" });
+    });
   });
 
   describe("createChatOptions", () => {
@@ -205,6 +239,29 @@ describe("sdk-options.ts", () => {
         autoAllowBashIfSandboxed: true,
       });
     });
+
+    it("should include systemPrompt when provided", async () => {
+      const { createAutoModeOptions } = await import("@/lib/sdk-options.js");
+
+      const options = createAutoModeOptions({
+        cwd: "/test/path",
+        systemPrompt: "Custom prompt",
+      });
+
+      expect(options.systemPrompt).toBe("Custom prompt");
+    });
+
+    it("should include abortController when provided", async () => {
+      const { createAutoModeOptions } = await import("@/lib/sdk-options.js");
+
+      const abortController = new AbortController();
+      const options = createAutoModeOptions({
+        cwd: "/test/path",
+        abortController,
+      });
+
+      expect(options.abortController).toBe(abortController);
+    });
   });
 
   describe("createCustomOptions", () => {
@@ -233,6 +290,43 @@ describe("sdk-options.ts", () => {
 
       expect(options.maxTurns).toBe(MAX_TURNS.maximum);
       expect(options.allowedTools).toEqual([...TOOL_PRESETS.readOnly]);
+    });
+
+    it("should include sandbox when provided", async () => {
+      const { createCustomOptions } = await import("@/lib/sdk-options.js");
+
+      const options = createCustomOptions({
+        cwd: "/test/path",
+        sandbox: { enabled: true, autoAllowBashIfSandboxed: false },
+      });
+
+      expect(options.sandbox).toEqual({
+        enabled: true,
+        autoAllowBashIfSandboxed: false,
+      });
+    });
+
+    it("should include systemPrompt when provided", async () => {
+      const { createCustomOptions } = await import("@/lib/sdk-options.js");
+
+      const options = createCustomOptions({
+        cwd: "/test/path",
+        systemPrompt: "Custom prompt",
+      });
+
+      expect(options.systemPrompt).toBe("Custom prompt");
+    });
+
+    it("should include abortController when provided", async () => {
+      const { createCustomOptions } = await import("@/lib/sdk-options.js");
+
+      const abortController = new AbortController();
+      const options = createCustomOptions({
+        cwd: "/test/path",
+        abortController,
+      });
+
+      expect(options.abortController).toBe(abortController);
     });
   });
 });

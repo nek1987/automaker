@@ -336,1138 +336,6 @@
   --running-indicator-text: oklch(0.6 0.22 265);
 }
 
-.dark {
-  /* Deep dark backgrounds - zinc-950 family */
-  --background: oklch(0.04 0 0); /* zinc-950 */
-  --background-50: oklch(0.04 0 0 / 0.5); /* zinc-950/50 */
-  --background-80: oklch(0.04 0 0 / 0.8); /* zinc-950/80 */
-
-  /* Text colors following hierarchy */
-  --foreground: oklch(1 0 0); /* text-white */
-  --foreground-secondary: oklch(0.588 0 0); /* text-zinc-400 */
-  --foreground-muted: oklch(0.525 0 0); /* text-zinc-500 */
-
-  /* Card and popover backgrounds */
-  --card: oklch(0.14 0 0); /* slightly lighter than background for contrast */
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.10 0 0); /* slightly lighter than background */
-  --popover-foreground: oklch(1 0 0);
-
-  /* Brand colors - purple/violet theme */
-  --primary: oklch(0.55 0.25 265); /* brand-500 */
-  --primary-foreground: oklch(1 0 0);
-  --brand-400: oklch(0.6 0.22 265);
-  --brand-500: oklch(0.55 0.25 265);
-  --brand-600: oklch(0.5 0.28 270); /* purple-600 for gradients */
-
-  /* Glass morphism borders and accents */
-  --secondary: oklch(1 0 0 / 0.05); /* bg-white/5 */
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.176 0 0); /* zinc-800 */
-  --muted-foreground: oklch(0.588 0 0); /* text-zinc-400 */
-  --accent: oklch(1 0 0 / 0.1); /* bg-white/10 for hover */
-  --accent-foreground: oklch(1 0 0);
-
-  /* Borders with transparency for glass effect */
-  --border: oklch(0.176 0 0); /* zinc-800 */
-  --border-glass: oklch(1 0 0 / 0.1); /* white/10 for glass morphism */
-  --destructive: oklch(0.6 0.25 25);
-  --input: oklch(0.04 0 0 / 0.8); /* Semi-transparent dark */
-  --ring: oklch(0.55 0.25 265);
-
-  /* Chart colors with brand theme */
-  --chart-1: oklch(0.55 0.25 265);
-  --chart-2: oklch(0.65 0.2 160);
-  --chart-3: oklch(0.75 0.2 70);
-  --chart-4: oklch(0.6 0.25 300);
-  --chart-5: oklch(0.6 0.25 20);
-
-  /* Sidebar with glass morphism */
-  --sidebar: oklch(0.04 0 0 / 0.5); /* zinc-950/50 with backdrop blur */
-  --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.55 0.25 265);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(1 0 0 / 0.05); /* bg-white/5 */
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(1 0 0 / 0.1); /* white/10 for glass borders */
-  --sidebar-ring: oklch(0.55 0.25 265);
-
-  /* Action button colors */
-  --action-view: oklch(0.6 0.25 265); /* Purple */
-  --action-view-hover: oklch(0.55 0.27 270);
-  --action-followup: oklch(0.6 0.2 230); /* Blue */
-  --action-followup-hover: oklch(0.55 0.22 230);
-  --action-commit: oklch(0.55 0.2 140); /* Green */
-  --action-commit-hover: oklch(0.5 0.22 140);
-  --action-verify: oklch(0.55 0.2 140); /* Green */
-  --action-verify-hover: oklch(0.5 0.22 140);
-
-  /* Running indicator - Purple */
-  --running-indicator: oklch(0.6 0.25 265);
-  --running-indicator-text: oklch(0.65 0.22 265);
-
-  /* Status colors - Dark mode */
-  --status-success: oklch(0.65 0.2 140);
-  --status-success-bg: oklch(0.65 0.2 140 / 0.2);
-  --status-warning: oklch(0.75 0.15 70);
-  --status-warning-bg: oklch(0.75 0.15 70 / 0.2);
-  --status-error: oklch(0.65 0.22 25);
-  --status-error-bg: oklch(0.65 0.22 25 / 0.2);
-  --status-info: oklch(0.65 0.2 230);
-  --status-info-bg: oklch(0.65 0.2 230 / 0.2);
-  --status-backlog: oklch(0.6 0 0);
-  --status-in-progress: oklch(0.75 0.15 70);
-  --status-waiting: oklch(0.7 0.18 50);
-
-  /* Shadow tokens - darker for dark mode */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-}
-
-.retro {
-  /* Retro / Cyberpunk Theme */
-  --background: oklch(0 0 0); /* Pure Black */
-  --background-50: oklch(0 0 0 / 0.5);
-  --background-80: oklch(0 0 0 / 0.8);
-
-  /* Neon Green Text */
-  --foreground: oklch(0.85 0.25 145); /* Neon Green */
-  --foreground-secondary: oklch(0.7 0.2 145);
-  --foreground-muted: oklch(0.5 0.15 145);
-
-  /* Hard Edges */
-  --radius: 0px;
-
-  /* UI Elements */
-  --card: oklch(0 0 0); /* Black card */
-  --card-foreground: oklch(0.85 0.25 145);
-  --popover: oklch(0.05 0.05 145);
-  --popover-foreground: oklch(0.85 0.25 145);
-
-  --primary: oklch(0.85 0.25 145); /* Neon Green */
-  --primary-foreground: oklch(0 0 0); /* Black text on green */
-
-  --brand-400: oklch(0.85 0.25 145);
-  --brand-500: oklch(0.85 0.25 145);
-  --brand-600: oklch(0.75 0.25 145);
-
-  --secondary: oklch(0.1 0.1 145); /* Dark Green bg */
-  --secondary-foreground: oklch(0.85 0.25 145);
-
-  --muted: oklch(0.1 0.05 145);
-  --muted-foreground: oklch(0.5 0.15 145);
-
-  --accent: oklch(0.2 0.2 145); /* Brighter green accent */
-  --accent-foreground: oklch(0.85 0.25 145);
-
-  --destructive: oklch(0.6 0.25 25); /* Keep red for destructive */
-
-  --border: oklch(0.3 0.15 145); /* Visible Green Border */
-  --border-glass: oklch(0.85 0.25 145 / 0.3);
-
-  --input: oklch(0.1 0.1 145);
-  --ring: oklch(0.85 0.25 145);
-
-  /* Charts - various neons */
-  --chart-1: oklch(0.85 0.25 145); /* Green */
-  --chart-2: oklch(0.8 0.25 300); /* Purple Neon */
-  --chart-3: oklch(0.8 0.25 200); /* Cyan Neon */
-  --chart-4: oklch(0.8 0.25 60); /* Yellow Neon */
-  --chart-5: oklch(0.8 0.25 20); /* Red Neon */
-
-  /* Sidebar */
-  --sidebar: oklch(0 0 0);
-  --sidebar-foreground: oklch(0.85 0.25 145);
-  --sidebar-primary: oklch(0.85 0.25 145);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.1 0.1 145);
-  --sidebar-accent-foreground: oklch(0.85 0.25 145);
-  --sidebar-border: oklch(0.3 0.15 145);
-  --sidebar-ring: oklch(0.85 0.25 145);
-
-  /* Fonts */
-  --font-sans: var(--font-geist-mono); /* Force Mono everywhere */
-
-  /* Action button colors - All green neon for retro theme */
-  --action-view: oklch(0.85 0.25 145); /* Neon Green */
-  --action-view-hover: oklch(0.9 0.25 145);
-  --action-followup: oklch(0.85 0.25 145); /* Neon Green */
-  --action-followup-hover: oklch(0.9 0.25 145);
-  --action-commit: oklch(0.85 0.25 145); /* Neon Green */
-  --action-commit-hover: oklch(0.9 0.25 145);
-  --action-verify: oklch(0.85 0.25 145); /* Neon Green */
-  --action-verify-hover: oklch(0.9 0.25 145);
-
-  /* Running indicator - Neon Green for retro */
-  --running-indicator: oklch(0.85 0.25 145);
-  --running-indicator-text: oklch(0.85 0.25 145);
-}
-
-/* ========================================
-   DRACULA THEME
-   Inspired by the popular Dracula VS Code theme
-   ======================================== */
-.dracula {
-  --background: oklch(0.18 0.02 280); /* #282a36 */
-  --background-50: oklch(0.18 0.02 280 / 0.5);
-  --background-80: oklch(0.18 0.02 280 / 0.8);
-
-  --foreground: oklch(0.95 0.01 280); /* #f8f8f2 */
-  --foreground-secondary: oklch(0.7 0.05 280);
-  --foreground-muted: oklch(0.55 0.08 280); /* #6272a4 */
-
-  --card: oklch(0.22 0.02 280); /* #44475a */
-  --card-foreground: oklch(0.95 0.01 280);
-  --popover: oklch(0.2 0.02 280);
-  --popover-foreground: oklch(0.95 0.01 280);
-
-  --primary: oklch(0.7 0.2 320); /* #bd93f9 purple */
-  --primary-foreground: oklch(0.18 0.02 280);
-
-  --brand-400: oklch(0.75 0.2 320);
-  --brand-500: oklch(0.7 0.2 320); /* #bd93f9 */
-  --brand-600: oklch(0.65 0.22 320);
-
-  --secondary: oklch(0.28 0.03 280); /* #44475a */
-  --secondary-foreground: oklch(0.95 0.01 280);
-
-  --muted: oklch(0.28 0.03 280);
-  --muted-foreground: oklch(0.55 0.08 280); /* #6272a4 */
-
-  --accent: oklch(0.32 0.04 280);
-  --accent-foreground: oklch(0.95 0.01 280);
-
-  --destructive: oklch(0.65 0.25 15); /* #ff5555 */
-
-  --border: oklch(0.35 0.05 280);
-  --border-glass: oklch(0.7 0.2 320 / 0.3);
-
-  --input: oklch(0.22 0.02 280);
-  --ring: oklch(0.7 0.2 320);
-
-  --chart-1: oklch(0.7 0.2 320); /* Purple */
-  --chart-2: oklch(0.75 0.2 180); /* Cyan #8be9fd */
-  --chart-3: oklch(0.8 0.2 130); /* Green #50fa7b */
-  --chart-4: oklch(0.7 0.25 350); /* Pink #ff79c6 */
-  --chart-5: oklch(0.85 0.2 90); /* Yellow #f1fa8c */
-
-  --sidebar: oklch(0.16 0.02 280);
-  --sidebar-foreground: oklch(0.95 0.01 280);
-  --sidebar-primary: oklch(0.7 0.2 320);
-  --sidebar-primary-foreground: oklch(0.18 0.02 280);
-  --sidebar-accent: oklch(0.28 0.03 280);
-  --sidebar-accent-foreground: oklch(0.95 0.01 280);
-  --sidebar-border: oklch(0.35 0.05 280);
-  --sidebar-ring: oklch(0.7 0.2 320);
-
-  /* Action button colors - Dracula purple/pink theme */
-  --action-view: oklch(0.7 0.2 320); /* Purple */
-  --action-view-hover: oklch(0.65 0.22 320);
-  --action-followup: oklch(0.65 0.25 350); /* Pink */
-  --action-followup-hover: oklch(0.6 0.27 350);
-  --action-commit: oklch(0.75 0.2 130); /* Green */
-  --action-commit-hover: oklch(0.7 0.22 130);
-  --action-verify: oklch(0.75 0.2 130); /* Green */
-  --action-verify-hover: oklch(0.7 0.22 130);
-
-  /* Running indicator - Purple */
-  --running-indicator: oklch(0.7 0.2 320);
-  --running-indicator-text: oklch(0.75 0.18 320);
-}
-
-/* ========================================
-   NORD THEME
-   Inspired by the Arctic, north-bluish color palette
-   ======================================== */
-.nord {
-  --background: oklch(0.23 0.02 240); /* #2e3440 */
-  --background-50: oklch(0.23 0.02 240 / 0.5);
-  --background-80: oklch(0.23 0.02 240 / 0.8);
-
-  --foreground: oklch(0.9 0.01 230); /* #eceff4 */
-  --foreground-secondary: oklch(0.75 0.02 230); /* #d8dee9 */
-  --foreground-muted: oklch(0.6 0.03 230); /* #4c566a */
-
-  --card: oklch(0.27 0.02 240); /* #3b4252 */
-  --card-foreground: oklch(0.9 0.01 230);
-  --popover: oklch(0.25 0.02 240);
-  --popover-foreground: oklch(0.9 0.01 230);
-
-  --primary: oklch(0.7 0.12 220); /* #88c0d0 frost */
-  --primary-foreground: oklch(0.23 0.02 240);
-
-  --brand-400: oklch(0.75 0.12 220);
-  --brand-500: oklch(0.7 0.12 220); /* #88c0d0 */
-  --brand-600: oklch(0.65 0.14 220); /* #81a1c1 */
-
-  --secondary: oklch(0.31 0.02 240); /* #434c5e */
-  --secondary-foreground: oklch(0.9 0.01 230);
-
-  --muted: oklch(0.31 0.02 240);
-  --muted-foreground: oklch(0.55 0.03 230);
-
-  --accent: oklch(0.35 0.03 240); /* #4c566a */
-  --accent-foreground: oklch(0.9 0.01 230);
-
-  --destructive: oklch(0.65 0.2 15); /* #bf616a */
-
-  --border: oklch(0.35 0.03 240);
-  --border-glass: oklch(0.7 0.12 220 / 0.3);
-
-  --input: oklch(0.27 0.02 240);
-  --ring: oklch(0.7 0.12 220);
-
-  --chart-1: oklch(0.7 0.12 220); /* Frost blue */
-  --chart-2: oklch(0.65 0.14 220); /* #81a1c1 */
-  --chart-3: oklch(0.7 0.15 140); /* #a3be8c green */
-  --chart-4: oklch(0.7 0.2 320); /* #b48ead purple */
-  --chart-5: oklch(0.75 0.15 70); /* #ebcb8b yellow */
-
-  --sidebar: oklch(0.21 0.02 240);
-  --sidebar-foreground: oklch(0.9 0.01 230);
-  --sidebar-primary: oklch(0.7 0.12 220);
-  --sidebar-primary-foreground: oklch(0.23 0.02 240);
-  --sidebar-accent: oklch(0.31 0.02 240);
-  --sidebar-accent-foreground: oklch(0.9 0.01 230);
-  --sidebar-border: oklch(0.35 0.03 240);
-  --sidebar-ring: oklch(0.7 0.12 220);
-
-  /* Action button colors - Nord frost blue theme */
-  --action-view: oklch(0.7 0.12 220); /* Frost blue */
-  --action-view-hover: oklch(0.65 0.14 220);
-  --action-followup: oklch(0.65 0.14 220); /* Darker frost */
-  --action-followup-hover: oklch(0.6 0.16 220);
-  --action-commit: oklch(0.7 0.15 140); /* Green */
-  --action-commit-hover: oklch(0.65 0.17 140);
-  --action-verify: oklch(0.7 0.15 140); /* Green */
-  --action-verify-hover: oklch(0.65 0.17 140);
-
-  /* Running indicator - Frost blue */
-  --running-indicator: oklch(0.7 0.12 220);
-  --running-indicator-text: oklch(0.75 0.1 220);
-}
-
-/* ========================================
-   MONOKAI THEME
-   The classic Monokai color scheme
-   ======================================== */
-.monokai {
-  --background: oklch(0.17 0.01 90); /* #272822 */
-  --background-50: oklch(0.17 0.01 90 / 0.5);
-  --background-80: oklch(0.17 0.01 90 / 0.8);
-
-  --foreground: oklch(0.95 0.02 100); /* #f8f8f2 */
-  --foreground-secondary: oklch(0.8 0.02 100);
-  --foreground-muted: oklch(0.55 0.04 100); /* #75715e */
-
-  --card: oklch(0.22 0.01 90); /* #3e3d32 */
-  --card-foreground: oklch(0.95 0.02 100);
-  --popover: oklch(0.2 0.01 90);
-  --popover-foreground: oklch(0.95 0.02 100);
-
-  --primary: oklch(0.8 0.2 350); /* #f92672 pink */
-  --primary-foreground: oklch(0.17 0.01 90);
-
-  --brand-400: oklch(0.85 0.2 350);
-  --brand-500: oklch(0.8 0.2 350); /* #f92672 */
-  --brand-600: oklch(0.75 0.22 350);
-
-  --secondary: oklch(0.25 0.02 90);
-  --secondary-foreground: oklch(0.95 0.02 100);
-
-  --muted: oklch(0.25 0.02 90);
-  --muted-foreground: oklch(0.55 0.04 100);
-
-  --accent: oklch(0.3 0.02 90);
-  --accent-foreground: oklch(0.95 0.02 100);
-
-  --destructive: oklch(0.65 0.25 15); /* red */
-
-  --border: oklch(0.35 0.03 90);
-  --border-glass: oklch(0.8 0.2 350 / 0.3);
-
-  --input: oklch(0.22 0.01 90);
-  --ring: oklch(0.8 0.2 350);
-
-  --chart-1: oklch(0.8 0.2 350); /* Pink #f92672 */
-  --chart-2: oklch(0.85 0.2 90); /* Yellow #e6db74 */
-  --chart-3: oklch(0.8 0.2 140); /* Green #a6e22e */
-  --chart-4: oklch(0.75 0.2 200); /* Cyan #66d9ef */
-  --chart-5: oklch(0.75 0.2 30); /* Orange #fd971f */
-
-  --sidebar: oklch(0.15 0.01 90);
-  --sidebar-foreground: oklch(0.95 0.02 100);
-  --sidebar-primary: oklch(0.8 0.2 350);
-  --sidebar-primary-foreground: oklch(0.17 0.01 90);
-  --sidebar-accent: oklch(0.25 0.02 90);
-  --sidebar-accent-foreground: oklch(0.95 0.02 100);
-  --sidebar-border: oklch(0.35 0.03 90);
-  --sidebar-ring: oklch(0.8 0.2 350);
-
-  /* Action button colors - Monokai pink/yellow theme */
-  --action-view: oklch(0.8 0.2 350); /* Pink */
-  --action-view-hover: oklch(0.75 0.22 350);
-  --action-followup: oklch(0.75 0.2 200); /* Cyan */
-  --action-followup-hover: oklch(0.7 0.22 200);
-  --action-commit: oklch(0.8 0.2 140); /* Green */
-  --action-commit-hover: oklch(0.75 0.22 140);
-  --action-verify: oklch(0.8 0.2 140); /* Green */
-  --action-verify-hover: oklch(0.75 0.22 140);
-
-  /* Running indicator - Pink */
-  --running-indicator: oklch(0.8 0.2 350);
-  --running-indicator-text: oklch(0.85 0.18 350);
-}
-
-/* ========================================
-   TOKYO NIGHT THEME
-   A clean dark theme celebrating Tokyo at night
-   ======================================== */
-.tokyonight {
-  --background: oklch(0.16 0.03 260); /* #1a1b26 */
-  --background-50: oklch(0.16 0.03 260 / 0.5);
-  --background-80: oklch(0.16 0.03 260 / 0.8);
-
-  --foreground: oklch(0.85 0.02 250); /* #a9b1d6 */
-  --foreground-secondary: oklch(0.7 0.03 250);
-  --foreground-muted: oklch(0.5 0.04 250); /* #565f89 */
-
-  --card: oklch(0.2 0.03 260); /* #24283b */
-  --card-foreground: oklch(0.85 0.02 250);
-  --popover: oklch(0.18 0.03 260);
-  --popover-foreground: oklch(0.85 0.02 250);
-
-  --primary: oklch(0.7 0.18 280); /* #7aa2f7 blue */
-  --primary-foreground: oklch(0.16 0.03 260);
-
-  --brand-400: oklch(0.75 0.18 280);
-  --brand-500: oklch(0.7 0.18 280); /* #7aa2f7 */
-  --brand-600: oklch(0.65 0.2 280); /* #7dcfff */
-
-  --secondary: oklch(0.24 0.03 260); /* #292e42 */
-  --secondary-foreground: oklch(0.85 0.02 250);
-
-  --muted: oklch(0.24 0.03 260);
-  --muted-foreground: oklch(0.5 0.04 250);
-
-  --accent: oklch(0.28 0.04 260);
-  --accent-foreground: oklch(0.85 0.02 250);
-
-  --destructive: oklch(0.65 0.2 15); /* #f7768e */
-
-  --border: oklch(0.32 0.04 260);
-  --border-glass: oklch(0.7 0.18 280 / 0.3);
-
-  --input: oklch(0.2 0.03 260);
-  --ring: oklch(0.7 0.18 280);
-
-  --chart-1: oklch(0.7 0.18 280); /* Blue #7aa2f7 */
-  --chart-2: oklch(0.75 0.18 200); /* Cyan #7dcfff */
-  --chart-3: oklch(0.75 0.18 140); /* Green #9ece6a */
-  --chart-4: oklch(0.7 0.2 320); /* Magenta #bb9af7 */
-  --chart-5: oklch(0.8 0.18 70); /* Yellow #e0af68 */
-
-  --sidebar: oklch(0.14 0.03 260);
-  --sidebar-foreground: oklch(0.85 0.02 250);
-  --sidebar-primary: oklch(0.7 0.18 280);
-  --sidebar-primary-foreground: oklch(0.16 0.03 260);
-  --sidebar-accent: oklch(0.24 0.03 260);
-  --sidebar-accent-foreground: oklch(0.85 0.02 250);
-  --sidebar-border: oklch(0.32 0.04 260);
-  --sidebar-ring: oklch(0.7 0.18 280);
-
-  /* Action button colors - Tokyo Night blue/magenta theme */
-  --action-view: oklch(0.7 0.18 280); /* Blue */
-  --action-view-hover: oklch(0.65 0.2 280);
-  --action-followup: oklch(0.75 0.18 200); /* Cyan */
-  --action-followup-hover: oklch(0.7 0.2 200);
-  --action-commit: oklch(0.75 0.18 140); /* Green */
-  --action-commit-hover: oklch(0.7 0.2 140);
-  --action-verify: oklch(0.75 0.18 140); /* Green */
-  --action-verify-hover: oklch(0.7 0.2 140);
-
-  /* Running indicator - Blue */
-  --running-indicator: oklch(0.7 0.18 280);
-  --running-indicator-text: oklch(0.75 0.16 280);
-}
-
-/* ========================================
-   SOLARIZED DARK THEME
-   The classic color scheme by Ethan Schoonover
-   ======================================== */
-.solarized {
-  --background: oklch(0.2 0.02 230); /* #002b36 base03 */
-  --background-50: oklch(0.2 0.02 230 / 0.5);
-  --background-80: oklch(0.2 0.02 230 / 0.8);
-
-  --foreground: oklch(0.75 0.02 90); /* #839496 base0 */
-  --foreground-secondary: oklch(0.6 0.03 200); /* #657b83 base00 */
-  --foreground-muted: oklch(0.5 0.04 200); /* #586e75 base01 */
-
-  --card: oklch(0.23 0.02 230); /* #073642 base02 */
-  --card-foreground: oklch(0.75 0.02 90);
-  --popover: oklch(0.22 0.02 230);
-  --popover-foreground: oklch(0.75 0.02 90);
-
-  --primary: oklch(0.65 0.15 220); /* #268bd2 blue */
-  --primary-foreground: oklch(0.2 0.02 230);
-
-  --brand-400: oklch(0.7 0.15 220);
-  --brand-500: oklch(0.65 0.15 220); /* #268bd2 */
-  --brand-600: oklch(0.6 0.17 220);
-
-  --secondary: oklch(0.25 0.02 230);
-  --secondary-foreground: oklch(0.75 0.02 90);
-
-  --muted: oklch(0.25 0.02 230);
-  --muted-foreground: oklch(0.5 0.04 200);
-
-  --accent: oklch(0.28 0.03 230);
-  --accent-foreground: oklch(0.75 0.02 90);
-
-  --destructive: oklch(0.55 0.2 25); /* #dc322f red */
-
-  --border: oklch(0.35 0.03 230);
-  --border-glass: oklch(0.65 0.15 220 / 0.3);
-
-  --input: oklch(0.23 0.02 230);
-  --ring: oklch(0.65 0.15 220);
-
-  --chart-1: oklch(0.65 0.15 220); /* Blue */
-  --chart-2: oklch(0.6 0.18 180); /* Cyan #2aa198 */
-  --chart-3: oklch(0.65 0.2 140); /* Green #859900 */
-  --chart-4: oklch(0.7 0.18 55); /* Yellow #b58900 */
-  --chart-5: oklch(0.6 0.2 30); /* Orange #cb4b16 */
-
-  --sidebar: oklch(0.18 0.02 230);
-  --sidebar-foreground: oklch(0.75 0.02 90);
-  --sidebar-primary: oklch(0.65 0.15 220);
-  --sidebar-primary-foreground: oklch(0.2 0.02 230);
-  --sidebar-accent: oklch(0.25 0.02 230);
-  --sidebar-accent-foreground: oklch(0.75 0.02 90);
-  --sidebar-border: oklch(0.35 0.03 230);
-  --sidebar-ring: oklch(0.65 0.15 220);
-
-  /* Action button colors - Solarized blue/cyan theme */
-  --action-view: oklch(0.65 0.15 220); /* Blue */
-  --action-view-hover: oklch(0.6 0.17 220);
-  --action-followup: oklch(0.6 0.18 180); /* Cyan */
-  --action-followup-hover: oklch(0.55 0.2 180);
-  --action-commit: oklch(0.65 0.2 140); /* Green */
-  --action-commit-hover: oklch(0.6 0.22 140);
-  --action-verify: oklch(0.65 0.2 140); /* Green */
-  --action-verify-hover: oklch(0.6 0.22 140);
-
-  /* Running indicator - Blue */
-  --running-indicator: oklch(0.65 0.15 220);
-  --running-indicator-text: oklch(0.7 0.13 220);
-}
-
-/* ========================================
-   GRUVBOX THEME
-   Retro groove color scheme
-   ======================================== */
-.gruvbox {
-  --background: oklch(0.18 0.02 60); /* #282828 bg */
-  --background-50: oklch(0.18 0.02 60 / 0.5);
-  --background-80: oklch(0.18 0.02 60 / 0.8);
-
-  --foreground: oklch(0.85 0.05 85); /* #ebdbb2 fg */
-  --foreground-secondary: oklch(0.7 0.04 85); /* #d5c4a1 */
-  --foreground-muted: oklch(0.55 0.04 85); /* #928374 */
-
-  --card: oklch(0.22 0.02 60); /* #3c3836 bg1 */
-  --card-foreground: oklch(0.85 0.05 85);
-  --popover: oklch(0.2 0.02 60);
-  --popover-foreground: oklch(0.85 0.05 85);
-
-  --primary: oklch(0.7 0.18 55); /* #fabd2f yellow */
-  --primary-foreground: oklch(0.18 0.02 60);
-
-  --brand-400: oklch(0.75 0.18 55);
-  --brand-500: oklch(0.7 0.18 55); /* Yellow */
-  --brand-600: oklch(0.65 0.2 55);
-
-  --secondary: oklch(0.26 0.02 60); /* #504945 bg2 */
-  --secondary-foreground: oklch(0.85 0.05 85);
-
-  --muted: oklch(0.26 0.02 60);
-  --muted-foreground: oklch(0.55 0.04 85);
-
-  --accent: oklch(0.3 0.03 60);
-  --accent-foreground: oklch(0.85 0.05 85);
-
-  --destructive: oklch(0.55 0.22 25); /* #fb4934 red */
-
-  --border: oklch(0.35 0.03 60);
-  --border-glass: oklch(0.7 0.18 55 / 0.3);
-
-  --input: oklch(0.22 0.02 60);
-  --ring: oklch(0.7 0.18 55);
-
-  --chart-1: oklch(0.7 0.18 55); /* Yellow */
-  --chart-2: oklch(0.65 0.2 140); /* Green #b8bb26 */
-  --chart-3: oklch(0.7 0.15 200); /* Aqua #8ec07c */
-  --chart-4: oklch(0.6 0.2 30); /* Orange #fe8019 */
-  --chart-5: oklch(0.6 0.2 320); /* Purple #d3869b */
-
-  --sidebar: oklch(0.16 0.02 60);
-  --sidebar-foreground: oklch(0.85 0.05 85);
-  --sidebar-primary: oklch(0.7 0.18 55);
-  --sidebar-primary-foreground: oklch(0.18 0.02 60);
-  --sidebar-accent: oklch(0.26 0.02 60);
-  --sidebar-accent-foreground: oklch(0.85 0.05 85);
-  --sidebar-border: oklch(0.35 0.03 60);
-  --sidebar-ring: oklch(0.7 0.18 55);
-
-  /* Action button colors - Gruvbox yellow/orange theme */
-  --action-view: oklch(0.7 0.18 55); /* Yellow */
-  --action-view-hover: oklch(0.65 0.2 55);
-  --action-followup: oklch(0.7 0.15 200); /* Aqua */
-  --action-followup-hover: oklch(0.65 0.17 200);
-  --action-commit: oklch(0.65 0.2 140); /* Green */
-  --action-commit-hover: oklch(0.6 0.22 140);
-  --action-verify: oklch(0.65 0.2 140); /* Green */
-  --action-verify-hover: oklch(0.6 0.22 140);
-
-  /* Running indicator - Yellow */
-  --running-indicator: oklch(0.7 0.18 55);
-  --running-indicator-text: oklch(0.75 0.16 55);
-}
-
-/* ========================================
-   CATPPUCCIN MOCHA THEME
-   Soothing pastel theme for the high-spirited
-   ======================================== */
-.catppuccin {
-  --background: oklch(0.18 0.02 260); /* #1e1e2e base */
-  --background-50: oklch(0.18 0.02 260 / 0.5);
-  --background-80: oklch(0.18 0.02 260 / 0.8);
-
-  --foreground: oklch(0.9 0.01 280); /* #cdd6f4 text */
-  --foreground-secondary: oklch(0.75 0.02 280); /* #bac2de subtext1 */
-  --foreground-muted: oklch(0.6 0.03 280); /* #a6adc8 subtext0 */
-
-  --card: oklch(0.22 0.02 260); /* #313244 surface0 */
-  --card-foreground: oklch(0.9 0.01 280);
-  --popover: oklch(0.2 0.02 260);
-  --popover-foreground: oklch(0.9 0.01 280);
-
-  --primary: oklch(0.75 0.15 280); /* #cba6f7 mauve */
-  --primary-foreground: oklch(0.18 0.02 260);
-
-  --brand-400: oklch(0.8 0.15 280);
-  --brand-500: oklch(0.75 0.15 280); /* Mauve */
-  --brand-600: oklch(0.7 0.17 280);
-
-  --secondary: oklch(0.26 0.02 260); /* #45475a surface1 */
-  --secondary-foreground: oklch(0.9 0.01 280);
-
-  --muted: oklch(0.26 0.02 260);
-  --muted-foreground: oklch(0.6 0.03 280);
-
-  --accent: oklch(0.3 0.03 260); /* #585b70 surface2 */
-  --accent-foreground: oklch(0.9 0.01 280);
-
-  --destructive: oklch(0.65 0.2 15); /* #f38ba8 red */
-
-  --border: oklch(0.35 0.03 260);
-  --border-glass: oklch(0.75 0.15 280 / 0.3);
-
-  --input: oklch(0.22 0.02 260);
-  --ring: oklch(0.75 0.15 280);
-
-  --chart-1: oklch(0.75 0.15 280); /* Mauve */
-  --chart-2: oklch(0.75 0.15 220); /* Blue #89b4fa */
-  --chart-3: oklch(0.8 0.15 160); /* Green #a6e3a1 */
-  --chart-4: oklch(0.8 0.15 350); /* Pink #f5c2e7 */
-  --chart-5: oklch(0.85 0.12 90); /* Yellow #f9e2af */
-
-  --sidebar: oklch(0.16 0.02 260); /* #181825 mantle */
-  --sidebar-foreground: oklch(0.9 0.01 280);
-  --sidebar-primary: oklch(0.75 0.15 280);
-  --sidebar-primary-foreground: oklch(0.18 0.02 260);
-  --sidebar-accent: oklch(0.26 0.02 260);
-  --sidebar-accent-foreground: oklch(0.9 0.01 280);
-  --sidebar-border: oklch(0.35 0.03 260);
-  --sidebar-ring: oklch(0.75 0.15 280);
-
-  /* Action button colors - Catppuccin mauve/pink theme */
-  --action-view: oklch(0.75 0.15 280); /* Mauve */
-  --action-view-hover: oklch(0.7 0.17 280);
-  --action-followup: oklch(0.75 0.15 220); /* Blue */
-  --action-followup-hover: oklch(0.7 0.17 220);
-  --action-commit: oklch(0.8 0.15 160); /* Green */
-  --action-commit-hover: oklch(0.75 0.17 160);
-  --action-verify: oklch(0.8 0.15 160); /* Green */
-  --action-verify-hover: oklch(0.75 0.17 160);
-
-  /* Running indicator - Mauve */
-  --running-indicator: oklch(0.75 0.15 280);
-  --running-indicator-text: oklch(0.8 0.13 280);
-}
-
-/* ========================================
-   ONE DARK THEME
-   Atom's iconic One Dark theme
-   ======================================== */
-.onedark {
-  --background: oklch(0.19 0.01 250); /* #282c34 */
-  --background-50: oklch(0.19 0.01 250 / 0.5);
-  --background-80: oklch(0.19 0.01 250 / 0.8);
-
-  --foreground: oklch(0.85 0.02 240); /* #abb2bf */
-  --foreground-secondary: oklch(0.7 0.02 240);
-  --foreground-muted: oklch(0.5 0.03 240); /* #5c6370 */
-
-  --card: oklch(0.23 0.01 250); /* #21252b */
-  --card-foreground: oklch(0.85 0.02 240);
-  --popover: oklch(0.21 0.01 250);
-  --popover-foreground: oklch(0.85 0.02 240);
-
-  --primary: oklch(0.7 0.18 230); /* #61afef blue */
-  --primary-foreground: oklch(0.19 0.01 250);
-
-  --brand-400: oklch(0.75 0.18 230);
-  --brand-500: oklch(0.7 0.18 230); /* Blue */
-  --brand-600: oklch(0.65 0.2 230);
-
-  --secondary: oklch(0.25 0.01 250);
-  --secondary-foreground: oklch(0.85 0.02 240);
-
-  --muted: oklch(0.25 0.01 250);
-  --muted-foreground: oklch(0.5 0.03 240);
-
-  --accent: oklch(0.28 0.02 250);
-  --accent-foreground: oklch(0.85 0.02 240);
-
-  --destructive: oklch(0.6 0.2 20); /* #e06c75 red */
-
-  --border: oklch(0.35 0.02 250);
-  --border-glass: oklch(0.7 0.18 230 / 0.3);
-
-  --input: oklch(0.23 0.01 250);
-  --ring: oklch(0.7 0.18 230);
-
-  --chart-1: oklch(0.7 0.18 230); /* Blue */
-  --chart-2: oklch(0.75 0.15 320); /* Magenta #c678dd */
-  --chart-3: oklch(0.75 0.18 150); /* Green #98c379 */
-  --chart-4: oklch(0.8 0.15 80); /* Yellow #e5c07b */
-  --chart-5: oklch(0.7 0.15 180); /* Cyan #56b6c2 */
-
-  --sidebar: oklch(0.17 0.01 250);
-  --sidebar-foreground: oklch(0.85 0.02 240);
-  --sidebar-primary: oklch(0.7 0.18 230);
-  --sidebar-primary-foreground: oklch(0.19 0.01 250);
-  --sidebar-accent: oklch(0.25 0.01 250);
-  --sidebar-accent-foreground: oklch(0.85 0.02 240);
-  --sidebar-border: oklch(0.35 0.02 250);
-  --sidebar-ring: oklch(0.7 0.18 230);
-
-  /* Action button colors - One Dark blue/magenta theme */
-  --action-view: oklch(0.7 0.18 230); /* Blue */
-  --action-view-hover: oklch(0.65 0.2 230);
-  --action-followup: oklch(0.75 0.15 320); /* Magenta */
-  --action-followup-hover: oklch(0.7 0.17 320);
-  --action-commit: oklch(0.75 0.18 150); /* Green */
-  --action-commit-hover: oklch(0.7 0.2 150);
-  --action-verify: oklch(0.75 0.18 150); /* Green */
-  --action-verify-hover: oklch(0.7 0.2 150);
-
-  /* Running indicator - Blue */
-  --running-indicator: oklch(0.7 0.18 230);
-  --running-indicator-text: oklch(0.75 0.16 230);
-}
-
-/* ========================================
-   SYNTHWAVE '84 THEME
-   Neon dreams of the 80s
-   ======================================== */
-.synthwave {
-  --background: oklch(0.15 0.05 290); /* #262335 */
-  --background-50: oklch(0.15 0.05 290 / 0.5);
-  --background-80: oklch(0.15 0.05 290 / 0.8);
-
-  --foreground: oklch(0.95 0.02 320); /* #ffffff with warm tint */
-  --foreground-secondary: oklch(0.75 0.05 320);
-  --foreground-muted: oklch(0.55 0.08 290);
-
-  --card: oklch(0.2 0.06 290); /* #34294f */
-  --card-foreground: oklch(0.95 0.02 320);
-  --popover: oklch(0.18 0.05 290);
-  --popover-foreground: oklch(0.95 0.02 320);
-
-  --primary: oklch(0.7 0.28 350); /* #f97e72 hot pink */
-  --primary-foreground: oklch(0.15 0.05 290);
-
-  --brand-400: oklch(0.75 0.28 350);
-  --brand-500: oklch(0.7 0.28 350); /* Hot pink */
-  --brand-600: oklch(0.65 0.3 350);
-
-  --secondary: oklch(0.25 0.07 290);
-  --secondary-foreground: oklch(0.95 0.02 320);
-
-  --muted: oklch(0.25 0.07 290);
-  --muted-foreground: oklch(0.55 0.08 290);
-
-  --accent: oklch(0.3 0.08 290);
-  --accent-foreground: oklch(0.95 0.02 320);
-
-  --destructive: oklch(0.6 0.25 15);
-
-  --border: oklch(0.4 0.1 290);
-  --border-glass: oklch(0.7 0.28 350 / 0.3);
-
-  --input: oklch(0.2 0.06 290);
-  --ring: oklch(0.7 0.28 350);
-
-  --chart-1: oklch(0.7 0.28 350); /* Hot pink */
-  --chart-2: oklch(0.8 0.25 200); /* Cyan #72f1b8 */
-  --chart-3: oklch(0.85 0.2 60); /* Yellow #fede5d */
-  --chart-4: oklch(0.7 0.25 280); /* Purple #ff7edb */
-  --chart-5: oklch(0.7 0.2 30); /* Orange #f97e72 */
-
-  --sidebar: oklch(0.13 0.05 290);
-  --sidebar-foreground: oklch(0.95 0.02 320);
-  --sidebar-primary: oklch(0.7 0.28 350);
-  --sidebar-primary-foreground: oklch(0.15 0.05 290);
-  --sidebar-accent: oklch(0.25 0.07 290);
-  --sidebar-accent-foreground: oklch(0.95 0.02 320);
-  --sidebar-border: oklch(0.4 0.1 290);
-  --sidebar-ring: oklch(0.7 0.28 350);
-
-  /* Action button colors - Synthwave hot pink/cyan theme */
-  --action-view: oklch(0.7 0.28 350); /* Hot pink */
-  --action-view-hover: oklch(0.65 0.3 350);
-  --action-followup: oklch(0.8 0.25 200); /* Cyan */
-  --action-followup-hover: oklch(0.75 0.27 200);
-  --action-commit: oklch(0.85 0.2 60); /* Yellow */
-  --action-commit-hover: oklch(0.8 0.22 60);
-  --action-verify: oklch(0.85 0.2 60); /* Yellow */
-  --action-verify-hover: oklch(0.8 0.22 60);
-
-  /* Running indicator - Hot pink */
-  --running-indicator: oklch(0.7 0.28 350);
-  --running-indicator-text: oklch(0.75 0.26 350);
-}
-
-/* Red Theme - Bold crimson/red aesthetic */
-.red {
-  --background: oklch(0.12 0.03 15); /* Deep dark red-tinted black */
-  --background-50: oklch(0.12 0.03 15 / 0.5);
-  --background-80: oklch(0.12 0.03 15 / 0.8);
-
-  --foreground: oklch(0.95 0.01 15); /* Off-white with warm tint */
-  --foreground-secondary: oklch(0.7 0.02 15);
-  --foreground-muted: oklch(0.5 0.03 15);
-
-  --card: oklch(0.18 0.04 15); /* Slightly lighter dark red */
-  --card-foreground: oklch(0.95 0.01 15);
-  --popover: oklch(0.15 0.035 15);
-  --popover-foreground: oklch(0.95 0.01 15);
-
-  --primary: oklch(0.55 0.25 25); /* Vibrant crimson red */
-  --primary-foreground: oklch(0.98 0 0);
-
-  --brand-400: oklch(0.6 0.23 25);
-  --brand-500: oklch(0.55 0.25 25); /* Crimson */
-  --brand-600: oklch(0.5 0.27 25);
-
-  --secondary: oklch(0.22 0.05 15);
-  --secondary-foreground: oklch(0.95 0.01 15);
-
-  --muted: oklch(0.22 0.05 15);
-  --muted-foreground: oklch(0.5 0.03 15);
-
-  --accent: oklch(0.28 0.06 15);
-  --accent-foreground: oklch(0.95 0.01 15);
-
-  --destructive: oklch(0.6 0.28 30); /* Bright orange-red for destructive */
-
-  --border: oklch(0.35 0.08 15);
-  --border-glass: oklch(0.55 0.25 25 / 0.3);
-
-  --input: oklch(0.18 0.04 15);
-  --ring: oklch(0.55 0.25 25);
-
-  --chart-1: oklch(0.55 0.25 25); /* Crimson */
-  --chart-2: oklch(0.7 0.2 50); /* Orange */
-  --chart-3: oklch(0.8 0.18 80); /* Gold */
-  --chart-4: oklch(0.6 0.22 0); /* Pure red */
-  --chart-5: oklch(0.65 0.2 350); /* Pink-red */
-
-  --sidebar: oklch(0.1 0.025 15);
-  --sidebar-foreground: oklch(0.95 0.01 15);
-  --sidebar-primary: oklch(0.55 0.25 25);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.22 0.05 15);
-  --sidebar-accent-foreground: oklch(0.95 0.01 15);
-  --sidebar-border: oklch(0.35 0.08 15);
-  --sidebar-ring: oklch(0.55 0.25 25);
-
-  /* Action button colors - Red theme */
-  --action-view: oklch(0.55 0.25 25); /* Crimson */
-  --action-view-hover: oklch(0.5 0.27 25);
-  --action-followup: oklch(0.7 0.2 50); /* Orange */
-  --action-followup-hover: oklch(0.65 0.22 50);
-  --action-commit: oklch(0.6 0.2 140); /* Green for positive actions */
-  --action-commit-hover: oklch(0.55 0.22 140);
-  --action-verify: oklch(0.6 0.2 140); /* Green */
-  --action-verify-hover: oklch(0.55 0.22 140);
-
-  /* Running indicator - Crimson */
-  --running-indicator: oklch(0.55 0.25 25);
-  --running-indicator-text: oklch(0.6 0.23 25);
-}
-
-.cream {
-  /* Cream Theme - Warm, soft, easy on the eyes */
-  --background: oklch(0.95 0.01 70); /* Warm cream background */
-  --background-50: oklch(0.95 0.01 70 / 0.5);
-  --background-80: oklch(0.95 0.01 70 / 0.8);
-
-  --foreground: oklch(0.25 0.02 60); /* Dark warm brown */
-  --foreground-secondary: oklch(0.45 0.02 60); /* Medium brown */
-  --foreground-muted: oklch(0.55 0.02 60); /* Light brown */
-
-  --card: oklch(0.98 0.005 70); /* Slightly lighter cream */
-  --card-foreground: oklch(0.25 0.02 60);
-  --popover: oklch(0.97 0.008 70);
-  --popover-foreground: oklch(0.25 0.02 60);
-
-  --primary: oklch(0.5 0.12 45); /* Warm terracotta/rust */
-  --primary-foreground: oklch(0.98 0.005 70);
-
-  --brand-400: oklch(0.55 0.12 45);
-  --brand-500: oklch(0.5 0.12 45); /* Terracotta */
-  --brand-600: oklch(0.45 0.13 45);
-
-  --secondary: oklch(0.88 0.02 70);
-  --secondary-foreground: oklch(0.25 0.02 60);
-
-  --muted: oklch(0.9 0.015 70);
-  --muted-foreground: oklch(0.45 0.02 60);
-
-  --accent: oklch(0.85 0.025 70);
-  --accent-foreground: oklch(0.25 0.02 60);
-
-  --destructive: oklch(0.55 0.22 25); /* Warm red */
-
-  --border: oklch(0.85 0.015 70);
-  --border-glass: oklch(0.5 0.12 45 / 0.2);
-
-  --input: oklch(0.98 0.005 70);
-  --ring: oklch(0.5 0.12 45);
-
-  --chart-1: oklch(0.5 0.12 45); /* Terracotta */
-  --chart-2: oklch(0.55 0.15 35); /* Burnt orange */
-  --chart-3: oklch(0.6 0.12 100); /* Olive */
-  --chart-4: oklch(0.5 0.15 20); /* Deep rust */
-  --chart-5: oklch(0.65 0.1 80); /* Golden */
-
-  --sidebar: oklch(0.93 0.012 70);
-  --sidebar-foreground: oklch(0.25 0.02 60);
-  --sidebar-primary: oklch(0.5 0.12 45);
-  --sidebar-primary-foreground: oklch(0.98 0.005 70);
-  --sidebar-accent: oklch(0.88 0.02 70);
-  --sidebar-accent-foreground: oklch(0.25 0.02 60);
-  --sidebar-border: oklch(0.85 0.015 70);
-  --sidebar-ring: oklch(0.5 0.12 45);
-
-  /* Action button colors - Warm earth tones */
-  --action-view: oklch(0.5 0.12 45); /* Terracotta */
-  --action-view-hover: oklch(0.45 0.13 45);
-  --action-followup: oklch(0.55 0.15 35); /* Burnt orange */
-  --action-followup-hover: oklch(0.5 0.16 35);
-  --action-commit: oklch(0.55 0.12 130); /* Sage green */
-  --action-commit-hover: oklch(0.5 0.13 130);
-  --action-verify: oklch(0.55 0.12 130); /* Sage green */
-  --action-verify-hover: oklch(0.5 0.13 130);
-
-  /* Running indicator - Terracotta */
-  --running-indicator: oklch(0.5 0.12 45);
-  --running-indicator-text: oklch(0.55 0.12 45);
-
-  /* Status colors - Cream theme */
-  --status-success: oklch(0.55 0.15 130);
-  --status-success-bg: oklch(0.55 0.15 130 / 0.15);
-  --status-warning: oklch(0.6 0.15 70);
-  --status-warning-bg: oklch(0.6 0.15 70 / 0.15);
-  --status-error: oklch(0.55 0.22 25);
-  --status-error-bg: oklch(0.55 0.22 25 / 0.15);
-  --status-info: oklch(0.5 0.15 230);
-  --status-info-bg: oklch(0.5 0.15 230 / 0.15);
-  --status-backlog: oklch(0.6 0.02 60);
-  --status-in-progress: oklch(0.6 0.15 70);
-  --status-waiting: oklch(0.58 0.13 50);
-}
-
-.sunset {
-  /* Sunset Theme - Mellow oranges and soft purples */
-  --background: oklch(0.15 0.02 280); /* Deep twilight blue-purple */
-  --background-50: oklch(0.15 0.02 280 / 0.5);
-  --background-80: oklch(0.15 0.02 280 / 0.8);
-
-  --foreground: oklch(0.95 0.01 80); /* Warm white */
-  --foreground-secondary: oklch(0.75 0.02 60);
-  --foreground-muted: oklch(0.6 0.02 60);
-
-  --card: oklch(0.2 0.025 280);
-  --card-foreground: oklch(0.95 0.01 80);
-  --popover: oklch(0.18 0.02 280);
-  --popover-foreground: oklch(0.95 0.01 80);
-
-  --primary: oklch(0.68 0.18 45); /* Mellow sunset orange */
-  --primary-foreground: oklch(0.15 0.02 280);
-
-  --brand-400: oklch(0.72 0.17 45);
-  --brand-500: oklch(0.68 0.18 45); /* Soft sunset orange */
-  --brand-600: oklch(0.64 0.19 42);
-
-  --secondary: oklch(0.25 0.03 280);
-  --secondary-foreground: oklch(0.95 0.01 80);
-
-  --muted: oklch(0.27 0.03 280);
-  --muted-foreground: oklch(0.6 0.02 60);
-
-  --accent: oklch(0.35 0.04 310);
-  --accent-foreground: oklch(0.95 0.01 80);
-
-  --destructive: oklch(0.6 0.2 25); /* Muted red */
-
-  --border: oklch(0.32 0.04 280);
-  --border-glass: oklch(0.68 0.18 45 / 0.3);
-
-  --input: oklch(0.2 0.025 280);
-  --ring: oklch(0.68 0.18 45);
-
-  --chart-1: oklch(0.68 0.18 45); /* Mellow orange */
-  --chart-2: oklch(0.75 0.16 340); /* Soft pink sunset */
-  --chart-3: oklch(0.78 0.18 70); /* Soft golden */
-  --chart-4: oklch(0.66 0.19 42); /* Subtle coral */
-  --chart-5: oklch(0.72 0.14 310); /* Pastel purple */
-
-  --sidebar: oklch(0.13 0.015 280);
-  --sidebar-foreground: oklch(0.95 0.01 80);
-  --sidebar-primary: oklch(0.68 0.18 45);
-  --sidebar-primary-foreground: oklch(0.15 0.02 280);
-  --sidebar-accent: oklch(0.25 0.03 280);
-  --sidebar-accent-foreground: oklch(0.95 0.01 80);
-  --sidebar-border: oklch(0.32 0.04 280);
-  --sidebar-ring: oklch(0.68 0.18 45);
-
-  /* Action button colors - Mellow sunset palette */
-  --action-view: oklch(0.68 0.18 45); /* Mellow orange */
-  --action-view-hover: oklch(0.64 0.19 42);
-  --action-followup: oklch(0.75 0.16 340); /* Soft pink */
-  --action-followup-hover: oklch(0.7 0.17 340);
-  --action-commit: oklch(0.65 0.16 140); /* Soft green */
-  --action-commit-hover: oklch(0.6 0.17 140);
-  --action-verify: oklch(0.65 0.16 140); /* Soft green */
-  --action-verify-hover: oklch(0.6 0.17 140);
-
-  /* Running indicator - Mellow orange */
-  --running-indicator: oklch(0.68 0.18 45);
-  --running-indicator-text: oklch(0.72 0.17 45);
-
-  /* Status colors - Sunset theme */
-  --status-success: oklch(0.65 0.16 140);
-  --status-success-bg: oklch(0.65 0.16 140 / 0.2);
-  --status-warning: oklch(0.78 0.18 70);
-  --status-warning-bg: oklch(0.78 0.18 70 / 0.2);
-  --status-error: oklch(0.65 0.2 25);
-  --status-error-bg: oklch(0.65 0.2 25 / 0.2);
-  --status-info: oklch(0.75 0.16 340);
-  --status-info-bg: oklch(0.75 0.16 340 / 0.2);
-  --status-backlog: oklch(0.65 0.02 280);
-  --status-in-progress: oklch(0.78 0.18 70);
-  --status-waiting: oklch(0.72 0.17 60);
-}
-
-.gray {
-  /* Gray Theme - Modern, minimal gray scheme inspired by Cursor */
-  --background: oklch(0.2 0.005 250); /* Medium-dark neutral gray */
-  --background-50: oklch(0.2 0.005 250 / 0.5);
-  --background-80: oklch(0.2 0.005 250 / 0.8);
-
-  --foreground: oklch(0.9 0.005 250); /* Light gray */
-  --foreground-secondary: oklch(0.65 0.005 250);
-  --foreground-muted: oklch(0.5 0.005 250);
-
-  --card: oklch(0.24 0.005 250);
-  --card-foreground: oklch(0.9 0.005 250);
-  --popover: oklch(0.22 0.005 250);
-  --popover-foreground: oklch(0.9 0.005 250);
-
-  --primary: oklch(0.6 0.08 250); /* Subtle blue-gray */
-  --primary-foreground: oklch(0.95 0.005 250);
-
-  --brand-400: oklch(0.65 0.08 250);
-  --brand-500: oklch(0.6 0.08 250); /* Blue-gray */
-  --brand-600: oklch(0.55 0.09 250);
-
-  --secondary: oklch(0.28 0.005 250);
-  --secondary-foreground: oklch(0.9 0.005 250);
-
-  --muted: oklch(0.3 0.005 250);
-  --muted-foreground: oklch(0.6 0.005 250);
-
-  --accent: oklch(0.35 0.01 250);
-  --accent-foreground: oklch(0.9 0.005 250);
-
-  --destructive: oklch(0.6 0.2 25); /* Muted red */
-
-  --border: oklch(0.32 0.005 250);
-  --border-glass: oklch(0.6 0.08 250 / 0.2);
-
-  --input: oklch(0.24 0.005 250);
-  --ring: oklch(0.6 0.08 250);
-
-  --chart-1: oklch(0.6 0.08 250); /* Blue-gray */
-  --chart-2: oklch(0.65 0.1 210); /* Cyan */
-  --chart-3: oklch(0.7 0.12 160); /* Teal */
-  --chart-4: oklch(0.65 0.1 280); /* Purple */
-  --chart-5: oklch(0.7 0.08 300); /* Violet */
-
-  --sidebar: oklch(0.18 0.005 250);
-  --sidebar-foreground: oklch(0.9 0.005 250);
-  --sidebar-primary: oklch(0.6 0.08 250);
-  --sidebar-primary-foreground: oklch(0.95 0.005 250);
-  --sidebar-accent: oklch(0.28 0.005 250);
-  --sidebar-accent-foreground: oklch(0.9 0.005 250);
-  --sidebar-border: oklch(0.32 0.005 250);
-  --sidebar-ring: oklch(0.6 0.08 250);
-
-  /* Action button colors - Subtle modern colors */
-  --action-view: oklch(0.6 0.08 250); /* Blue-gray */
-  --action-view-hover: oklch(0.55 0.09 250);
-  --action-followup: oklch(0.65 0.1 210); /* Cyan */
-  --action-followup-hover: oklch(0.6 0.11 210);
-  --action-commit: oklch(0.65 0.12 150); /* Teal-green */
-  --action-commit-hover: oklch(0.6 0.13 150);
-  --action-verify: oklch(0.65 0.12 150); /* Teal-green */
-  --action-verify-hover: oklch(0.6 0.13 150);
-
-  /* Running indicator - Blue-gray */
-  --running-indicator: oklch(0.6 0.08 250);
-  --running-indicator-text: oklch(0.65 0.08 250);
-
-  /* Status colors - Gray theme */
-  --status-success: oklch(0.65 0.12 150);
-  --status-success-bg: oklch(0.65 0.12 150 / 0.2);
-  --status-warning: oklch(0.7 0.15 70);
-  --status-warning-bg: oklch(0.7 0.15 70 / 0.2);
-  --status-error: oklch(0.6 0.2 25);
-  --status-error-bg: oklch(0.6 0.2 25 / 0.2);
-  --status-info: oklch(0.65 0.1 210);
-  --status-info-bg: oklch(0.65 0.1 210 / 0.2);
-  --status-backlog: oklch(0.6 0.005 250);
-  --status-in-progress: oklch(0.7 0.15 70);
-  --status-waiting: oklch(0.68 0.1 220);
-}
 
 @layer base {
   * {
@@ -1545,62 +413,6 @@
   background: oklch(0.15 0.05 25);
 }
 
-/* Cream theme scrollbar */
-.cream ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.cream ::-webkit-scrollbar-thumb,
-.cream .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: oklch(0.7 0.03 60);
-  border-radius: 4px;
-}
-
-.cream ::-webkit-scrollbar-thumb:hover,
-.cream .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.6 0.04 60);
-}
-
-.cream ::-webkit-scrollbar-track,
-.cream .scrollbar-visible::-webkit-scrollbar-track {
-  background: oklch(0.9 0.015 70);
-}
-
-/* Sunset theme scrollbar */
-.sunset ::-webkit-scrollbar-thumb,
-.sunset .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0.14 45);
-  border-radius: 4px;
-}
-
-.sunset ::-webkit-scrollbar-thumb:hover,
-.sunset .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.58 0.16 45);
-}
-
-.sunset ::-webkit-scrollbar-track,
-.sunset .scrollbar-visible::-webkit-scrollbar-track {
-  background: oklch(0.18 0.03 280);
-}
-
-/* Gray theme scrollbar */
-.gray ::-webkit-scrollbar-thumb,
-.gray .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: oklch(0.4 0.01 250);
-  border-radius: 4px;
-}
-
-.gray ::-webkit-scrollbar-thumb:hover,
-.gray .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0.02 250);
-}
-
-.gray ::-webkit-scrollbar-track,
-.gray .scrollbar-visible::-webkit-scrollbar-track {
-  background: oklch(0.25 0.005 250);
-}
-
 /* Always visible scrollbar for file diffs and code blocks */
 .scrollbar-visible {
   overflow-y: auto !important;
@@ -1633,30 +445,6 @@
   visibility: visible;
 }
 
-/* Light mode scrollbar-visible adjustments */
-.light .scrollbar-visible::-webkit-scrollbar-track {
-  background: oklch(0.95 0 0);
-}
-
-.light .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: oklch(0.7 0 0);
-}
-
-.light .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.6 0 0);
-}
-
-/* Retro mode scrollbar-visible adjustments */
-.retro .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 0;
-}
-
-.retro .scrollbar-visible::-webkit-scrollbar-track {
-  background: var(--background);
-  border-radius: 0;
-}
-
 /* Styled scrollbar for code blocks and log entries (horizontal/vertical) */
 .scrollbar-styled {
   scrollbar-width: thin;
@@ -1680,53 +468,6 @@
 
 .scrollbar-styled::-webkit-scrollbar-thumb:hover {
   background: oklch(0.45 0 0);
-}
-
-/* Light mode scrollbar-styled adjustments */
-.light .scrollbar-styled::-webkit-scrollbar-thumb {
-  background: oklch(0.75 0 0);
-}
-
-.light .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.65 0 0);
-}
-
-/* Cream theme scrollbar-styled */
-.cream .scrollbar-styled::-webkit-scrollbar-thumb {
-  background: oklch(0.7 0.03 60);
-}
-
-.cream .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.6 0.04 60);
-}
-
-/* Retro theme scrollbar-styled */
-.retro .scrollbar-styled::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 0;
-}
-
-.retro .scrollbar-styled::-webkit-scrollbar-track {
-  background: var(--background);
-  border-radius: 0;
-}
-
-/* Sunset theme scrollbar-styled */
-.sunset .scrollbar-styled::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0.14 45);
-}
-
-.sunset .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.58 0.16 45);
-}
-
-/* Gray theme scrollbar-styled */
-.gray .scrollbar-styled::-webkit-scrollbar-thumb {
-  background: oklch(0.4 0.01 250);
-}
-
-.gray .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0.02 250);
 }
 
 /* Glass morphism utilities */
@@ -1778,13 +519,7 @@
     -webkit-backdrop-filter: blur(12px);
   }
   
-  .light .bg-glass {
-    background: oklch(1 0 0 / 0.8);
-  }
   
-  .light .bg-glass-80 {
-    background: oklch(1 0 0 / 0.95);
-  }
 
   /* Hover state utilities */
   .hover-glass {
@@ -1808,13 +543,7 @@
     background: var(--background);
   }
 
-  .light .content-bg {
-    background: linear-gradient(135deg, oklch(0.99 0 0), oklch(0.98 0 0), oklch(0.99 0 0));
-  }
 
-  .dark .content-bg {
-    background: linear-gradient(135deg, oklch(0.04 0 0), oklch(0.08 0 0), oklch(0.04 0 0));
-  }
 
   /* Action button utilities */
   .bg-action-view {
@@ -1902,28 +631,8 @@
 }
 
 /* Retro Overrides for Utilities */
-.retro .glass,
-.retro .glass-subtle,
-.retro .glass-strong,
-.retro .bg-glass,
-.retro .bg-glass-80 {
-    backdrop-filter: none;
-    background: var(--background);
-    border: 1px solid var(--border);
-}
 
-.retro .gradient-brand {
-    background: var(--primary);
-    color: var(--primary-foreground);
-}
 
-.retro .content-bg {
-    background: 
-        linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-        var(--background);
-    background-size: 20px 20px;
-}
 
 .retro * {
     border-radius: 0 !important;
@@ -1936,41 +645,14 @@
 }
 
 /* Light mode - deeper purple to blue gradient for better visibility */
-.light .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #7c3aed 0%, #2563eb 50%, #7c3aed 100%);
-}
 
-.light .animated-outline-inner {
-    background: oklch(100% 0 0) !important;
-    color: #7c3aed !important;
-    border: 1px solid oklch(92% 0 0);
-}
 
-.light [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(97% 0.02 270) !important;
-    color: #5b21b6 !important;
-}
 
 /* Dark mode - purple to blue gradient */
-.dark .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #a855f7 0%, #3b82f6 50%, #a855f7 100%);
-}
 
-.dark .animated-outline-inner {
-    background: oklch(0.15 0 0) !important;
-    color: #c084fc !important;
-}
 
-.dark [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.2 0.02 270) !important;
-    color: #e9d5ff !important;
-}
 
 /* Retro mode - unique scanline + neon effect */
-.retro .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #00ff41 0%, #00ffff 25%, #ff00ff 50%, #00ffff 75%, #00ff41 100%);
-    animation: spin 2s linear infinite, retro-glow 1s ease-in-out infinite alternate;
-}
 
 @keyframes retro-glow {
     from {
@@ -1981,155 +663,42 @@
     }
 }
 
-.retro [data-slot="button"][class*="animated-outline"] {
-    border-radius: 0 !important;
-}
 
-.retro .animated-outline-inner {
-    background: oklch(0 0 0) !important;
-    color: #00ff41 !important;
-    border-radius: 0 !important;
-    text-shadow: 0 0 5px #00ff41;
-    font-family: var(--font-geist-mono), monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
 
-.retro [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.1 0.1 145) !important;
-    color: #00ff41 !important;
-    box-shadow: 
-        0 0 10px #00ff41,
-        0 0 20px #00ff41,
-        inset 0 0 10px rgba(0, 255, 65, 0.1);
-    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41;
-}
 
 /* Dracula animated-outline - purple/pink */
-.dracula .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #bd93f9 0%, #ff79c6 50%, #bd93f9 100%);
-}
 
-.dracula .animated-outline-inner {
-    background: oklch(0.18 0.02 280) !important;
-    color: #bd93f9 !important;
-}
 
-.dracula [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.24 0.03 280) !important;
-    color: #ff79c6 !important;
-}
 
 /* Nord animated-outline - frost blue */
-.nord .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #88c0d0 0%, #81a1c1 50%, #88c0d0 100%);
-}
 
-.nord .animated-outline-inner {
-    background: oklch(0.23 0.02 240) !important;
-    color: #88c0d0 !important;
-}
 
-.nord [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.28 0.03 240) !important;
-    color: #8fbcbb !important;
-}
 
 /* Monokai animated-outline - pink/yellow */
-.monokai .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #f92672 0%, #e6db74 50%, #f92672 100%);
-}
 
-.monokai .animated-outline-inner {
-    background: oklch(0.17 0.01 90) !important;
-    color: #f92672 !important;
-}
 
-.monokai [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.22 0.02 90) !important;
-    color: #e6db74 !important;
-}
 
 /* Tokyo Night animated-outline - blue/magenta */
-.tokyonight .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #7aa2f7 0%, #bb9af7 50%, #7aa2f7 100%);
-}
 
-.tokyonight .animated-outline-inner {
-    background: oklch(0.16 0.03 260) !important;
-    color: #7aa2f7 !important;
-}
 
-.tokyonight [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.22 0.04 260) !important;
-    color: #bb9af7 !important;
-}
 
 /* Solarized animated-outline - blue/cyan */
-.solarized .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #268bd2 0%, #2aa198 50%, #268bd2 100%);
-}
 
-.solarized .animated-outline-inner {
-    background: oklch(0.2 0.02 230) !important;
-    color: #268bd2 !important;
-}
 
-.solarized [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.25 0.03 230) !important;
-    color: #2aa198 !important;
-}
 
 /* Gruvbox animated-outline - yellow/orange */
-.gruvbox .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #fabd2f 0%, #fe8019 50%, #fabd2f 100%);
-}
 
-.gruvbox .animated-outline-inner {
-    background: oklch(0.18 0.02 60) !important;
-    color: #fabd2f !important;
-}
 
-.gruvbox [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.24 0.03 60) !important;
-    color: #fe8019 !important;
-}
 
 /* Catppuccin animated-outline - mauve/pink */
-.catppuccin .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #cba6f7 0%, #f5c2e7 50%, #cba6f7 100%);
-}
 
-.catppuccin .animated-outline-inner {
-    background: oklch(0.18 0.02 260) !important;
-    color: #cba6f7 !important;
-}
 
-.catppuccin [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.24 0.03 260) !important;
-    color: #f5c2e7 !important;
-}
 
 /* One Dark animated-outline - blue/magenta */
-.onedark .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #61afef 0%, #c678dd 50%, #61afef 100%);
-}
 
-.onedark .animated-outline-inner {
-    background: oklch(0.19 0.01 250) !important;
-    color: #61afef !important;
-}
 
-.onedark [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.25 0.02 250) !important;
-    color: #c678dd !important;
-}
 
 /* Synthwave animated-outline - hot pink/cyan with glow */
-.synthwave .animated-outline-gradient {
-    background: conic-gradient(from 90deg at 50% 50%, #f97e72 0%, #72f1b8 25%, #ff7edb 50%, #72f1b8 75%, #f97e72 100%);
-    animation: spin 2s linear infinite, synthwave-glow 1.5s ease-in-out infinite alternate;
-}
 
 @keyframes synthwave-glow {
     from {
@@ -2140,197 +709,54 @@
     }
 }
 
-.synthwave .animated-outline-inner {
-    background: oklch(0.15 0.05 290) !important;
-    color: #f97e72 !important;
-    text-shadow: 0 0 8px #f97e72;
-}
 
-.synthwave [data-slot="button"][class*="animated-outline"]:hover .animated-outline-inner {
-    background: oklch(0.22 0.07 290) !important;
-    color: #72f1b8 !important;
-    text-shadow: 0 0 12px #72f1b8;
-    box-shadow: 0 0 15px rgba(114, 241, 184, 0.3);
-}
 
 /* Slider Theme Styles */
-.light .slider-track {
-    background: oklch(90% 0 0);
-}
 
-.light .slider-range {
-    background: linear-gradient(to right, #7c3aed, #2563eb);
-}
 
-.light .slider-thumb {
-    background: oklch(100% 0 0);
-    border-color: oklch(80% 0 0);
-}
 
-.dark .slider-track {
-    background: oklch(0.2 0 0);
-}
 
-.dark .slider-range {
-    background: linear-gradient(to right, #a855f7, #3b82f6);
-}
 
-.dark .slider-thumb {
-    background: oklch(0.25 0 0);
-    border-color: oklch(0.4 0 0);
-}
 
-.retro .slider-track {
-    background: oklch(0.15 0.05 145);
-    border: 1px solid #00ff41;
-    border-radius: 0 !important;
-}
 
-.retro .slider-range {
-    background: #00ff41;
-    box-shadow: 0 0 10px #00ff41, 0 0 5px #00ff41;
-    border-radius: 0 !important;
-}
 
-.retro .slider-thumb {
-    background: oklch(0 0 0);
-    border: 2px solid #00ff41;
-    border-radius: 0 !important;
-    box-shadow: 0 0 8px #00ff41;
-}
 
-.retro .slider-thumb:hover {
-    background: oklch(0.1 0.1 145);
-    box-shadow: 0 0 12px #00ff41, 0 0 20px #00ff41;
-}
 
 /* Dracula slider */
-.dracula .slider-track {
-    background: oklch(0.28 0.03 280);
-}
 
-.dracula .slider-range {
-    background: linear-gradient(to right, #bd93f9, #ff79c6);
-}
 
-.dracula .slider-thumb {
-    background: oklch(0.22 0.02 280);
-    border-color: #bd93f9;
-}
 
 /* Nord slider */
-.nord .slider-track {
-    background: oklch(0.31 0.02 240);
-}
 
-.nord .slider-range {
-    background: linear-gradient(to right, #88c0d0, #81a1c1);
-}
 
-.nord .slider-thumb {
-    background: oklch(0.27 0.02 240);
-    border-color: #88c0d0;
-}
 
 /* Monokai slider */
-.monokai .slider-track {
-    background: oklch(0.25 0.02 90);
-}
 
-.monokai .slider-range {
-    background: linear-gradient(to right, #f92672, #fd971f);
-}
 
-.monokai .slider-thumb {
-    background: oklch(0.22 0.01 90);
-    border-color: #f92672;
-}
 
 /* Tokyo Night slider */
-.tokyonight .slider-track {
-    background: oklch(0.24 0.03 260);
-}
 
-.tokyonight .slider-range {
-    background: linear-gradient(to right, #7aa2f7, #bb9af7);
-}
 
-.tokyonight .slider-thumb {
-    background: oklch(0.2 0.03 260);
-    border-color: #7aa2f7;
-}
 
 /* Solarized slider */
-.solarized .slider-track {
-    background: oklch(0.25 0.02 230);
-}
 
-.solarized .slider-range {
-    background: linear-gradient(to right, #268bd2, #2aa198);
-}
 
-.solarized .slider-thumb {
-    background: oklch(0.23 0.02 230);
-    border-color: #268bd2;
-}
 
 /* Gruvbox slider */
-.gruvbox .slider-track {
-    background: oklch(0.26 0.02 60);
-}
 
-.gruvbox .slider-range {
-    background: linear-gradient(to right, #fabd2f, #fe8019);
-}
 
-.gruvbox .slider-thumb {
-    background: oklch(0.22 0.02 60);
-    border-color: #fabd2f;
-}
 
 /* Catppuccin slider */
-.catppuccin .slider-track {
-    background: oklch(0.26 0.02 260);
-}
 
-.catppuccin .slider-range {
-    background: linear-gradient(to right, #cba6f7, #89b4fa);
-}
 
-.catppuccin .slider-thumb {
-    background: oklch(0.22 0.02 260);
-    border-color: #cba6f7;
-}
 
 /* One Dark slider */
-.onedark .slider-track {
-    background: oklch(0.25 0.01 250);
-}
 
-.onedark .slider-range {
-    background: linear-gradient(to right, #61afef, #c678dd);
-}
 
-.onedark .slider-thumb {
-    background: oklch(0.23 0.01 250);
-    border-color: #61afef;
-}
 
 /* Synthwave slider */
-.synthwave .slider-track {
-    background: oklch(0.25 0.07 290);
-}
 
-.synthwave .slider-range {
-    background: linear-gradient(to right, #f97e72, #ff7edb);
-    box-shadow: 0 0 10px #f97e72, 0 0 5px #ff7edb;
-}
 
-.synthwave .slider-thumb {
-    background: oklch(0.2 0.06 290);
-    border-color: #f97e72;
-    box-shadow: 0 0 8px #f97e72;
-}
 
 /* Line clamp utilities for text overflow prevention */
 .line-clamp-2 {
@@ -2380,511 +806,136 @@
    ======================================== */
 
 /* Light theme - professional and readable */
-.light .xml-highlight {
-  color: oklch(0.3 0 0); /* Default text */
-}
 
-.light .xml-tag-bracket {
-  color: oklch(0.45 0.15 250); /* Blue-gray for < > */
-}
 
-.light .xml-tag-name {
-  color: oklch(0.45 0.22 25); /* Red/maroon for tag names */
-}
 
-.light .xml-attribute-name {
-  color: oklch(0.45 0.18 280); /* Purple for attributes */
-}
 
-.light .xml-attribute-equals {
-  color: oklch(0.4 0 0); /* Dark gray for = */
-}
 
-.light .xml-attribute-value {
-  color: oklch(0.45 0.18 145); /* Green for string values */
-}
 
-.light .xml-comment {
-  color: oklch(0.55 0.05 100); /* Muted olive for comments */
-  font-style: italic;
-}
 
-.light .xml-cdata {
-  color: oklch(0.5 0.1 200); /* Teal for CDATA */
-}
 
-.light .xml-doctype {
-  color: oklch(0.5 0.15 280); /* Purple for DOCTYPE */
-}
 
-.light .xml-text {
-  color: oklch(0.25 0 0); /* Near-black for text content */
-}
 
 /* Dark theme - high contrast */
-.dark .xml-highlight {
-  color: oklch(0.9 0 0); /* Default light text */
-}
 
-.dark .xml-tag-bracket {
-  color: oklch(0.7 0.12 220); /* Soft blue for < > */
-}
 
-.dark .xml-tag-name {
-  color: oklch(0.75 0.2 25); /* Coral/salmon for tag names */
-}
 
-.dark .xml-attribute-name {
-  color: oklch(0.8 0.15 280); /* Light purple for attributes */
-}
 
-.dark .xml-attribute-equals {
-  color: oklch(0.6 0 0); /* Gray for = */
-}
 
-.dark .xml-attribute-value {
-  color: oklch(0.8 0.18 145); /* Bright green for strings */
-}
 
-.dark .xml-comment {
-  color: oklch(0.55 0.05 100); /* Muted for comments */
-  font-style: italic;
-}
 
-.dark .xml-cdata {
-  color: oklch(0.7 0.12 200); /* Teal for CDATA */
-}
 
-.dark .xml-doctype {
-  color: oklch(0.7 0.15 280); /* Purple for DOCTYPE */
-}
 
-.dark .xml-text {
-  color: oklch(0.85 0 0); /* Off-white for text */
-}
 
 /* Retro theme - neon green on black */
-.retro .xml-highlight {
-  color: oklch(0.85 0.25 145); /* Neon green default */
-}
 
-.retro .xml-tag-bracket {
-  color: oklch(0.8 0.25 200); /* Cyan for brackets */
-}
 
-.retro .xml-tag-name {
-  color: oklch(0.85 0.25 145); /* Bright green for tags */
-  text-shadow: 0 0 5px oklch(0.85 0.25 145 / 0.5);
-}
 
-.retro .xml-attribute-name {
-  color: oklch(0.8 0.25 300); /* Purple neon for attrs */
-}
 
-.retro .xml-attribute-equals {
-  color: oklch(0.6 0.15 145); /* Dim green for = */
-}
 
-.retro .xml-attribute-value {
-  color: oklch(0.8 0.25 60); /* Yellow neon for strings */
-}
 
-.retro .xml-comment {
-  color: oklch(0.5 0.15 145); /* Dim green for comments */
-  font-style: italic;
-}
 
-.retro .xml-cdata {
-  color: oklch(0.75 0.2 200); /* Cyan for CDATA */
-}
 
-.retro .xml-doctype {
-  color: oklch(0.75 0.2 300); /* Purple for DOCTYPE */
-}
 
-.retro .xml-text {
-  color: oklch(0.7 0.2 145); /* Green text */
-}
 
 /* Dracula theme */
-.dracula .xml-highlight {
-  color: oklch(0.95 0.01 280); /* #f8f8f2 */
-}
 
-.dracula .xml-tag-bracket {
-  color: oklch(0.7 0.25 350); /* Pink #ff79c6 */
-}
 
-.dracula .xml-tag-name {
-  color: oklch(0.7 0.25 350); /* Pink for tags */
-}
 
-.dracula .xml-attribute-name {
-  color: oklch(0.8 0.2 130); /* Green #50fa7b */
-}
 
-.dracula .xml-attribute-equals {
-  color: oklch(0.95 0.01 280); /* White */
-}
 
-.dracula .xml-attribute-value {
-  color: oklch(0.85 0.2 90); /* Yellow #f1fa8c */
-}
 
-.dracula .xml-comment {
-  color: oklch(0.55 0.08 280); /* #6272a4 */
-  font-style: italic;
-}
 
-.dracula .xml-cdata {
-  color: oklch(0.75 0.2 180); /* Cyan */
-}
 
-.dracula .xml-doctype {
-  color: oklch(0.7 0.2 320); /* Purple #bd93f9 */
-}
 
-.dracula .xml-text {
-  color: oklch(0.95 0.01 280); /* White */
-}
 
 /* Nord theme */
-.nord .xml-highlight {
-  color: oklch(0.9 0.01 230); /* #eceff4 */
-}
 
-.nord .xml-tag-bracket {
-  color: oklch(0.65 0.14 220); /* #81a1c1 */
-}
 
-.nord .xml-tag-name {
-  color: oklch(0.65 0.14 220); /* Frost blue for tags */
-}
 
-.nord .xml-attribute-name {
-  color: oklch(0.7 0.12 220); /* #88c0d0 */
-}
 
-.nord .xml-attribute-equals {
-  color: oklch(0.75 0.02 230); /* Dim white */
-}
 
-.nord .xml-attribute-value {
-  color: oklch(0.7 0.15 140); /* #a3be8c green */
-}
 
-.nord .xml-comment {
-  color: oklch(0.5 0.04 230); /* Dim text */
-  font-style: italic;
-}
 
-.nord .xml-cdata {
-  color: oklch(0.7 0.12 220); /* Frost blue */
-}
 
-.nord .xml-doctype {
-  color: oklch(0.7 0.2 320); /* #b48ead purple */
-}
 
-.nord .xml-text {
-  color: oklch(0.9 0.01 230); /* Snow white */
-}
 
 /* Monokai theme */
-.monokai .xml-highlight {
-  color: oklch(0.95 0.02 100); /* #f8f8f2 */
-}
 
-.monokai .xml-tag-bracket {
-  color: oklch(0.95 0.02 100); /* White */
-}
 
-.monokai .xml-tag-name {
-  color: oklch(0.8 0.2 350); /* #f92672 pink */
-}
 
-.monokai .xml-attribute-name {
-  color: oklch(0.8 0.2 140); /* #a6e22e green */
-}
 
-.monokai .xml-attribute-equals {
-  color: oklch(0.95 0.02 100); /* White */
-}
 
-.monokai .xml-attribute-value {
-  color: oklch(0.85 0.2 90); /* #e6db74 yellow */
-}
 
-.monokai .xml-comment {
-  color: oklch(0.55 0.04 100); /* #75715e */
-  font-style: italic;
-}
 
-.monokai .xml-cdata {
-  color: oklch(0.75 0.2 200); /* Cyan #66d9ef */
-}
 
-.monokai .xml-doctype {
-  color: oklch(0.75 0.2 200); /* Cyan */
-}
 
-.monokai .xml-text {
-  color: oklch(0.95 0.02 100); /* White */
-}
 
 /* Tokyo Night theme */
-.tokyonight .xml-highlight {
-  color: oklch(0.85 0.02 250); /* #a9b1d6 */
-}
 
-.tokyonight .xml-tag-bracket {
-  color: oklch(0.65 0.2 15); /* #f7768e red */
-}
 
-.tokyonight .xml-tag-name {
-  color: oklch(0.65 0.2 15); /* Red for tags */
-}
 
-.tokyonight .xml-attribute-name {
-  color: oklch(0.7 0.2 320); /* #bb9af7 purple */
-}
 
-.tokyonight .xml-attribute-equals {
-  color: oklch(0.75 0.02 250); /* Dim text */
-}
 
-.tokyonight .xml-attribute-value {
-  color: oklch(0.75 0.18 140); /* #9ece6a green */
-}
 
-.tokyonight .xml-comment {
-  color: oklch(0.5 0.04 250); /* #565f89 */
-  font-style: italic;
-}
 
-.tokyonight .xml-cdata {
-  color: oklch(0.75 0.18 200); /* #7dcfff cyan */
-}
 
-.tokyonight .xml-doctype {
-  color: oklch(0.7 0.18 280); /* #7aa2f7 blue */
-}
 
-.tokyonight .xml-text {
-  color: oklch(0.85 0.02 250); /* Text color */
-}
 
 /* Solarized theme */
-.solarized .xml-highlight {
-  color: oklch(0.75 0.02 90); /* #839496 */
-}
 
-.solarized .xml-tag-bracket {
-  color: oklch(0.65 0.15 220); /* #268bd2 blue */
-}
 
-.solarized .xml-tag-name {
-  color: oklch(0.65 0.15 220); /* Blue for tags */
-}
 
-.solarized .xml-attribute-name {
-  color: oklch(0.6 0.18 180); /* #2aa198 cyan */
-}
 
-.solarized .xml-attribute-equals {
-  color: oklch(0.75 0.02 90); /* Base text */
-}
 
-.solarized .xml-attribute-value {
-  color: oklch(0.65 0.2 140); /* #859900 green */
-}
 
-.solarized .xml-comment {
-  color: oklch(0.5 0.04 200); /* #586e75 */
-  font-style: italic;
-}
 
-.solarized .xml-cdata {
-  color: oklch(0.6 0.18 180); /* Cyan */
-}
 
-.solarized .xml-doctype {
-  color: oklch(0.6 0.2 290); /* #6c71c4 violet */
-}
 
-.solarized .xml-text {
-  color: oklch(0.75 0.02 90); /* Base text */
-}
 
 /* Gruvbox theme */
-.gruvbox .xml-highlight {
-  color: oklch(0.85 0.05 85); /* #ebdbb2 */
-}
 
-.gruvbox .xml-tag-bracket {
-  color: oklch(0.55 0.22 25); /* #fb4934 red */
-}
 
-.gruvbox .xml-tag-name {
-  color: oklch(0.55 0.22 25); /* Red for tags */
-}
 
-.gruvbox .xml-attribute-name {
-  color: oklch(0.7 0.15 200); /* #8ec07c aqua */
-}
 
-.gruvbox .xml-attribute-equals {
-  color: oklch(0.7 0.04 85); /* Dim text */
-}
 
-.gruvbox .xml-attribute-value {
-  color: oklch(0.65 0.2 140); /* #b8bb26 green */
-}
 
-.gruvbox .xml-comment {
-  color: oklch(0.55 0.04 85); /* #928374 gray */
-  font-style: italic;
-}
 
-.gruvbox .xml-cdata {
-  color: oklch(0.7 0.15 200); /* Aqua */
-}
 
-.gruvbox .xml-doctype {
-  color: oklch(0.6 0.2 320); /* #d3869b purple */
-}
 
-.gruvbox .xml-text {
-  color: oklch(0.85 0.05 85); /* Foreground */
-}
 
 /* Catppuccin theme */
-.catppuccin .xml-highlight {
-  color: oklch(0.9 0.01 280); /* #cdd6f4 */
-}
 
-.catppuccin .xml-tag-bracket {
-  color: oklch(0.65 0.2 15); /* #f38ba8 red */
-}
 
-.catppuccin .xml-tag-name {
-  color: oklch(0.65 0.2 15); /* Red for tags */
-}
 
-.catppuccin .xml-attribute-name {
-  color: oklch(0.75 0.15 280); /* #cba6f7 mauve */
-}
 
-.catppuccin .xml-attribute-equals {
-  color: oklch(0.75 0.02 280); /* Subtext */
-}
 
-.catppuccin .xml-attribute-value {
-  color: oklch(0.8 0.15 160); /* #a6e3a1 green */
-}
 
-.catppuccin .xml-comment {
-  color: oklch(0.5 0.04 280); /* Overlay */
-  font-style: italic;
-}
 
-.catppuccin .xml-cdata {
-  color: oklch(0.75 0.15 220); /* #89b4fa blue */
-}
 
-.catppuccin .xml-doctype {
-  color: oklch(0.8 0.15 350); /* #f5c2e7 pink */
-}
 
-.catppuccin .xml-text {
-  color: oklch(0.9 0.01 280); /* Text */
-}
 
 /* One Dark theme */
-.onedark .xml-highlight {
-  color: oklch(0.85 0.02 240); /* #abb2bf */
-}
 
-.onedark .xml-tag-bracket {
-  color: oklch(0.6 0.2 20); /* #e06c75 red */
-}
 
-.onedark .xml-tag-name {
-  color: oklch(0.6 0.2 20); /* Red for tags */
-}
 
-.onedark .xml-attribute-name {
-  color: oklch(0.8 0.15 80); /* #e5c07b yellow */
-}
 
-.onedark .xml-attribute-equals {
-  color: oklch(0.7 0.02 240); /* Dim text */
-}
 
-.onedark .xml-attribute-value {
-  color: oklch(0.75 0.18 150); /* #98c379 green */
-}
 
-.onedark .xml-comment {
-  color: oklch(0.5 0.03 240); /* #5c6370 */
-  font-style: italic;
-}
 
-.onedark .xml-cdata {
-  color: oklch(0.7 0.15 180); /* #56b6c2 cyan */
-}
 
-.onedark .xml-doctype {
-  color: oklch(0.75 0.15 320); /* #c678dd magenta */
-}
 
-.onedark .xml-text {
-  color: oklch(0.85 0.02 240); /* Text */
-}
 
 /* Synthwave theme */
-.synthwave .xml-highlight {
-  color: oklch(0.95 0.02 320); /* Warm white */
-}
 
-.synthwave .xml-tag-bracket {
-  color: oklch(0.7 0.28 350); /* #f97e72 hot pink */
-}
 
-.synthwave .xml-tag-name {
-  color: oklch(0.7 0.28 350); /* Hot pink */
-  text-shadow: 0 0 8px oklch(0.7 0.28 350 / 0.5);
-}
 
-.synthwave .xml-attribute-name {
-  color: oklch(0.7 0.25 280); /* #ff7edb purple */
-}
 
-.synthwave .xml-attribute-equals {
-  color: oklch(0.8 0.02 320); /* White-ish */
-}
 
-.synthwave .xml-attribute-value {
-  color: oklch(0.85 0.2 60); /* #fede5d yellow */
-  text-shadow: 0 0 5px oklch(0.85 0.2 60 / 0.3);
-}
 
-.synthwave .xml-comment {
-  color: oklch(0.55 0.08 290); /* Dim purple */
-  font-style: italic;
-}
 
-.synthwave .xml-cdata {
-  color: oklch(0.8 0.25 200); /* #72f1b8 cyan */
-}
 
-.synthwave .xml-doctype {
-  color: oklch(0.8 0.25 200); /* Cyan */
-}
 
-.synthwave .xml-text {
-  color: oklch(0.95 0.02 320); /* White */
-}
 
 /* XML Editor container styles */
 .xml-editor {

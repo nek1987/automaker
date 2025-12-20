@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useAppStore, defaultBackgroundSettings } from "@/store/app-store";
 import { getHttpApiClient } from "@/lib/http-api-client";
+import { useBoardBackgroundSettings } from "@/hooks/use-board-background-settings";
 import { toast } from "sonner";
 
 const ACCEPTED_IMAGE_TYPES = [
@@ -35,9 +36,8 @@ export function BoardBackgroundModal({
   open,
   onOpenChange,
 }: BoardBackgroundModalProps) {
+  const { currentProject, boardBackgroundByProject } = useAppStore();
   const {
-    currentProject,
-    boardBackgroundByProject,
     setBoardBackground,
     setCardOpacity,
     setColumnOpacity,
@@ -47,7 +47,7 @@ export function BoardBackgroundModal({
     setCardBorderOpacity,
     setHideScrollbar,
     clearBoardBackground,
-  } = useAppStore();
+  } = useBoardBackgroundSettings();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -139,8 +139,8 @@ export function BoardBackgroundModal({
         );
 
         if (result.success && result.path) {
-          // Update store with the relative path (live update)
-          setBoardBackground(currentProject.path, result.path);
+          // Update store and persist to server
+          await setBoardBackground(currentProject.path, result.path);
           toast.success("Background image saved");
         } else {
           toast.error(result.error || "Failed to save background image");
@@ -214,7 +214,7 @@ export function BoardBackgroundModal({
       );
 
       if (result.success) {
-        clearBoardBackground(currentProject.path);
+        await clearBoardBackground(currentProject.path);
         setPreviewImage(null);
         toast.success("Background image cleared");
       } else {
@@ -228,59 +228,59 @@ export function BoardBackgroundModal({
     }
   }, [currentProject, clearBoardBackground]);
 
-  // Live update opacity when sliders change
+  // Live update opacity when sliders change (with persistence)
   const handleCardOpacityChange = useCallback(
-    (value: number[]) => {
+    async (value: number[]) => {
       if (!currentProject) return;
-      setCardOpacity(currentProject.path, value[0]);
+      await setCardOpacity(currentProject.path, value[0]);
     },
     [currentProject, setCardOpacity]
   );
 
   const handleColumnOpacityChange = useCallback(
-    (value: number[]) => {
+    async (value: number[]) => {
       if (!currentProject) return;
-      setColumnOpacity(currentProject.path, value[0]);
+      await setColumnOpacity(currentProject.path, value[0]);
     },
     [currentProject, setColumnOpacity]
   );
 
   const handleColumnBorderToggle = useCallback(
-    (checked: boolean) => {
+    async (checked: boolean) => {
       if (!currentProject) return;
-      setColumnBorderEnabled(currentProject.path, checked);
+      await setColumnBorderEnabled(currentProject.path, checked);
     },
     [currentProject, setColumnBorderEnabled]
   );
 
   const handleCardGlassmorphismToggle = useCallback(
-    (checked: boolean) => {
+    async (checked: boolean) => {
       if (!currentProject) return;
-      setCardGlassmorphism(currentProject.path, checked);
+      await setCardGlassmorphism(currentProject.path, checked);
     },
     [currentProject, setCardGlassmorphism]
   );
 
   const handleCardBorderToggle = useCallback(
-    (checked: boolean) => {
+    async (checked: boolean) => {
       if (!currentProject) return;
-      setCardBorderEnabled(currentProject.path, checked);
+      await setCardBorderEnabled(currentProject.path, checked);
     },
     [currentProject, setCardBorderEnabled]
   );
 
   const handleCardBorderOpacityChange = useCallback(
-    (value: number[]) => {
+    async (value: number[]) => {
       if (!currentProject) return;
-      setCardBorderOpacity(currentProject.path, value[0]);
+      await setCardBorderOpacity(currentProject.path, value[0]);
     },
     [currentProject, setCardBorderOpacity]
   );
 
   const handleHideScrollbarToggle = useCallback(
-    (checked: boolean) => {
+    async (checked: boolean) => {
       if (!currentProject) return;
-      setHideScrollbar(currentProject.path, checked);
+      await setHideScrollbar(currentProject.path, checked);
     },
     [currentProject, setHideScrollbar]
   );
