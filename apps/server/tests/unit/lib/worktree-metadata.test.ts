@@ -66,6 +66,32 @@ describe("worktree-metadata.ts", () => {
       const result = await readWorktreeMetadata(testProjectPath, branch);
       expect(result).toEqual(metadata);
     });
+
+    it("should handle empty branch name", async () => {
+      const branch = "";
+      const metadata: WorktreeMetadata = {
+        branch: "branch",
+        createdAt: new Date().toISOString(),
+      };
+
+      // Empty branch name should be sanitized to "_branch"
+      await writeWorktreeMetadata(testProjectPath, branch, metadata);
+      const result = await readWorktreeMetadata(testProjectPath, branch);
+      expect(result).toEqual(metadata);
+    });
+
+    it("should handle branch name that becomes empty after sanitization", async () => {
+      // Test branch that would become empty after removing invalid chars
+      const branch = "///";
+      const metadata: WorktreeMetadata = {
+        branch: "branch",
+        createdAt: new Date().toISOString(),
+      };
+
+      await writeWorktreeMetadata(testProjectPath, branch, metadata);
+      const result = await readWorktreeMetadata(testProjectPath, branch);
+      expect(result).toEqual(metadata);
+    });
   });
 
   describe("readWorktreeMetadata", () => {

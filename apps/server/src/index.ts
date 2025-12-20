@@ -37,10 +37,12 @@ import {
   isTerminalEnabled,
   isTerminalPasswordRequired,
 } from "./routes/terminal/index.js";
+import { createSettingsRoutes } from "./routes/settings/index.js";
 import { AgentService } from "./services/agent-service.js";
 import { FeatureLoader } from "./services/feature-loader.js";
 import { AutoModeService } from "./services/auto-mode-service.js";
 import { getTerminalService } from "./services/terminal-service.js";
+import { SettingsService } from "./services/settings-service.js";
 import { createSpecRegenerationRoutes } from "./routes/app-spec/index.js";
 
 // Load environment variables
@@ -108,6 +110,7 @@ const events: EventEmitter = createEventEmitter();
 const agentService = new AgentService(DATA_DIR, events);
 const featureLoader = new FeatureLoader();
 const autoModeService = new AutoModeService(events);
+const settingsService = new SettingsService(DATA_DIR);
 
 // Initialize services
 (async () => {
@@ -137,6 +140,7 @@ app.use("/api/running-agents", createRunningAgentsRoutes(autoModeService));
 app.use("/api/workspace", createWorkspaceRoutes());
 app.use("/api/templates", createTemplatesRoutes());
 app.use("/api/terminal", createTerminalRoutes());
+app.use("/api/settings", createSettingsRoutes(settingsService));
 
 // Create HTTP server
 const server = createServer(app);

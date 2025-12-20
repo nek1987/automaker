@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   isAbortError,
   isAuthenticationError,
+  isCancellationError,
   classifyError,
   getUserFriendlyErrorMessage,
   type ErrorType,
@@ -29,6 +30,34 @@ describe("error-handler.ts", () => {
       expect(isAbortError("not an error")).toBe(false);
       expect(isAbortError(null)).toBe(false);
       expect(isAbortError(undefined)).toBe(false);
+    });
+  });
+
+  describe("isCancellationError", () => {
+    it("should detect 'cancelled' message", () => {
+      expect(isCancellationError("Operation was cancelled")).toBe(true);
+    });
+
+    it("should detect 'canceled' message", () => {
+      expect(isCancellationError("Request was canceled")).toBe(true);
+    });
+
+    it("should detect 'stopped' message", () => {
+      expect(isCancellationError("Process was stopped")).toBe(true);
+    });
+
+    it("should detect 'aborted' message", () => {
+      expect(isCancellationError("Task was aborted")).toBe(true);
+    });
+
+    it("should be case insensitive", () => {
+      expect(isCancellationError("CANCELLED")).toBe(true);
+      expect(isCancellationError("Canceled")).toBe(true);
+    });
+
+    it("should return false for non-cancellation errors", () => {
+      expect(isCancellationError("File not found")).toBe(false);
+      expect(isCancellationError("Network error")).toBe(false);
     });
   });
 
@@ -89,6 +118,42 @@ describe("error-handler.ts", () => {
       expect(result.type).toBe("authentication");
       expect(result.isAuth).toBe(true);
       expect(result.isAbort).toBe(true); // Still detected as abort too
+    });
+
+    it("should classify cancellation errors", () => {
+      const error = new Error("Operation was cancelled");
+      const result = classifyError(error);
+
+      expect(result.type).toBe("cancellation");
+      expect(result.isCancellation).toBe(true);
+      expect(result.isAbort).toBe(false);
+      expect(result.isAuth).toBe(false);
+    });
+
+    it("should prioritize abort over cancellation if both match", () => {
+      const error = new Error("Operation aborted");
+      error.name = "AbortError";
+      const result = classifyError(error);
+
+      expect(result.type).toBe("abort");
+      expect(result.isAbort).toBe(true);
+      expect(result.isCancellation).toBe(true); // Still detected as cancellation too
+    });
+
+    it("should classify cancellation errors with 'canceled' spelling", () => {
+      const error = new Error("Request was canceled");
+      const result = classifyError(error);
+
+      expect(result.type).toBe("cancellation");
+      expect(result.isCancellation).toBe(true);
+    });
+
+    it("should classify cancellation errors with 'stopped' message", () => {
+      const error = new Error("Process was stopped");
+      const result = classifyError(error);
+
+      expect(result.type).toBe("cancellation");
+      expect(result.isCancellation).toBe(true);
     });
 
     it("should classify generic Error as execution error", () => {

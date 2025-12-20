@@ -234,6 +234,30 @@ describe("claude-provider.ts", () => {
         }),
       });
     });
+
+    it("should handle errors during execution and rethrow", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const testError = new Error("SDK execution failed");
+
+      vi.mocked(sdk.query).mockReturnValue(
+        (async function* () {
+          throw testError;
+        })()
+      );
+
+      const generator = provider.executeQuery({
+        prompt: "Test",
+        cwd: "/test",
+      });
+
+      await expect(collectAsyncGenerator(generator)).rejects.toThrow("SDK execution failed");
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "[ClaudeProvider] executeQuery() error during execution:",
+        testError
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 
   describe("detectInstallation", () => {

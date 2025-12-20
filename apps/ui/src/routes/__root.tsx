@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { FileBrowserProvider, useFileBrowser, setGlobalFileBrowser } from "@/contexts/file-browser-context";
 import { useAppStore } from "@/store/app-store";
+import { useSetupStore } from "@/store/setup-store";
 import { getElectronAPI } from "@/lib/electron";
 import { Toaster } from "sonner";
 import { ThemeOption, themeOptions } from "@/config/theme-options";
@@ -16,9 +17,13 @@ function RootLayoutContent() {
     previewTheme,
     getEffectiveTheme,
   } = useAppStore();
+  const { setupComplete } = useSetupStore();
   const navigate = useNavigate();
   const [isMounted, setIsMounted] = useState(false);
   const [streamerPanelOpen, setStreamerPanelOpen] = useState(false);
+  const [setupHydrated, setSetupHydrated] = useState(() =>
+    useSetupStore.persist?.hasHydrated?.() ?? false
+  );
   const { openFileBrowser } = useFileBrowser();
 
   // Hidden streamer panel - opens with "\" key
@@ -60,6 +65,35 @@ function RootLayoutContent() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Wait for setup store hydration before enforcing routing rules
+  useEffect(() => {
+    if (useSetupStore.persist?.hasHydrated?.()) {
+      setSetupHydrated(true);
+      return;
+    }
+
+    const unsubscribe = useSetupStore.persist?.onFinishHydration?.(() => {
+      setSetupHydrated(true);
+    });
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  // Redirect first-run users (or anyone who reopened the wizard) to /setup
+  useEffect(() => {
+    if (!setupHydrated) return;
+
+    if (!setupComplete && location.pathname !== "/setup") {
+      navigate({ to: "/setup" });
+    } else if (setupComplete && location.pathname === "/setup") {
+      navigate({ to: "/" });
+    }
+  }, [setupComplete, setupHydrated, location.pathname, navigate]);
 
   useEffect(() => {
     setGlobalFileBrowser(openFileBrowser);

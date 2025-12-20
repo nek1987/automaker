@@ -264,9 +264,66 @@ describe("subprocess-manager.ts", () => {
       );
     });
 
-    // Note: Timeout behavior tests are omitted from unit tests as they involve
-    // complex timing interactions that are difficult to mock reliably.
-    // These scenarios are better covered by integration tests with real subprocesses.
+    // Note: Timeout behavior is difficult to test reliably with mocks due to
+    // timing interactions. The timeout functionality is covered by integration tests.
+    // The error handling path (lines 117-118) is tested below.
+
+    it("should reset timeout when output is received", async () => {
+      vi.useFakeTimers();
+      const mockProcess = createMockProcess({
+        stdoutLines: [
+          '{"type":"first"}',
+          '{"type":"second"}',
+          '{"type":"third"}',
+        ],
+        exitCode: 0,
+        delayMs: 50,
+      });
+
+      vi.mocked(cp.spawn).mockReturnValue(mockProcess);
+
+      const generator = spawnJSONLProcess({
+        ...baseOptions,
+        timeout: 200,
+      });
+
+      const promise = collectAsyncGenerator(generator);
+
+      // Advance time but not enough to trigger timeout
+      await vi.advanceTimersByTimeAsync(150);
+      // Process should not be killed yet
+      expect(mockProcess.kill).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+      await promise;
+    });
+
+    it("should handle errors when reading stdout", async () => {
+      const mockProcess = new EventEmitter() as any;
+      const stdout = new Readable({
+        read() {
+          // Emit an error after a short delay
+          setTimeout(() => {
+            this.emit("error", new Error("Read error"));
+          }, 10);
+        },
+      });
+      const stderr = new Readable({ read() {} });
+
+      mockProcess.stdout = stdout;
+      mockProcess.stderr = stderr;
+      mockProcess.kill = vi.fn();
+
+      vi.mocked(cp.spawn).mockReturnValue(mockProcess);
+
+      const generator = spawnJSONLProcess(baseOptions);
+
+      await expect(collectAsyncGenerator(generator)).rejects.toThrow("Read error");
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        expect.stringContaining("Error reading stdout"),
+        expect.any(Error)
+      );
+    });
 
     it("should spawn process with correct arguments", async () => {
       const mockProcess = createMockProcess({ exitCode: 0 });

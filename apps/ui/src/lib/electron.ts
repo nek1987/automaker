@@ -508,7 +508,15 @@ const mockFileSystem: Record<string, string> = {};
 
 // Check if we're in Electron (for UI indicators only)
 export const isElectron = (): boolean => {
-  return typeof window !== "undefined" && window.isElectron === true;
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if ((window as any).isElectron === true) {
+    return true;
+  }
+
+  return window.electronAPI?.isElectron === true;
 };
 
 // Check if backend server is available

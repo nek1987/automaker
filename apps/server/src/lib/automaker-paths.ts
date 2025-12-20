@@ -89,3 +89,38 @@ export async function ensureAutomakerDir(projectPath: string): Promise<string> {
   await fs.mkdir(automakerDir, { recursive: true });
   return automakerDir;
 }
+
+// ============================================================================
+// Global Settings Paths (stored in DATA_DIR from app.getPath('userData'))
+// ============================================================================
+
+/**
+ * Get the global settings file path
+ * DATA_DIR is typically ~/Library/Application Support/automaker (macOS)
+ * or %APPDATA%\automaker (Windows) or ~/.config/automaker (Linux)
+ */
+export function getGlobalSettingsPath(dataDir: string): string {
+  return path.join(dataDir, "settings.json");
+}
+
+/**
+ * Get the credentials file path (separate from settings for security)
+ */
+export function getCredentialsPath(dataDir: string): string {
+  return path.join(dataDir, "credentials.json");
+}
+
+/**
+ * Get the project settings file path within a project's .automaker directory
+ */
+export function getProjectSettingsPath(projectPath: string): string {
+  return path.join(getAutomakerDir(projectPath), "settings.json");
+}
+
+/**
+ * Ensure the global data directory exists
+ */
+export async function ensureDataDir(dataDir: string): Promise<string> {
+  await fs.mkdir(dataDir, { recursive: true });
+  return dataDir;
+}

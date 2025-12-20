@@ -13,6 +13,10 @@ import {
   getAppSpecPath,
   getBranchTrackingPath,
   ensureAutomakerDir,
+  getGlobalSettingsPath,
+  getCredentialsPath,
+  getProjectSettingsPath,
+  ensureDataDir,
 } from "@/lib/automaker-paths.js";
 
 describe("automaker-paths.ts", () => {
@@ -134,6 +138,93 @@ describe("automaker-paths.ts", () => {
       const result = await ensureAutomakerDir(testDir);
 
       expect(result).toBe(automakerDir);
+    });
+  });
+
+  describe("getGlobalSettingsPath", () => {
+    it("should return path to settings.json in data directory", () => {
+      const dataDir = "/test/data";
+      const result = getGlobalSettingsPath(dataDir);
+      expect(result).toBe(path.join(dataDir, "settings.json"));
+    });
+
+    it("should handle paths with trailing slashes", () => {
+      const dataDir = "/test/data" + path.sep;
+      const result = getGlobalSettingsPath(dataDir);
+      expect(result).toBe(path.join(dataDir, "settings.json"));
+    });
+  });
+
+  describe("getCredentialsPath", () => {
+    it("should return path to credentials.json in data directory", () => {
+      const dataDir = "/test/data";
+      const result = getCredentialsPath(dataDir);
+      expect(result).toBe(path.join(dataDir, "credentials.json"));
+    });
+
+    it("should handle paths with trailing slashes", () => {
+      const dataDir = "/test/data" + path.sep;
+      const result = getCredentialsPath(dataDir);
+      expect(result).toBe(path.join(dataDir, "credentials.json"));
+    });
+  });
+
+  describe("getProjectSettingsPath", () => {
+    it("should return path to settings.json in project .automaker directory", () => {
+      const projectPath = "/test/project";
+      const result = getProjectSettingsPath(projectPath);
+      expect(result).toBe(
+        path.join(projectPath, ".automaker", "settings.json")
+      );
+    });
+
+    it("should handle paths with trailing slashes", () => {
+      const projectPath = "/test/project" + path.sep;
+      const result = getProjectSettingsPath(projectPath);
+      expect(result).toBe(
+        path.join(projectPath, ".automaker", "settings.json")
+      );
+    });
+  });
+
+  describe("ensureDataDir", () => {
+    let testDir: string;
+
+    beforeEach(async () => {
+      testDir = path.join(os.tmpdir(), `data-dir-test-${Date.now()}`);
+    });
+
+    afterEach(async () => {
+      try {
+        await fs.rm(testDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+    });
+
+    it("should create data directory and return path", async () => {
+      const result = await ensureDataDir(testDir);
+
+      expect(result).toBe(testDir);
+      const stats = await fs.stat(testDir);
+      expect(stats.isDirectory()).toBe(true);
+    });
+
+    it("should succeed if directory already exists", async () => {
+      await fs.mkdir(testDir, { recursive: true });
+
+      const result = await ensureDataDir(testDir);
+
+      expect(result).toBe(testDir);
+    });
+
+    it("should create nested directories", async () => {
+      const nestedDir = path.join(testDir, "nested", "deep");
+      const result = await ensureDataDir(nestedDir);
+
+      expect(result).toBe(nestedDir);
+      const stats = await fs.stat(nestedDir);
+      expect(stats.isDirectory()).toBe(true);
     });
   });
 });

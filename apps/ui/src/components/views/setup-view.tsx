@@ -1,8 +1,8 @@
-
 import { useSetupStore } from "@/store/setup-store";
 import { StepIndicator } from "./setup-view/components";
 import {
   WelcomeStep,
+  ThemeStep,
   CompleteStep,
   ClaudeSetupStep,
   GitHubSetupStep,
@@ -11,20 +11,17 @@ import { useNavigate } from "@tanstack/react-router";
 
 // Main Setup View
 export function SetupView() {
-  const {
-    currentStep,
-    setCurrentStep,
-    completeSetup,
-    setSkipClaudeSetup,
-  } = useSetupStore();
+  const { currentStep, setCurrentStep, completeSetup, setSkipClaudeSetup } =
+    useSetupStore();
   const navigate = useNavigate();
 
-  const steps = ["welcome", "claude", "github", "complete"] as const;
+  const steps = ["welcome", "theme", "claude", "github", "complete"] as const;
   type StepName = (typeof steps)[number];
   const getStepName = (): StepName => {
     if (currentStep === "claude_detect" || currentStep === "claude_auth")
       return "claude";
     if (currentStep === "welcome") return "welcome";
+    if (currentStep === "theme") return "theme";
     if (currentStep === "github") return "github";
     return "complete";
   };
@@ -39,6 +36,10 @@ export function SetupView() {
     );
     switch (from) {
       case "welcome":
+        console.log("[Setup Flow] Moving to theme step");
+        setCurrentStep("theme");
+        break;
+      case "theme":
         console.log("[Setup Flow] Moving to claude_detect step");
         setCurrentStep("claude_detect");
         break;
@@ -56,8 +57,11 @@ export function SetupView() {
   const handleBack = (from: string) => {
     console.log("[Setup Flow] handleBack called from:", from);
     switch (from) {
-      case "claude":
+      case "theme":
         setCurrentStep("welcome");
+        break;
+      case "claude":
+        setCurrentStep("theme");
         break;
       case "github":
         setCurrentStep("claude_detect");
@@ -98,42 +102,47 @@ export function SetupView() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="p-8">
-          <div className="w-full max-w-2xl mx-auto">
-            <div className="mb-8">
-              <StepIndicator
-                currentStep={currentIndex}
-                totalSteps={steps.length}
+      <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto px-8">
+          <div className="mb-8">
+            <StepIndicator
+              currentStep={currentIndex}
+              totalSteps={steps.length}
+            />
+          </div>
+
+          <div>
+            {currentStep === "welcome" && (
+              <WelcomeStep onNext={() => handleNext("welcome")} />
+            )}
+
+            {currentStep === "theme" && (
+              <ThemeStep
+                onNext={() => handleNext("theme")}
+                onBack={() => handleBack("theme")}
               />
-            </div>
+            )}
 
-            <div className="py-8">
-              {currentStep === "welcome" && (
-                <WelcomeStep onNext={() => handleNext("welcome")} />
-              )}
+            {(currentStep === "claude_detect" ||
+              currentStep === "claude_auth") && (
+              <ClaudeSetupStep
+                onNext={() => handleNext("claude")}
+                onBack={() => handleBack("claude")}
+                onSkip={handleSkipClaude}
+              />
+            )}
 
-              {(currentStep === "claude_detect" ||
-                currentStep === "claude_auth") && (
-                <ClaudeSetupStep
-                  onNext={() => handleNext("claude")}
-                  onBack={() => handleBack("claude")}
-                  onSkip={handleSkipClaude}
-                />
-              )}
+            {currentStep === "github" && (
+              <GitHubSetupStep
+                onNext={() => handleNext("github")}
+                onBack={() => handleBack("github")}
+                onSkip={handleSkipGithub}
+              />
+            )}
 
-              {currentStep === "github" && (
-                <GitHubSetupStep
-                  onNext={() => handleNext("github")}
-                  onBack={() => handleBack("github")}
-                  onSkip={handleSkipGithub}
-                />
-              )}
-
-              {currentStep === "complete" && (
-                <CompleteStep onFinish={handleFinish} />
-              )}
-            </div>
+            {currentStep === "complete" && (
+              <CompleteStep onFinish={handleFinish} />
+            )}
           </div>
         </div>
       </div>

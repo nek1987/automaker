@@ -53,6 +53,7 @@ export interface InstallProgress {
 
 export type SetupStep =
   | "welcome"
+  | "theme"
   | "claude_detect"
   | "claude_auth"
   | "github"
