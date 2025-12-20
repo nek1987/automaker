@@ -20,7 +20,6 @@ import {
   ensureInitialCommit,
 } from "../common.js";
 import { trackBranch } from "./branch-tracking.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const execAsync = promisify(exec);
 
@@ -90,20 +89,6 @@ export function createCreateHandler() {
           error: "projectPath and branchName required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       if (!(await isGitRepo(projectPath))) {

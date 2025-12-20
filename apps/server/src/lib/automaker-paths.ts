@@ -9,7 +9,7 @@
  * Directory creation is handled separately by ensure* functions.
  */
 
-import fs from "fs/promises";
+import * as secureFs from "./secure-fs.js";
 import path from "path";
 
 /**
@@ -149,7 +149,7 @@ export function getBranchTrackingPath(projectPath: string): string {
  */
 export async function ensureAutomakerDir(projectPath: string): Promise<string> {
   const automakerDir = getAutomakerDir(projectPath);
-  await fs.mkdir(automakerDir, { recursive: true });
+  await secureFs.mkdir(automakerDir, { recursive: true });
   return automakerDir;
 }
 
@@ -211,6 +211,6 @@ export function getProjectSettingsPath(projectPath: string): string {
  * @returns Promise resolving to the created data directory path
  */
 export async function ensureDataDir(dataDir: string): Promise<string> {
-  await fs.mkdir(dataDir, { recursive: true });
+  await secureFs.mkdir(dataDir, { recursive: true });
   return dataDir;
 }

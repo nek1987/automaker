@@ -9,7 +9,6 @@
 import type { Request, Response } from "express";
 import { getDevServerService } from "../../../services/dev-server-service.js";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 export function createStartDevHandler() {
   return async (req: Request, res: Response): Promise<void> => {
@@ -33,21 +32,6 @@ export function createStartDevHandler() {
           error: "worktreePath is required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-        validatePath(worktreePath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const devServerService = getDevServerService();

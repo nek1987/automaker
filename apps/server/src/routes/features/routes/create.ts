@@ -7,7 +7,6 @@ import {
   FeatureLoader,
   type Feature,
 } from "../../../services/feature-loader.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 import { getErrorMessage, logError } from "../common.js";
 
 export function createCreateHandler(featureLoader: FeatureLoader) {
@@ -26,20 +25,6 @@ export function createCreateHandler(featureLoader: FeatureLoader) {
             error: "projectPath and feature are required",
           });
         return;
-      }
-
-      // Validate path is within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const created = await featureLoader.create(projectPath, feature);

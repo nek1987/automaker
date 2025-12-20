@@ -5,7 +5,6 @@
 import type { Request, Response } from "express";
 import type { AutoModeService } from "../../../services/auto-mode-service.js";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 export function createCommitFeatureHandler(autoModeService: AutoModeService) {
   return async (req: Request, res: Response): Promise<void> => {
@@ -24,23 +23,6 @@ export function createCommitFeatureHandler(autoModeService: AutoModeService) {
             error: "projectPath and featureId are required",
           });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-        if (worktreePath) {
-          validatePath(worktreePath);
-        }
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const commitHash = await autoModeService.commitFeature(

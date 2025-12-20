@@ -8,7 +8,6 @@ import {
   type Feature,
 } from "../../../services/feature-loader.js";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 export function createUpdateHandler(featureLoader: FeatureLoader) {
   return async (req: Request, res: Response): Promise<void> => {
@@ -25,20 +24,6 @@ export function createUpdateHandler(featureLoader: FeatureLoader) {
           error: "projectPath, featureId, and updates are required",
         });
         return;
-      }
-
-      // Validate path is within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const updated = await featureLoader.update(

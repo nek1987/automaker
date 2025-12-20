@@ -6,7 +6,6 @@ import type { Request, Response } from "express";
 import type { AutoModeService } from "../../../services/auto-mode-service.js";
 import { createLogger } from "../../../lib/logger.js";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const logger = createLogger("AutoMode");
 
@@ -25,20 +24,6 @@ export function createRunFeatureHandler(autoModeService: AutoModeService) {
           error: "projectPath and featureId are required",
         });
         return;
-      }
-
-      // Validate path is within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       // Start execution in background

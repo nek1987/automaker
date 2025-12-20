@@ -9,7 +9,6 @@ import path from "path";
 import fs from "fs/promises";
 import { getErrorMessage, logError } from "../common.js";
 import { generateSyntheticDiffForNewFile } from "../../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const execAsync = promisify(exec);
 
@@ -28,21 +27,6 @@ export function createFileDiffHandler() {
           error: "projectPath, featureId, and filePath required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-        validatePath(filePath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       // Git worktrees are stored in project directory

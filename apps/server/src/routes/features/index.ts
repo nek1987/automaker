@@ -4,6 +4,7 @@
 
 import { Router } from "express";
 import { FeatureLoader } from "../../services/feature-loader.js";
+import { validatePathParams } from "../../middleware/validate-paths.js";
 import { createListHandler } from "./routes/list.js";
 import { createGetHandler } from "./routes/get.js";
 import { createCreateHandler } from "./routes/create.js";
@@ -15,11 +16,11 @@ import { createGenerateTitleHandler } from "./routes/generate-title.js";
 export function createFeaturesRoutes(featureLoader: FeatureLoader): Router {
   const router = Router();
 
-  router.post("/list", createListHandler(featureLoader));
-  router.post("/get", createGetHandler(featureLoader));
-  router.post("/create", createCreateHandler(featureLoader));
-  router.post("/update", createUpdateHandler(featureLoader));
-  router.post("/delete", createDeleteHandler(featureLoader));
+  router.post("/list", validatePathParams("projectPath"), createListHandler(featureLoader));
+  router.post("/get", validatePathParams("projectPath"), createGetHandler(featureLoader));
+  router.post("/create", validatePathParams("projectPath"), createCreateHandler(featureLoader));
+  router.post("/update", validatePathParams("projectPath"), createUpdateHandler(featureLoader));
+  router.post("/delete", validatePathParams("projectPath"), createDeleteHandler(featureLoader));
   router.post("/agent-output", createAgentOutputHandler(featureLoader));
   router.post("/generate-title", createGenerateTitleHandler());
 

@@ -2,7 +2,7 @@
  * File system utilities that handle symlinks safely
  */
 
-import fs from "fs/promises";
+import * as secureFs from "./secure-fs.js";
 import path from "path";
 
 /**
@@ -14,7 +14,7 @@ export async function mkdirSafe(dirPath: string): Promise<void> {
 
   // Check if path already exists using lstat (doesn't follow symlinks)
   try {
-    const stats = await fs.lstat(resolvedPath);
+    const stats = await secureFs.lstat(resolvedPath);
     // Path exists - if it's a directory or symlink, consider it success
     if (stats.isDirectory() || stats.isSymbolicLink()) {
       return;
@@ -36,7 +36,7 @@ export async function mkdirSafe(dirPath: string): Promise<void> {
 
   // Path doesn't exist, create it
   try {
-    await fs.mkdir(resolvedPath, { recursive: true });
+    await secureFs.mkdir(resolvedPath, { recursive: true });
   } catch (error: any) {
     // Handle race conditions and symlink issues
     if (error.code === "EEXIST" || error.code === "ELOOP") {
@@ -52,7 +52,7 @@ export async function mkdirSafe(dirPath: string): Promise<void> {
  */
 export async function existsSafe(filePath: string): Promise<boolean> {
   try {
-    await fs.lstat(filePath);
+    await secureFs.lstat(filePath);
     return true;
   } catch (error: any) {
     if (error.code === "ENOENT") {

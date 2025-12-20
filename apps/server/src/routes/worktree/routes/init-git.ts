@@ -8,7 +8,6 @@ import { promisify } from "util";
 import { existsSync } from "fs";
 import { join } from "path";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const execAsync = promisify(exec);
 
@@ -25,20 +24,6 @@ export function createInitGitHandler() {
           error: "projectPath required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       // Check if .git already exists

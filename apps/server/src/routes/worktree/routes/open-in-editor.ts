@@ -7,7 +7,6 @@ import type { Request, Response } from "express";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const execAsync = promisify(exec);
 
@@ -107,20 +106,6 @@ export function createOpenInEditorHandler() {
           error: "worktreePath required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(worktreePath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const editor = await detectDefaultEditor();

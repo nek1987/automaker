@@ -8,7 +8,7 @@
  * - Path resolution (relative/absolute)
  */
 
-import fs from "fs/promises";
+import * as secureFs from "./secure-fs.js";
 import path from "path";
 
 /**
@@ -63,7 +63,7 @@ export function getMimeTypeForImage(imagePath: string): string {
  * @throws Error if file cannot be read
  */
 export async function readImageAsBase64(imagePath: string): Promise<ImageData> {
-  const imageBuffer = await fs.readFile(imagePath);
+  const imageBuffer = await secureFs.readFile(imagePath) as Buffer;
   const base64Data = imageBuffer.toString("base64");
   const mimeType = getMimeTypeForImage(imagePath);
 

@@ -4,7 +4,6 @@
 
 import type { Request, Response } from "express";
 import { FeatureLoader } from "../../../services/feature-loader.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 import { getErrorMessage, logError } from "../common.js";
 
 export function createListHandler(featureLoader: FeatureLoader) {
@@ -17,20 +16,6 @@ export function createListHandler(featureLoader: FeatureLoader) {
           .status(400)
           .json({ success: false, error: "projectPath is required" });
         return;
-      }
-
-      // Validate path is within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       const features = await featureLoader.getAll(projectPath);

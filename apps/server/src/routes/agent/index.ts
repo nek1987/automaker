@@ -5,6 +5,7 @@
 import { Router } from "express";
 import { AgentService } from "../../services/agent-service.js";
 import type { EventEmitter } from "../../lib/events.js";
+import { validatePathParams } from "../../middleware/validate-paths.js";
 import { createStartHandler } from "./routes/start.js";
 import { createSendHandler } from "./routes/send.js";
 import { createHistoryHandler } from "./routes/history.js";
@@ -18,8 +19,8 @@ export function createAgentRoutes(
 ): Router {
   const router = Router();
 
-  router.post("/start", createStartHandler(agentService));
-  router.post("/send", createSendHandler(agentService));
+  router.post("/start", validatePathParams("workingDirectory?"), createStartHandler(agentService));
+  router.post("/send", validatePathParams("workingDirectory?", "imagePaths[]"), createSendHandler(agentService));
   router.post("/history", createHistoryHandler(agentService));
   router.post("/stop", createStopHandler(agentService));
   router.post("/clear", createClearHandler(agentService));

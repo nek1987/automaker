@@ -6,6 +6,7 @@
 
 import { Router } from "express";
 import type { AutoModeService } from "../../services/auto-mode-service.js";
+import { validatePathParams } from "../../middleware/validate-paths.js";
 import { createStopFeatureHandler } from "./routes/stop-feature.js";
 import { createStatusHandler } from "./routes/status.js";
 import { createRunFeatureHandler } from "./routes/run-feature.js";
@@ -22,16 +23,16 @@ export function createAutoModeRoutes(autoModeService: AutoModeService): Router {
 
   router.post("/stop-feature", createStopFeatureHandler(autoModeService));
   router.post("/status", createStatusHandler(autoModeService));
-  router.post("/run-feature", createRunFeatureHandler(autoModeService));
+  router.post("/run-feature", validatePathParams("projectPath"), createRunFeatureHandler(autoModeService));
   router.post("/verify-feature", createVerifyFeatureHandler(autoModeService));
   router.post("/resume-feature", createResumeFeatureHandler(autoModeService));
   router.post("/context-exists", createContextExistsHandler(autoModeService));
-  router.post("/analyze-project", createAnalyzeProjectHandler(autoModeService));
+  router.post("/analyze-project", validatePathParams("projectPath"), createAnalyzeProjectHandler(autoModeService));
   router.post(
     "/follow-up-feature",
     createFollowUpFeatureHandler(autoModeService)
   );
-  router.post("/commit-feature", createCommitFeatureHandler(autoModeService));
+  router.post("/commit-feature", validatePathParams("projectPath", "worktreePath?"), createCommitFeatureHandler(autoModeService));
   router.post("/approve-plan", createApprovePlanHandler(autoModeService));
 
   return router;

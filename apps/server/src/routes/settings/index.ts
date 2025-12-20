@@ -14,6 +14,7 @@
 
 import { Router } from "express";
 import type { SettingsService } from "../../services/settings-service.js";
+import { validatePathParams } from "../../middleware/validate-paths.js";
 import { createGetGlobalHandler } from "./routes/get-global.js";
 import { createUpdateGlobalHandler } from "./routes/update-global.js";
 import { createGetCredentialsHandler } from "./routes/get-credentials.js";
@@ -57,8 +58,8 @@ export function createSettingsRoutes(settingsService: SettingsService): Router {
   router.put("/credentials", createUpdateCredentialsHandler(settingsService));
 
   // Project settings
-  router.post("/project", createGetProjectHandler(settingsService));
-  router.put("/project", createUpdateProjectHandler(settingsService));
+  router.post("/project", validatePathParams("projectPath"), createGetProjectHandler(settingsService));
+  router.put("/project", validatePathParams("projectPath"), createUpdateProjectHandler(settingsService));
 
   // Migration from localStorage
   router.post("/migrate", createMigrateHandler(settingsService));

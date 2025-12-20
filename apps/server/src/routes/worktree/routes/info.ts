@@ -8,7 +8,6 @@ import { promisify } from "util";
 import path from "path";
 import fs from "fs/promises";
 import { getErrorMessage, logError, normalizePath } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
 
 const execAsync = promisify(exec);
 
@@ -28,20 +27,6 @@ export function createInfoHandler() {
             error: "projectPath and featureId required",
           });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        validatePath(projectPath);
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       // Check if worktree exists (git worktrees are stored in project directory)

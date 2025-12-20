@@ -6,8 +6,6 @@ import type { Request, Response } from "express";
 import { AgentService } from "../../../services/agent-service.js";
 import { createLogger } from "../../../lib/logger.js";
 import { getErrorMessage, logError } from "../common.js";
-import { validatePath, PathNotAllowedError } from "../../../lib/security.js";
-
 const logger = createLogger("Agent");
 
 export function createSendHandler(agentService: AgentService) {
@@ -28,27 +26,6 @@ export function createSendHandler(agentService: AgentService) {
           error: "sessionId and message are required",
         });
         return;
-      }
-
-      // Validate paths are within ALLOWED_ROOT_DIRECTORY
-      try {
-        if (workingDirectory) {
-          validatePath(workingDirectory);
-        }
-        if (imagePaths && imagePaths.length > 0) {
-          for (const imagePath of imagePaths) {
-            validatePath(imagePath);
-          }
-        }
-      } catch (error) {
-        if (error instanceof PathNotAllowedError) {
-          res.status(403).json({
-            success: false,
-            error: error.message,
-          });
-          return;
-        }
-        throw error;
       }
 
       // Start the message processing (don't await - it streams via WebSocket)

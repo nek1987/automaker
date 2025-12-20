@@ -7,8 +7,7 @@
  * - Per-project settings ({projectPath}/.automaker/settings.json)
  */
 
-import fs from "fs/promises";
-import path from "path";
+import * as secureFs from "../lib/secure-fs.js";
 import { createLogger } from "../lib/logger.js";
 import {
   getGlobalSettingsPath,
@@ -47,12 +46,12 @@ async function atomicWriteJson(filePath: string, data: unknown): Promise<void> {
   const content = JSON.stringify(data, null, 2);
 
   try {
-    await fs.writeFile(tempPath, content, "utf-8");
-    await fs.rename(tempPath, filePath);
+    await secureFs.writeFile(tempPath, content, "utf-8");
+    await secureFs.rename(tempPath, filePath);
   } catch (error) {
     // Clean up temp file if it exists
     try {
-      await fs.unlink(tempPath);
+      await secureFs.unlink(tempPath);
     } catch {
       // Ignore cleanup errors
     }
@@ -65,7 +64,7 @@ async function atomicWriteJson(filePath: string, data: unknown): Promise<void> {
  */
 async function readJsonFile<T>(filePath: string, defaultValue: T): Promise<T> {
   try {
-    const content = await fs.readFile(filePath, "utf-8");
+    const content = await secureFs.readFile(filePath, "utf-8") as string;
     return JSON.parse(content) as T;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
@@ -81,7 +80,7 @@ async function readJsonFile<T>(filePath: string, defaultValue: T): Promise<T> {
  */
 async function fileExists(filePath: string): Promise<boolean> {
   try {
-    await fs.access(filePath);
+    await secureFs.access(filePath);
     return true;
   } catch {
     return false;
