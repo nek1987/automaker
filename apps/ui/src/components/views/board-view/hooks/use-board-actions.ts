@@ -41,6 +41,7 @@ interface UseBoardActionsProps {
   outputFeature: Feature | null;
   projectPath: string | null;
   onWorktreeCreated?: () => void;
+  onWorktreeAutoSelect?: (worktree: { path: string; branch: string }) => void;
   currentWorktreeBranch: string | null; // Branch name of the selected worktree for filtering
 }
 
@@ -68,6 +69,7 @@ export function useBoardActions({
   outputFeature,
   projectPath,
   onWorktreeCreated,
+  onWorktreeAutoSelect,
   currentWorktreeBranch,
 }: UseBoardActionsProps) {
   const {
@@ -115,15 +117,20 @@ export function useBoardActions({
               currentProject.path,
               finalBranchName
             );
-            if (result.success) {
+            if (result.success && result.worktree) {
               console.log(
                 `[Board] Worktree for branch "${finalBranchName}" ${
                   result.worktree?.isNew ? "created" : "already exists"
                 }`
               );
+              // Auto-select the worktree when creating a feature for it
+              onWorktreeAutoSelect?.({
+                path: result.worktree.path,
+                branch: result.worktree.branch,
+              });
               // Refresh worktree list in UI
               onWorktreeCreated?.();
-            } else {
+            } else if (!result.success) {
               console.error(
                 `[Board] Failed to create worktree for branch "${finalBranchName}":`,
                 result.error
@@ -143,7 +150,8 @@ export function useBoardActions({
       }
 
       // Check if we need to generate a title
-      const needsTitleGeneration = !featureData.title.trim() && featureData.description.trim();
+      const needsTitleGeneration =
+        !featureData.title.trim() && featureData.description.trim();
 
       const newFeatureData = {
         ...featureData,
@@ -161,10 +169,14 @@ export function useBoardActions({
       if (needsTitleGeneration) {
         const api = getElectronAPI();
         if (api?.features?.generateTitle) {
-          api.features.generateTitle(featureData.description)
+          api.features
+            .generateTitle(featureData.description)
             .then((result) => {
               if (result.success && result.title) {
-                const titleUpdates = { title: result.title, titleGenerating: false };
+                const titleUpdates = {
+                  title: result.title,
+                  titleGenerating: false,
+                };
                 updateFeature(createdFeature.id, titleUpdates);
                 persistFeatureUpdate(createdFeature.id, titleUpdates);
               } else {
@@ -184,7 +196,17 @@ export function useBoardActions({
         }
       }
     },
-    [addFeature, persistFeatureCreate, persistFeatureUpdate, updateFeature, saveCategory, useWorktrees, currentProject, onWorktreeCreated]
+    [
+      addFeature,
+      persistFeatureCreate,
+      persistFeatureUpdate,
+      updateFeature,
+      saveCategory,
+      useWorktrees,
+      currentProject,
+      onWorktreeCreated,
+      onWorktreeAutoSelect,
+    ]
   );
 
   const handleUpdateFeature = useCallback(
@@ -257,7 +279,15 @@ export function useBoardActions({
       }
       setEditingFeature(null);
     },
-    [updateFeature, persistFeatureUpdate, saveCategory, setEditingFeature, useWorktrees, currentProject, onWorktreeCreated]
+    [
+      updateFeature,
+      persistFeatureUpdate,
+      saveCategory,
+      setEditingFeature,
+      useWorktrees,
+      currentProject,
+      onWorktreeCreated,
+    ]
   );
 
   const handleDeleteFeature = useCallback(

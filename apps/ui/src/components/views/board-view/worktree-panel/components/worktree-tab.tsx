@@ -138,19 +138,15 @@ export function WorktreeTab({
     };
 
     prBadge = (
-      <button
-        type="button"
+      <span
+        role="button"
+        tabIndex={0}
         className={cn(
           "ml-1.5 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background",
-          "appearance-none cursor-pointer hover:opacity-80 active:opacity-70", // Reset button appearance but keep cursor, add hover/active states
+          "cursor-pointer hover:opacity-80 active:opacity-70",
           prStateClasses
         )}
-        style={{
-          // Override any inherited button styles
-          backgroundImage: "none",
-          boxShadow: "none",
-        }}
         title={`${prLabel} - Click to open`}
         aria-label={`${prLabel} - Click to open pull request`}
         onClick={(e) => {
@@ -177,7 +173,7 @@ export function WorktreeTab({
         <span className={cn("capitalize", getStatusColorClass())} aria-hidden="true">
           {prState}
         </span>
-      </button>
+      </span>
     );
   }
 

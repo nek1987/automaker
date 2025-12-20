@@ -418,6 +418,35 @@ export function BoardView() {
     outputFeature,
     projectPath: currentProject?.path || null,
     onWorktreeCreated: () => setWorktreeRefreshKey((k) => k + 1),
+    onWorktreeAutoSelect: (newWorktree) => {
+      if (!currentProject) return;
+      // Check if worktree already exists in the store (by branch name)
+      const currentWorktrees = getWorktrees(currentProject.path);
+      const existingWorktree = currentWorktrees.find(
+        (w) => w.branch === newWorktree.branch
+      );
+
+      // Only add if it doesn't already exist (to avoid duplicates)
+      if (!existingWorktree) {
+        const newWorktreeInfo = {
+          path: newWorktree.path,
+          branch: newWorktree.branch,
+          isMain: false,
+          isCurrent: false,
+          hasWorktree: true,
+        };
+        setWorktrees(currentProject.path, [
+          ...currentWorktrees,
+          newWorktreeInfo,
+        ]);
+      }
+      // Select the worktree (whether it existed or was just added)
+      setCurrentWorktree(
+        currentProject.path,
+        newWorktree.path,
+        newWorktree.branch
+      );
+    },
     currentWorktreeBranch,
   });
 

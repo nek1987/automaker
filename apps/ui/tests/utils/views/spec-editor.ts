@@ -60,12 +60,16 @@ export async function navigateToSpecEditor(page: Page): Promise<void> {
 
 /**
  * Get the CodeMirror editor content
+ * Waits for CodeMirror to be ready and returns the content
  */
 export async function getEditorContent(page: Page): Promise<string> {
   // CodeMirror uses a contenteditable div with class .cm-content
-  const content = await page
-    .locator('[data-testid="spec-editor"] .cm-content')
-    .textContent();
+  // Wait for it to be visible and then read its textContent
+  const contentElement = page.locator('[data-testid="spec-editor"] .cm-content');
+  await contentElement.waitFor({ state: "visible", timeout: 10000 });
+  
+  // Read the content - CodeMirror should have updated its DOM by now
+  const content = await contentElement.textContent();
   return content || "";
 }
 
