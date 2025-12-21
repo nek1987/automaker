@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef, memo } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { cn } from '@/lib/utils';
 import { useAppStore, formatShortcut, type ThemeMode } from '@/store/app-store';
@@ -6,9 +6,6 @@ import {
   FolderOpen,
   Plus,
   Settings,
-  FileText,
-  LayoutGrid,
-  Bot,
   Folder,
   X,
   PanelLeft,
@@ -16,12 +13,10 @@ import {
   ChevronDown,
   Redo2,
   Check,
-  BookOpen,
   GripVertical,
   RotateCcw,
   Trash2,
   Undo2,
-  UserCircle,
   MoreVertical,
   Palette,
   Monitor,
@@ -31,7 +26,6 @@ import {
   Recycle,
   Sparkles,
   Loader2,
-  Terminal,
   Rocket,
   Zap,
   CheckCircle2,
@@ -61,16 +55,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  useKeyboardShortcuts,
-  useKeyboardShortcutsConfig,
-  KeyboardShortcut,
-} from '@/hooks/use-keyboard-shortcuts';
+import { useKeyboardShortcuts, useKeyboardShortcutsConfig } from '@/hooks/use-keyboard-shortcuts';
 import { getElectronAPI, Project, TrashedProject, RunningAgent } from '@/lib/electron';
 import { initializeProject, hasAppSpec, hasAutomakerDir } from '@/lib/project-init';
 import { toast } from 'sonner';
 import { themeOptions } from '@/config/theme-options';
-import type { SpecRegenerationEvent } from '@/types/electron';
 import { DeleteProjectDialog } from '@/components/views/settings-view/components/delete-project-dialog';
 import { NewProjectModal } from '@/components/dialogs/new-project-modal';
 import { CreateSpecDialog } from '@/components/views/spec-view/dialogs';
@@ -81,14 +70,27 @@ import { getHttpApiClient } from '@/lib/http-api-client';
 import type { StarterTemplate } from '@/lib/templates';
 
 // Local imports from subfolder
-import type { NavSection, NavItem } from './sidebar/types';
-import { SortableProjectItem, ThemeMenuItem, BugReportButton } from './sidebar/components';
+import {
+  SortableProjectItem,
+  ThemeMenuItem,
+  BugReportButton,
+  CollapseToggleButton,
+} from './sidebar/components';
 import {
   PROJECT_DARK_THEMES,
   PROJECT_LIGHT_THEMES,
   SIDEBAR_FEATURE_FLAGS,
 } from './sidebar/constants';
-import { useThemePreview, useSidebarAutoCollapse, useDragAndDrop } from './sidebar/hooks';
+import {
+  useThemePreview,
+  useSidebarAutoCollapse,
+  useDragAndDrop,
+  useRunningAgents,
+  useTrashOperations,
+  useProjectPicker,
+  useSpecRegeneration,
+  useNavigation,
+} from './sidebar/hooks';
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -128,17 +130,10 @@ export function Sidebar() {
 
   // State for project picker dropdown
   const [isProjectPickerOpen, setIsProjectPickerOpen] = useState(false);
-  const [projectSearchQuery, setProjectSearchQuery] = useState('');
-  const [selectedProjectIndex, setSelectedProjectIndex] = useState(0);
   const [showTrashDialog, setShowTrashDialog] = useState(false);
-  const [activeTrashId, setActiveTrashId] = useState<string | null>(null);
-  const [isEmptyingTrash, setIsEmptyingTrash] = useState(false);
 
   // State for delete project confirmation dialog
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false);
-
-  // State for running agents count
-  const [runningAgentsCount, setRunningAgentsCount] = useState(0);
 
   // State for new project modal
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -165,132 +160,56 @@ export function Sidebar() {
   const isCreatingSpec = specCreatingForProject !== null;
   const creatingSpecProjectPath = specCreatingForProject;
 
-  // Ref for project search input
-  const projectSearchInputRef = useRef<HTMLInputElement>(null);
-
   // Auto-collapse sidebar on small screens
   useSidebarAutoCollapse({ sidebarOpen, toggleSidebar });
 
-  // Filtered projects based on search query
-  const filteredProjects = useMemo(() => {
-    if (!projectSearchQuery.trim()) {
-      return projects;
-    }
-    const query = projectSearchQuery.toLowerCase();
-    return projects.filter((project) => project.name.toLowerCase().includes(query));
-  }, [projects, projectSearchQuery]);
-
-  // Reset selection when filtered results change
-  useEffect(() => {
-    setSelectedProjectIndex(0);
-  }, [filteredProjects.length, projectSearchQuery]);
-
-  // Reset search query when dropdown closes
-  useEffect(() => {
-    if (!isProjectPickerOpen) {
-      setProjectSearchQuery('');
-      setSelectedProjectIndex(0);
-    }
-  }, [isProjectPickerOpen]);
-
-  // Focus the search input when dropdown opens
-  useEffect(() => {
-    if (isProjectPickerOpen) {
-      // Small delay to ensure the dropdown is rendered
-      setTimeout(() => {
-        projectSearchInputRef.current?.focus();
-      }, 0);
-    }
-  }, [isProjectPickerOpen]);
+  // Project picker with search and keyboard navigation
+  const {
+    projectSearchQuery,
+    setProjectSearchQuery,
+    selectedProjectIndex,
+    setSelectedProjectIndex,
+    projectSearchInputRef,
+    filteredProjects,
+    selectHighlightedProject,
+  } = useProjectPicker({
+    projects,
+    isProjectPickerOpen,
+    setIsProjectPickerOpen,
+    setCurrentProject,
+  });
 
   // Drag-and-drop for project reordering
   const { sensors, handleDragEnd } = useDragAndDrop({ projects, reorderProjects });
 
-  // Subscribe to spec regeneration events
-  useEffect(() => {
-    const api = getElectronAPI();
-    if (!api.specRegeneration) return;
+  // Running agents count
+  const { runningAgentsCount } = useRunningAgents();
 
-    const unsubscribe = api.specRegeneration.onEvent((event: SpecRegenerationEvent) => {
-      console.log(
-        '[Sidebar] Spec regeneration event:',
-        event.type,
-        'for project:',
-        event.projectPath
-      );
+  // Trash operations
+  const {
+    activeTrashId,
+    isEmptyingTrash,
+    handleRestoreProject,
+    handleDeleteProjectFromDisk,
+    handleEmptyTrash,
+  } = useTrashOperations({
+    restoreTrashedProject,
+    deleteTrashedProject,
+    emptyTrash,
+    trashedProjects,
+  });
 
-      // Only handle events for the project we're currently setting up
-      if (event.projectPath !== creatingSpecProjectPath && event.projectPath !== setupProjectPath) {
-        console.log('[Sidebar] Ignoring event - not for project being set up');
-        return;
-      }
-
-      if (event.type === 'spec_regeneration_complete') {
-        setSpecCreatingForProject(null);
-        setShowSetupDialog(false);
-        setProjectOverview('');
-        setSetupProjectPath('');
-        // Clear onboarding state if we came from onboarding
-        setNewProjectName('');
-        setNewProjectPath('');
-        toast.success('App specification created', {
-          description: 'Your project is now set up and ready to go!',
-        });
-      } else if (event.type === 'spec_regeneration_error') {
-        setSpecCreatingForProject(null);
-        toast.error('Failed to create specification', {
-          description: event.error,
-        });
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [creatingSpecProjectPath, setupProjectPath, setSpecCreatingForProject]);
-
-  // Fetch running agents count function - used for initial load and event-driven updates
-  const fetchRunningAgentsCount = useCallback(async () => {
-    try {
-      const api = getElectronAPI();
-      if (api.runningAgents) {
-        const result = await api.runningAgents.getAll();
-        if (result.success && result.runningAgents) {
-          setRunningAgentsCount(result.runningAgents.length);
-        }
-      }
-    } catch (error) {
-      console.error('[Sidebar] Error fetching running agents count:', error);
-    }
-  }, []);
-
-  // Subscribe to auto-mode events to update running agents count in real-time
-  useEffect(() => {
-    const api = getElectronAPI();
-    if (!api.autoMode) {
-      // If autoMode is not available, still fetch initial count
-      fetchRunningAgentsCount();
-      return;
-    }
-
-    // Initial fetch on mount
-    fetchRunningAgentsCount();
-
-    const unsubscribe = api.autoMode.onEvent((event) => {
-      // When a feature starts, completes, or errors, refresh the count
-      if (
-        event.type === 'auto_mode_feature_complete' ||
-        event.type === 'auto_mode_error' ||
-        event.type === 'auto_mode_feature_start'
-      ) {
-        fetchRunningAgentsCount();
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [fetchRunningAgentsCount]);
+  // Spec regeneration events
+  useSpecRegeneration({
+    creatingSpecProjectPath,
+    setupProjectPath,
+    setSpecCreatingForProject,
+    setShowSetupDialog,
+    setProjectOverview,
+    setSetupProjectPath,
+    setNewProjectName,
+    setNewProjectPath,
+  });
 
   // Handle creating initial spec for new project
   const handleCreateInitialSpec = useCallback(async () => {
@@ -711,261 +630,23 @@ export function Sidebar() {
     }
   }, [trashedProjects, upsertAndSetCurrentProject, currentProject, globalTheme]);
 
-  const handleRestoreProject = useCallback(
-    (projectId: string) => {
-      restoreTrashedProject(projectId);
-      toast.success('Project restored', {
-        description: 'Added back to your project list.',
-      });
-      setShowTrashDialog(false);
-    },
-    [restoreTrashedProject]
-  );
-
-  const handleDeleteProjectFromDisk = useCallback(
-    async (trashedProject: TrashedProject) => {
-      const confirmed = window.confirm(
-        `Delete "${trashedProject.name}" from disk?\nThis sends the folder to your system Trash.`
-      );
-      if (!confirmed) return;
-
-      setActiveTrashId(trashedProject.id);
-      try {
-        const api = getElectronAPI();
-        if (!api.trashItem) {
-          throw new Error('System Trash is not available in this build.');
-        }
-
-        const result = await api.trashItem(trashedProject.path);
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to delete project folder');
-        }
-
-        deleteTrashedProject(trashedProject.id);
-        toast.success('Project folder sent to system Trash', {
-          description: trashedProject.path,
-        });
-      } catch (error) {
-        console.error('[Sidebar] Failed to delete project from disk:', error);
-        toast.error('Failed to delete project folder', {
-          description: error instanceof Error ? error.message : 'Unknown error',
-        });
-      } finally {
-        setActiveTrashId(null);
-      }
-    },
-    [deleteTrashedProject]
-  );
-
-  const handleEmptyTrash = useCallback(() => {
-    if (trashedProjects.length === 0) {
-      setShowTrashDialog(false);
-      return;
-    }
-
-    const confirmed = window.confirm(
-      'Clear all projects from recycle bin? This does not delete folders from disk.'
-    );
-    if (!confirmed) return;
-
-    setIsEmptyingTrash(true);
-    try {
-      emptyTrash();
-      toast.success('Recycle bin cleared');
-      setShowTrashDialog(false);
-    } finally {
-      setIsEmptyingTrash(false);
-    }
-  }, [emptyTrash, trashedProjects.length]);
-
-  const navSections: NavSection[] = useMemo(() => {
-    const allToolsItems: NavItem[] = [
-      {
-        id: 'spec',
-        label: 'Spec Editor',
-        icon: FileText,
-        shortcut: shortcuts.spec,
-      },
-      {
-        id: 'context',
-        label: 'Context',
-        icon: BookOpen,
-        shortcut: shortcuts.context,
-      },
-      {
-        id: 'profiles',
-        label: 'AI Profiles',
-        icon: UserCircle,
-        shortcut: shortcuts.profiles,
-      },
-    ];
-
-    // Filter out hidden items
-    const visibleToolsItems = allToolsItems.filter((item) => {
-      if (item.id === 'spec' && hideSpecEditor) {
-        return false;
-      }
-      if (item.id === 'context' && hideContext) {
-        return false;
-      }
-      if (item.id === 'profiles' && hideAiProfiles) {
-        return false;
-      }
-      return true;
-    });
-
-    // Build project items - Terminal is conditionally included
-    const projectItems: NavItem[] = [
-      {
-        id: 'board',
-        label: 'Kanban Board',
-        icon: LayoutGrid,
-        shortcut: shortcuts.board,
-      },
-      {
-        id: 'agent',
-        label: 'Agent Runner',
-        icon: Bot,
-        shortcut: shortcuts.agent,
-      },
-    ];
-
-    // Add Terminal to Project section if not hidden
-    if (!hideTerminal) {
-      projectItems.push({
-        id: 'terminal',
-        label: 'Terminal',
-        icon: Terminal,
-        shortcut: shortcuts.terminal,
-      });
-    }
-
-    return [
-      {
-        label: 'Project',
-        items: projectItems,
-      },
-      {
-        label: 'Tools',
-        items: visibleToolsItems,
-      },
-    ];
-  }, [shortcuts, hideSpecEditor, hideContext, hideTerminal, hideAiProfiles]);
-
-  // Handle selecting the currently highlighted project
-  const selectHighlightedProject = useCallback(() => {
-    if (filteredProjects.length > 0 && selectedProjectIndex < filteredProjects.length) {
-      setCurrentProject(filteredProjects[selectedProjectIndex]);
-      setIsProjectPickerOpen(false);
-    }
-  }, [filteredProjects, selectedProjectIndex, setCurrentProject]);
-
-  // Handle keyboard events when project picker is open
-  useEffect(() => {
-    if (!isProjectPickerOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsProjectPickerOpen(false);
-      } else if (event.key === 'Enter') {
-        event.preventDefault();
-        selectHighlightedProject();
-      } else if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        setSelectedProjectIndex((prev) => (prev < filteredProjects.length - 1 ? prev + 1 : prev));
-      } else if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        setSelectedProjectIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      } else if (event.key.toLowerCase() === 'p' && !event.metaKey && !event.ctrlKey) {
-        // Toggle off when P is pressed (not with modifiers) while dropdown is open
-        // Only if not typing in the search input
-        if (document.activeElement !== projectSearchInputRef.current) {
-          event.preventDefault();
-          setIsProjectPickerOpen(false);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isProjectPickerOpen, selectHighlightedProject, filteredProjects.length]);
-
-  // Build keyboard shortcuts for navigation
-  const navigationShortcuts: KeyboardShortcut[] = useMemo(() => {
-    const shortcutsList: KeyboardShortcut[] = [];
-
-    // Sidebar toggle shortcut - always available
-    shortcutsList.push({
-      key: shortcuts.toggleSidebar,
-      action: () => toggleSidebar(),
-      description: 'Toggle sidebar',
-    });
-
-    // Open project shortcut - opens the folder selection dialog directly
-    shortcutsList.push({
-      key: shortcuts.openProject,
-      action: () => handleOpenFolder(),
-      description: 'Open folder selection dialog',
-    });
-
-    // Project picker shortcut - only when we have projects
-    if (projects.length > 0) {
-      shortcutsList.push({
-        key: shortcuts.projectPicker,
-        action: () => setIsProjectPickerOpen((prev) => !prev),
-        description: 'Toggle project picker',
-      });
-    }
-
-    // Project cycling shortcuts - only when we have project history
-    if (projectHistory.length > 1) {
-      shortcutsList.push({
-        key: shortcuts.cyclePrevProject,
-        action: () => cyclePrevProject(),
-        description: 'Cycle to previous project (MRU)',
-      });
-      shortcutsList.push({
-        key: shortcuts.cycleNextProject,
-        action: () => cycleNextProject(),
-        description: 'Cycle to next project (LRU)',
-      });
-    }
-
-    // Only enable nav shortcuts if there's a current project
-    if (currentProject) {
-      navSections.forEach((section) => {
-        section.items.forEach((item) => {
-          if (item.shortcut) {
-            shortcutsList.push({
-              key: item.shortcut,
-              action: () => navigate({ to: `/${item.id}` as const }),
-              description: `Navigate to ${item.label}`,
-            });
-          }
-        });
-      });
-
-      // Add settings shortcut
-      shortcutsList.push({
-        key: shortcuts.settings,
-        action: () => navigate({ to: '/settings' }),
-        description: 'Navigate to Settings',
-      });
-    }
-
-    return shortcutsList;
-  }, [
+  // Navigation sections and keyboard shortcuts (defined after handlers)
+  const { navSections, navigationShortcuts } = useNavigation({
     shortcuts,
+    hideSpecEditor,
+    hideContext,
+    hideTerminal,
+    hideAiProfiles,
     currentProject,
+    projects,
+    projectHistory,
     navigate,
     toggleSidebar,
-    projects.length,
     handleOpenFolder,
-    projectHistory.length,
+    setIsProjectPickerOpen,
     cyclePrevProject,
     cycleNextProject,
-    navSections,
-  ]);
+  });
 
   // Register keyboard shortcuts
   useKeyboardShortcuts(navigationShortcuts);
@@ -990,49 +671,11 @@ export function Sidebar() {
       )}
       data-testid="sidebar"
     >
-      {/* Floating Collapse Toggle Button - Desktop only - At border intersection */}
-      <button
-        onClick={toggleSidebar}
-        className={cn(
-          'hidden lg:flex absolute top-[68px] -right-3 z-9999',
-          'group/toggle items-center justify-center w-7 h-7 rounded-full',
-          // Glass morphism button
-          'bg-card/95 backdrop-blur-sm border border-border/80',
-          // Premium shadow with glow on hover
-          'shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-brand-500/10',
-          'text-muted-foreground hover:text-brand-500 hover:bg-accent/80',
-          'hover:border-brand-500/30',
-          'transition-all duration-200 ease-out titlebar-no-drag',
-          'hover:scale-110 active:scale-90'
-        )}
-        data-testid="sidebar-collapse-button"
-      >
-        {sidebarOpen ? (
-          <PanelLeftClose className="w-3.5 h-3.5 pointer-events-none transition-transform duration-200" />
-        ) : (
-          <PanelLeft className="w-3.5 h-3.5 pointer-events-none transition-transform duration-200" />
-        )}
-        {/* Tooltip */}
-        <div
-          className={cn(
-            'absolute left-full ml-3 px-2.5 py-1.5 rounded-lg',
-            'bg-popover text-popover-foreground text-xs font-medium',
-            'border border-border shadow-lg',
-            'opacity-0 group-hover/toggle:opacity-100 transition-all duration-200',
-            'whitespace-nowrap z-50 pointer-events-none',
-            'translate-x-1 group-hover/toggle:translate-x-0'
-          )}
-          data-testid="sidebar-toggle-tooltip"
-        >
-          {sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}{' '}
-          <span
-            className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono text-muted-foreground"
-            data-testid="sidebar-toggle-shortcut"
-          >
-            {formatShortcut(shortcuts.toggleSidebar, true)}
-          </span>
-        </div>
-      </button>
+      <CollapseToggleButton
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        shortcut={shortcuts.toggleSidebar}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Logo */}
