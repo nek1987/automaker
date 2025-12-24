@@ -32,7 +32,7 @@ import {
 } from '../lib/sdk-options.js';
 import { FeatureLoader } from './feature-loader.js';
 import type { SettingsService } from './settings-service.js';
-import { getAutoLoadClaudeMdSetting } from '../lib/settings-helpers.js';
+import { getAutoLoadClaudeMdSetting, filterClaudeMdFromContext } from '../lib/settings-helpers.js';
 
 const execAsync = promisify(exec);
 
@@ -576,45 +576,7 @@ export class AutoModeService {
 
       // When autoLoadClaudeMd is enabled, filter out CLAUDE.md to avoid duplication
       // (SDK handles CLAUDE.md via settingSources), but keep other context files like CODE_QUALITY.md
-      let contextFilesPrompt = contextResult.formattedPrompt;
-      if (autoLoadClaudeMd && contextResult.files.length > 0) {
-        const nonClaudeFiles = contextResult.files.filter(
-          (f) => f.name.toLowerCase() !== 'claude.md'
-        );
-
-        // Rebuild prompt without CLAUDE.md
-        if (nonClaudeFiles.length > 0) {
-          const formattedFiles = nonClaudeFiles.map((file) => {
-            const header = `## ${file.name}`;
-            const pathInfo = `**Path:** \`${file.path}\``;
-            const descriptionInfo = file.description ? `\n**Purpose:** ${file.description}` : '';
-            return `${header}\n${pathInfo}${descriptionInfo}\n\n${file.content}`;
-          });
-
-          contextFilesPrompt = `# Project Context Files
-
-The following context files provide project-specific rules, conventions, and guidelines.
-Each file serves a specific purpose - use the description to understand when to reference it.
-If you need more details about a context file, you can read the full file at the path provided.
-
-**IMPORTANT**: You MUST follow the rules and conventions specified in these files.
-- Follow ALL commands exactly as shown (e.g., if the project uses \`pnpm\`, NEVER use \`npm\` or \`npx\`)
-- Follow ALL coding conventions, commit message formats, and architectural patterns specified
-- Reference these rules before running ANY shell commands or making commits
-
----
-
-${formattedFiles.join('\n\n---\n\n')}
-
----
-
-**REMINDER**: Before taking any action, verify you are following the conventions specified above.
-`;
-        } else {
-          // All files were CLAUDE.md, so no context to add
-          contextFilesPrompt = '';
-        }
-      }
+      const contextFilesPrompt = filterClaudeMdFromContext(contextResult, autoLoadClaudeMd);
 
       if (options?.continuationPrompt) {
         // Continuation prompt is used when recovering from a plan approval
@@ -819,45 +781,7 @@ ${formattedFiles.join('\n\n---\n\n')}
 
     // When autoLoadClaudeMd is enabled, filter out CLAUDE.md to avoid duplication
     // (SDK handles CLAUDE.md via settingSources), but keep other context files like CODE_QUALITY.md
-    let contextFilesPrompt = contextResult.formattedPrompt;
-    if (autoLoadClaudeMd && contextResult.files.length > 0) {
-      const nonClaudeFiles = contextResult.files.filter(
-        (f) => f.name.toLowerCase() !== 'claude.md'
-      );
-
-      // Rebuild prompt without CLAUDE.md
-      if (nonClaudeFiles.length > 0) {
-        const formattedFiles = nonClaudeFiles.map((file) => {
-          const header = `## ${file.name}`;
-          const pathInfo = `**Path:** \`${file.path}\``;
-          const descriptionInfo = file.description ? `\n**Purpose:** ${file.description}` : '';
-          return `${header}\n${pathInfo}${descriptionInfo}\n\n${file.content}`;
-        });
-
-        contextFilesPrompt = `# Project Context Files
-
-The following context files provide project-specific rules, conventions, and guidelines.
-Each file serves a specific purpose - use the description to understand when to reference it.
-If you need more details about a context file, you can read the full file at the path provided.
-
-**IMPORTANT**: You MUST follow the rules and conventions specified in these files.
-- Follow ALL commands exactly as shown (e.g., if the project uses \`pnpm\`, NEVER use \`npm\` or \`npx\`)
-- Follow ALL coding conventions, commit message formats, and architectural patterns specified
-- Reference these rules before running ANY shell commands or making commits
-
----
-
-${formattedFiles.join('\n\n---\n\n')}
-
----
-
-**REMINDER**: Before taking any action, verify you are following the conventions specified above.
-`;
-      } else {
-        // All files were CLAUDE.md, so no context to add
-        contextFilesPrompt = '';
-      }
-    }
+    const contextFilesPrompt = filterClaudeMdFromContext(contextResult, autoLoadClaudeMd);
 
     // Build complete prompt with feature info, previous context, and follow-up instructions
     let fullPrompt = `## Follow-up on Feature Implementation
