@@ -216,14 +216,6 @@ export function useIssueValidation({
       } = {}
     ) => {
       const { forceRevalidate = false, comments, linkedPRs } = options;
-      console.log('[useIssueValidation] handleValidateIssue called with:', {
-        issueNumber: issue.number,
-        forceRevalidate,
-        commentsProvided: !!comments,
-        commentsCount: comments?.length ?? 0,
-        linkedPRsProvided: !!linkedPRs,
-        linkedPRsCount: linkedPRs?.length ?? 0,
-      });
 
       if (!currentProject?.path) {
         toast.error('No project selected');
@@ -261,12 +253,6 @@ export function useIssueValidation({
             comments, // Include comments if provided
             linkedPRs, // Include linked PRs if provided
           };
-          console.log('[useIssueValidation] Sending validation request:', {
-            hasComments: !!validationInput.comments,
-            commentsCount: validationInput.comments?.length ?? 0,
-            hasLinkedPRs: !!validationInput.linkedPRs,
-            linkedPRsCount: validationInput.linkedPRs?.length ?? 0,
-          });
           const result = await api.github.validateIssue(
             currentProject.path,
             validationInput,

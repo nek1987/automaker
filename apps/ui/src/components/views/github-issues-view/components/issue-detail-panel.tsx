@@ -54,7 +54,7 @@ export function IssueDetailPanel({
 
   // Helper to get validation options with comments and linked PRs
   const getValidationOptions = (forceRevalidate = false) => {
-    const options = {
+    return {
       forceRevalidate,
       comments: includeCommentsInAnalysis && comments.length > 0 ? comments : undefined,
       linkedPRs: issue.linkedPRs?.map((pr) => ({
@@ -63,14 +63,6 @@ export function IssueDetailPanel({
         state: pr.state,
       })),
     };
-    console.log('[IssueDetailPanel] getValidationOptions:', {
-      includeCommentsInAnalysis,
-      commentsCount: comments.length,
-      linkedPRsCount: issue.linkedPRs?.length ?? 0,
-      willIncludeComments: !!options.comments,
-      willIncludeLinkedPRs: !!options.linkedPRs,
-    });
-    return options;
   };
 
   return (

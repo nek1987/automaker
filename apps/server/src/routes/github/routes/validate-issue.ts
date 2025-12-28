@@ -91,19 +91,6 @@ async function runValidation(
 
   try {
     // Build the prompt (include comments and linked PRs if provided)
-    logger.info(
-      `Building validation prompt for issue #${issueNumber}` +
-        (comments?.length ? ` with ${comments.length} comments` : ' without comments') +
-        (linkedPRs?.length ? ` and ${linkedPRs.length} linked PRs` : '')
-    );
-    if (comments?.length) {
-      logger.debug(`Comments included: ${comments.map((c) => c.author).join(', ')}`);
-    }
-    if (linkedPRs?.length) {
-      logger.debug(
-        `Linked PRs: ${linkedPRs.map((pr) => `#${pr.number} (${pr.state})`).join(', ')}`
-      );
-    }
     const prompt = buildValidationPrompt(
       issueNumber,
       issueTitle,
@@ -136,16 +123,12 @@ async function runValidation(
     // Execute the query
     const stream = query({ prompt, options });
     let validationResult: IssueValidationResult | null = null;
-    let responseText = '';
 
     for await (const msg of stream) {
-      // Collect assistant text for debugging and emit progress
+      // Emit progress events for assistant text
       if (msg.type === 'assistant' && msg.message?.content) {
         for (const block of msg.message.content) {
           if (block.type === 'text') {
-            responseText += block.text;
-
-            // Emit progress event
             const progressEvent: IssueValidationEvent = {
               type: 'issue_validation_progress',
               issueNumber,
@@ -162,7 +145,6 @@ async function runValidation(
         const resultMsg = msg as { structured_output?: IssueValidationResult };
         if (resultMsg.structured_output) {
           validationResult = resultMsg.structured_output;
-          logger.debug('Received structured output:', validationResult);
         }
       }
 
@@ -182,7 +164,6 @@ async function runValidation(
     // Require structured output
     if (!validationResult) {
       logger.error('No structured output received from Claude SDK');
-      logger.debug('Raw response text:', responseText);
       throw new Error('Validation failed: no structured output received');
     }
 
@@ -331,9 +312,8 @@ export function createValidateIssueHandler(
         validationComments,
         validationLinkedPRs
       )
-        .catch((error) => {
+        .catch(() => {
           // Error is already handled inside runValidation (event emitted)
-          logger.debug('Validation error caught in background handler:', error);
         })
         .finally(() => {
           clearValidationStatus(projectPath, issueNumber);
