@@ -302,7 +302,6 @@ export class SettingsService {
     ignoreEmptyArrayOverwrite('aiProfiles');
     ignoreEmptyArrayOverwrite('mcpServers');
     ignoreEmptyArrayOverwrite('enabledCursorModels');
-    ignoreEmptyArrayOverwrite('enabledCodexModels');
 
     // Empty object overwrite guard
     if (

@@ -98,7 +98,8 @@ const E2E_SETTINGS = {
     {
       id: 'profile-heavy-task',
       name: 'Heavy Task',
-      description: 'Claude Opus with Ultrathink for complex architecture, migrations, or deep debugging.',
+      description:
+        'Claude Opus with Ultrathink for complex architecture, migrations, or deep debugging.',
       model: 'opus',
       thinkingLevel: 'ultrathink',
       provider: 'claude',
