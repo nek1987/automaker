@@ -14,7 +14,7 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { authenticateForTests } from '../utils';
+import { authenticateForTests, handleLoginScreenIfPresent } from '../utils';
 
 const SETTINGS_PATH = path.resolve(process.cwd(), '../server/data/settings.json');
 const WORKSPACE_ROOT = path.resolve(process.cwd(), '../..');
@@ -109,6 +109,8 @@ test.describe('Settings startup sync race', () => {
     // Ensure authenticated and app is loaded at least to welcome/board.
     await authenticateForTests(page);
     await page.goto('/');
+    await page.waitForLoadState('load');
+    await handleLoginScreenIfPresent(page);
     await page
       .locator('[data-testid="welcome-view"], [data-testid="board-view"]')
       .first()

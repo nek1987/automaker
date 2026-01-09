@@ -1271,25 +1271,6 @@ export function ProvidersSetupStep({ onNext, onBack }: ProvidersSetupStepProps) 
         </div>
       </Tabs>
 
-      <div className="flex items-center justify-center gap-4 py-2 text-sm">
-        {providers.map((provider) => (
-          <div
-            key={provider.id}
-            className={cn(
-              'flex items-center gap-1.5',
-              provider.configured ? 'text-green-500' : 'text-muted-foreground'
-            )}
-          >
-            {provider.configured ? (
-              <CheckCircle2 className="w-4 h-4" />
-            ) : (
-              <div className="w-4 h-4 rounded-full border border-current" />
-            )}
-            <span>{provider.label}</span>
-          </div>
-        ))}
-      </div>
-
       <div className="flex justify-between pt-4">
         <Button variant="ghost" onClick={onBack} className="text-muted-foreground">
           <ArrowLeft className="w-4 h-4 mr-2" />

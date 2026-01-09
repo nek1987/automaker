@@ -202,6 +202,7 @@ export interface InstallationStatus {
    */
   method?: 'cli' | 'wsl' | 'npm' | 'brew' | 'sdk';
   hasApiKey?: boolean;
+  hasOAuthToken?: boolean;
   authenticated?: boolean;
   error?: string;
 }

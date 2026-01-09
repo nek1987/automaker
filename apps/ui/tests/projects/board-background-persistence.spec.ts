@@ -20,6 +20,7 @@ import {
   cleanupTempDir,
   authenticateForTests,
   handleLoginScreenIfPresent,
+  setupWelcomeView,
 } from '../utils';
 
 // Create unique temp dirs for this test run
@@ -102,53 +103,53 @@ test.describe('Board Background Persistence', () => {
       JSON.stringify({ version: 1 }, null, 2)
     );
 
-    // Set up app state with both projects in the list (not recent, but in projects list)
-    await page.addInitScript(
-      ({ projects }: { projects: string[] }) => {
-        const appState = {
-          state: {
-            projects: [
-              {
-                id: projects[0],
-                name: projects[1],
-                path: projects[2],
-                lastOpened: new Date(Date.now() - 86400000).toISOString(),
-                theme: 'red',
-              },
-              {
-                id: projects[3],
-                name: projects[4],
-                path: projects[5],
-                lastOpened: new Date(Date.now() - 172800000).toISOString(),
-                theme: 'red',
-              },
-            ],
-            currentProject: null,
-            currentView: 'welcome',
-            theme: 'red',
-            sidebarOpen: true,
-            apiKeys: { anthropic: '', google: '' },
-            chatSessions: [],
-            chatHistoryOpen: false,
-            maxConcurrency: 3,
-            boardBackgroundByProject: {},
-          },
-          version: 2,
-        };
-        localStorage.setItem('automaker-storage', JSON.stringify(appState));
+    // Set up welcome view with both projects in the list
+    await setupWelcomeView(page, {
+      workspaceDir: TEST_TEMP_DIR,
+      recentProjects: [
+        {
+          id: projectAId,
+          name: projectAName,
+          path: projectAPath,
+          lastOpened: new Date(Date.now() - 86400000).toISOString(),
+        },
+        {
+          id: projectBId,
+          name: projectBName,
+          path: projectBPath,
+          lastOpened: new Date(Date.now() - 172800000).toISOString(),
+        },
+      ],
+    });
 
-        // Setup complete
-        const setupState = {
-          state: {
-            setupComplete: true,
-            workspaceDir: '/tmp',
+    await authenticateForTests(page);
+
+    // Intercept settings API to use our test projects and clear currentProjectId
+    // This ensures the app shows the welcome view with our test projects
+    await page.route('**/api/settings/global', async (route) => {
+      const response = await route.fetch();
+      const json = await response.json();
+      if (json.settings) {
+        // Clear currentProjectId to show welcome view
+        json.settings.currentProjectId = null;
+        // Include our test projects so they appear in the recent projects list
+        json.settings.projects = [
+          {
+            id: projectAId,
+            name: projectAName,
+            path: projectAPath,
+            lastOpened: new Date(Date.now() - 86400000).toISOString(),
           },
-          version: 0,
-        };
-        localStorage.setItem('setup-storage', JSON.stringify(setupState));
-      },
-      { projects: [projectAId, projectAName, projectAPath, projectBId, projectBName, projectBPath] }
-    );
+          {
+            id: projectBId,
+            name: projectBName,
+            path: projectBPath,
+            lastOpened: new Date(Date.now() - 172800000).toISOString(),
+          },
+        ];
+      }
+      await route.fulfill({ response, json });
+    });
 
     // Track API calls to /api/settings/project to verify settings are being loaded
     const settingsApiCalls: Array<{ url: string; method: string; body: string }> = [];
@@ -163,7 +164,6 @@ test.describe('Board Background Persistence', () => {
     });
 
     // Navigate to the app
-    await authenticateForTests(page);
     await page.goto('/');
     await page.waitForLoadState('load');
     await handleLoginScreenIfPresent(page);
@@ -179,10 +179,10 @@ test.describe('Board Background Persistence', () => {
     // Wait for board view
     await expect(page.locator('[data-testid="board-view"]')).toBeVisible({ timeout: 15000 });
 
-    // Verify project A is current
-    await expect(
-      page.locator('[data-testid="project-selector"]').getByText(projectAName)
-    ).toBeVisible({ timeout: 5000 });
+    // Verify project A is current (check header paragraph which is always visible)
+    await expect(page.locator('[data-testid="board-view"]').getByText(projectAName)).toBeVisible({
+      timeout: 5000,
+    });
 
     // CRITICAL: Wait for settings to be loaded (useProjectSettingsLoader hook)
     // This ensures the background settings are fetched from the server
@@ -196,8 +196,16 @@ test.describe('Board Background Persistence', () => {
     // Wait for initial project load to stabilize
     await page.waitForTimeout(500);
 
+    // Ensure sidebar is expanded before interacting with project selector
+    const expandSidebarButton = page.locator('button:has-text("Expand sidebar")');
+    if (await expandSidebarButton.isVisible()) {
+      await expandSidebarButton.click();
+      await page.waitForTimeout(300);
+    }
+
     // Switch to project B (no background)
     const projectSelector = page.locator('[data-testid="project-selector"]');
+    await expect(projectSelector).toBeVisible({ timeout: 5000 });
     await projectSelector.click();
 
     // Wait for dropdown to be visible
@@ -315,7 +323,6 @@ test.describe('Board Background Persistence', () => {
           name: project[1],
           path: project[2],
           lastOpened: new Date().toISOString(),
-          theme: 'red',
         };
 
         const appState = {
@@ -323,8 +330,9 @@ test.describe('Board Background Persistence', () => {
             projects: [projectObj],
             currentProject: projectObj,
             currentView: 'board',
-            theme: 'red',
+            theme: 'dark',
             sidebarOpen: true,
+            skipSandboxWarning: true,
             apiKeys: { anthropic: '', google: '' },
             chatSessions: [],
             chatHistoryOpen: false,
@@ -335,18 +343,43 @@ test.describe('Board Background Persistence', () => {
         };
         localStorage.setItem('automaker-storage', JSON.stringify(appState));
 
-        // Setup complete
+        // Setup complete - use correct key name
         const setupState = {
           state: {
+            isFirstRun: false,
             setupComplete: true,
-            workspaceDir: '/tmp',
+            skipClaudeSetup: false,
           },
-          version: 0,
+          version: 1,
         };
-        localStorage.setItem('setup-storage', JSON.stringify(setupState));
+        localStorage.setItem('automaker-setup', JSON.stringify(setupState));
+
+        // Disable splash screen in tests
+        sessionStorage.setItem('automaker-splash-shown', 'true');
       },
       { project: [projectId, projectName, projectPath] }
     );
+
+    await authenticateForTests(page);
+
+    // Intercept settings API to use our test project instead of the E2E fixture
+    await page.route('**/api/settings/global', async (route) => {
+      const response = await route.fetch();
+      const json = await response.json();
+      // Override to use our test project
+      if (json.settings) {
+        json.settings.currentProjectId = projectId;
+        json.settings.projects = [
+          {
+            id: projectId,
+            name: projectName,
+            path: projectPath,
+            lastOpened: new Date().toISOString(),
+          },
+        ];
+      }
+      await route.fulfill({ response, json });
+    });
 
     // Track API calls to /api/settings/project to verify settings are being loaded
     const settingsApiCalls: Array<{ url: string; method: string; body: string }> = [];
@@ -360,8 +393,7 @@ test.describe('Board Background Persistence', () => {
       }
     });
 
-    // Navigate and authenticate
-    await authenticateForTests(page);
+    // Navigate to the app
     await page.goto('/');
     await page.waitForLoadState('load');
     await handleLoginScreenIfPresent(page);

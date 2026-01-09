@@ -5,7 +5,7 @@ import {
 } from '../../../src/providers/opencode-provider.js';
 import type { ProviderMessage } from '@automaker/types';
 import { collectAsyncGenerator } from '../../utils/helpers.js';
-import { spawnJSONLProcess } from '@automaker/platform';
+import { spawnJSONLProcess, getOpenCodeAuthIndicators } from '@automaker/platform';
 
 vi.mock('@automaker/platform', () => ({
   spawnJSONLProcess: vi.fn(),
@@ -13,6 +13,11 @@ vi.mock('@automaker/platform', () => ({
   findCliInWsl: vi.fn().mockReturnValue(null),
   createWslCommand: vi.fn(),
   windowsToWslPath: vi.fn(),
+  getOpenCodeAuthIndicators: vi.fn().mockResolvedValue({
+    hasAuthFile: false,
+    hasOAuthToken: false,
+    hasApiKey: false,
+  }),
 }));
 
 describe('opencode-provider.ts', () => {
@@ -25,7 +30,8 @@ describe('opencode-provider.ts', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    // Note: Don't use vi.restoreAllMocks() here as it would undo the module-level
+    // mock implementations (like getOpenCodeAuthIndicators) set up with vi.mock()
   });
 
   // ==========================================================================
@@ -815,6 +821,15 @@ describe('opencode-provider.ts', () => {
   // ==========================================================================
 
   describe('detectInstallation', () => {
+    beforeEach(() => {
+      // Ensure the mock implementation is set up for each test
+      vi.mocked(getOpenCodeAuthIndicators).mockResolvedValue({
+        hasAuthFile: false,
+        hasOAuthToken: false,
+        hasApiKey: false,
+      });
+    });
+
     it('should return installed true when CLI is found', async () => {
       (provider as unknown as { cliPath: string }).cliPath = '/usr/local/bin/opencode';
       (provider as unknown as { detectedStrategy: string }).detectedStrategy = 'native';
