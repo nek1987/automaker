@@ -94,6 +94,16 @@ echo "CURSOR_AUTH_TOKEN=$(./scripts/get-cursor-token.sh)" >> .env
 - **macOS**: Tokens are stored in Keychain (service: `cursor-access-token`)
 - **Linux**: Tokens are stored in `~/.config/cursor/auth.json` (not `~/.cursor`)
 
+### OpenCode CLI
+
+OpenCode stores its configuration and auth at `~/.local/share/opencode/`. To share your host authentication with the container:
+
+```yaml
+# In docker-compose.override.yml
+volumes:
+  - ~/.local/share/opencode:/home/automaker/.local/share/opencode
+```
+
 ### Apply to container
 
 ```bash
@@ -121,6 +131,7 @@ echo "CURSOR_AUTH_TOKEN=$(jq -r '.accessToken' ~/.config/cursor/auth.json)" >> .
 volumes:
   - ~/.claude:/home/automaker/.claude
   - ~/.config/cursor:/home/automaker/.config/cursor
+  - ~/.local/share/opencode:/home/automaker/.local/share/opencode
 ```
 
 ## Troubleshooting
@@ -131,4 +142,6 @@ volumes:
 | Can't access web UI   | Verify container is running with `docker ps \| grep automaker`                                                                                    |
 | Need a fresh start    | Run `docker-compose down && docker volume rm automaker-data && docker-compose up -d --build`                                                      |
 | Cursor auth fails     | Re-extract token with `./scripts/get-cursor-token.sh` - tokens expire periodically. Make sure you've run `cursor-agent login` on your host first. |
+| OpenCode not detected | Mount `~/.local/share/opencode` to `/home/automaker/.local/share/opencode`. Make sure you've run `opencode auth login` on your host first.        |
 | File permission errors | Rebuild with `UID=$(id -u) GID=$(id -g) docker-compose build` to match container user to your host user. See [Fixing File Permission Issues](#fixing-file-permission-issues). |
+

@@ -102,6 +102,12 @@ RUN curl https://cursor.com/install -fsS | bash && \
     ls -la /home/automaker/.local/bin/ && \
     echo "=== PATH is: $PATH ===" && \
     (which cursor-agent && cursor-agent --version) || echo "cursor-agent installed (may need auth setup)"
+
+# Install OpenCode CLI (for multi-provider AI model access)
+RUN curl -fsSL https://opencode.ai/install | bash && \
+    echo "=== Checking OpenCode CLI installation ===" && \
+    ls -la /home/automaker/.local/bin/ && \
+    (which opencode && opencode --version) || echo "opencode installed (may need auth setup)"
 USER root
 
 # Add PATH to profile so it's available in all interactive shells (for login shells)
