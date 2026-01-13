@@ -422,6 +422,31 @@ export function BoardView() {
   const selectedWorktreeBranch =
     currentWorktreeBranch || worktrees.find((w) => w.isMain)?.branch || 'main';
 
+  // Helper function to add and select a worktree
+  const addAndSelectWorktree = useCallback(
+    (worktreeResult: { path: string; branch: string }) => {
+      if (!currentProject) return;
+
+      const currentWorktrees = getWorktrees(currentProject.path);
+      const existingWorktree = currentWorktrees.find((w) => w.branch === worktreeResult.branch);
+
+      // Only add if it doesn't already exist (to avoid duplicates)
+      if (!existingWorktree) {
+        const newWorktreeInfo = {
+          path: worktreeResult.path,
+          branch: worktreeResult.branch,
+          isMain: false,
+          isCurrent: false,
+          hasWorktree: true,
+        };
+        setWorktrees(currentProject.path, [...currentWorktrees, newWorktreeInfo]);
+      }
+      // Select the worktree (whether it existed or was just added)
+      setCurrentWorktree(currentProject.path, worktreeResult.path, worktreeResult.branch);
+    },
+    [currentProject, getWorktrees, setWorktrees, setCurrentWorktree]
+  );
+
   // Extract all action handlers into a hook
   const {
     handleAddFeature,
@@ -467,26 +492,7 @@ export function BoardView() {
     outputFeature,
     projectPath: currentProject?.path || null,
     onWorktreeCreated: () => setWorktreeRefreshKey((k) => k + 1),
-    onWorktreeAutoSelect: (newWorktree) => {
-      if (!currentProject) return;
-      // Check if worktree already exists in the store (by branch name)
-      const currentWorktrees = getWorktrees(currentProject.path);
-      const existingWorktree = currentWorktrees.find((w) => w.branch === newWorktree.branch);
-
-      // Only add if it doesn't already exist (to avoid duplicates)
-      if (!existingWorktree) {
-        const newWorktreeInfo = {
-          path: newWorktree.path,
-          branch: newWorktree.branch,
-          isMain: false,
-          isCurrent: false,
-          hasWorktree: true,
-        };
-        setWorktrees(currentProject.path, [...currentWorktrees, newWorktreeInfo]);
-      }
-      // Select the worktree (whether it existed or was just added)
-      setCurrentWorktree(currentProject.path, newWorktree.path, newWorktree.branch);
-    },
+    onWorktreeAutoSelect: addAndSelectWorktree,
     currentWorktreeBranch,
   });
 
@@ -507,7 +513,8 @@ export function BoardView() {
           finalBranchName = undefined;
         } else if (workMode === 'auto') {
           // Auto-generate a branch name based on current branch and timestamp
-          const baseBranch = currentWorktreeBranch || 'main';
+          const baseBranch =
+            currentWorktreeBranch || getPrimaryWorktreeBranch(currentProject.path) || 'main';
           const timestamp = Date.now();
           const randomSuffix = Math.random().toString(36).substring(2, 6);
           finalBranchName = `feature/${baseBranch}-${timestamp}-${randomSuffix}`;
@@ -532,28 +539,7 @@ export function BoardView() {
                   }`
                 );
                 // Auto-select the worktree when creating/using it for bulk update
-                const currentWorktrees = getWorktrees(currentProject.path);
-                const existingWorktree = currentWorktrees.find(
-                  (w) => w.branch === result.worktree.branch
-                );
-
-                // Only add if it doesn't already exist (to avoid duplicates)
-                if (!existingWorktree) {
-                  const newWorktreeInfo = {
-                    path: result.worktree.path,
-                    branch: result.worktree.branch,
-                    isMain: false,
-                    isCurrent: false,
-                    hasWorktree: true,
-                  };
-                  setWorktrees(currentProject.path, [...currentWorktrees, newWorktreeInfo]);
-                }
-                // Select the worktree (whether it existed or was just added)
-                setCurrentWorktree(
-                  currentProject.path,
-                  result.worktree.path,
-                  result.worktree.branch
-                );
+                addAndSelectWorktree(result.worktree);
                 // Refresh worktree list in UI
                 setWorktreeRefreshKey((k) => k + 1);
               } else if (!result.success) {
@@ -609,9 +595,8 @@ export function BoardView() {
       updateFeature,
       exitSelectionMode,
       currentWorktreeBranch,
-      getWorktrees,
-      setWorktrees,
-      setCurrentWorktree,
+      getPrimaryWorktreeBranch,
+      addAndSelectWorktree,
       setWorktreeRefreshKey,
     ]
   );
