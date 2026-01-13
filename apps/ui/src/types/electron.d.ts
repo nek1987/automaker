@@ -770,6 +770,13 @@ export interface WorktreeAPI {
     error?: string;
   }>;
 
+  // Generate an AI commit message from git diff
+  generateCommitMessage: (worktreePath: string) => Promise<{
+    success: boolean;
+    message?: string;
+    error?: string;
+  }>;
+
   // Push a worktree branch to remote
   push: (
     worktreePath: string,

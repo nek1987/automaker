@@ -1543,6 +1543,14 @@ function createMockWorktreeAPI(): WorktreeAPI {
       };
     },
 
+    generateCommitMessage: async (worktreePath: string) => {
+      console.log('[Mock] Generating commit message for:', worktreePath);
+      return {
+        success: true,
+        message: 'feat: Add mock commit message generation',
+      };
+    },
+
     push: async (worktreePath: string, force?: boolean) => {
       console.log('[Mock] Pushing worktree:', { worktreePath, force });
       return {

@@ -72,18 +72,17 @@ export function UsagePopover() {
   const [codexError, setCodexError] = useState<UsageError | null>(null);
 
   // Check authentication status
-  const isClaudeCliVerified =
-    claudeAuthStatus?.authenticated && claudeAuthStatus?.method === 'cli_authenticated';
+  const isClaudeAuthenticated = !!claudeAuthStatus?.authenticated;
   const isCodexAuthenticated = codexAuthStatus?.authenticated;
 
   // Determine which tab to show by default
   useEffect(() => {
-    if (isClaudeCliVerified) {
+    if (isClaudeAuthenticated) {
       setActiveTab('claude');
     } else if (isCodexAuthenticated) {
       setActiveTab('codex');
     }
-  }, [isClaudeCliVerified, isCodexAuthenticated]);
+  }, [isClaudeAuthenticated, isCodexAuthenticated]);
 
   // Check if data is stale (older than 2 minutes)
   const isClaudeStale = useMemo(() => {
@@ -174,10 +173,10 @@ export function UsagePopover() {
 
   // Auto-fetch on mount if data is stale
   useEffect(() => {
-    if (isClaudeStale && isClaudeCliVerified) {
+    if (isClaudeStale && isClaudeAuthenticated) {
       fetchClaudeUsage(true);
     }
-  }, [isClaudeStale, isClaudeCliVerified, fetchClaudeUsage]);
+  }, [isClaudeStale, isClaudeAuthenticated, fetchClaudeUsage]);
 
   useEffect(() => {
     if (isCodexStale && isCodexAuthenticated) {
@@ -190,7 +189,7 @@ export function UsagePopover() {
     if (!open) return;
 
     // Fetch based on active tab
-    if (activeTab === 'claude' && isClaudeCliVerified) {
+    if (activeTab === 'claude' && isClaudeAuthenticated) {
       if (!claudeUsage || isClaudeStale) {
         fetchClaudeUsage();
       }
@@ -214,7 +213,7 @@ export function UsagePopover() {
     activeTab,
     claudeUsage,
     isClaudeStale,
-    isClaudeCliVerified,
+    isClaudeAuthenticated,
     codexUsage,
     isCodexStale,
     isCodexAuthenticated,
@@ -349,7 +348,7 @@ export function UsagePopover() {
   );
 
   // Determine which tabs to show
-  const showClaudeTab = isClaudeCliVerified;
+  const showClaudeTab = isClaudeAuthenticated;
   const showCodexTab = isCodexAuthenticated;
 
   return (

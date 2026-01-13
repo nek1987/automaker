@@ -8,7 +8,7 @@ import { Archive, Settings2, CheckSquare, GripVertical, Plus } from 'lucide-reac
 import { useResponsiveKanban } from '@/hooks/use-responsive-kanban';
 import { getColumnsWithPipeline, type ColumnId } from './constants';
 import type { PipelineConfig } from '@automaker/types';
-
+import { cn } from '@/lib/utils';
 interface KanbanBoardProps {
   sensors: any;
   collisionDetectionStrategy: (args: any) => any;
@@ -57,6 +57,8 @@ interface KanbanBoardProps {
   isDragging?: boolean;
   /** Whether the board is in read-only mode */
   isReadOnly?: boolean;
+  /** Additional className for custom styling (e.g., transition classes) */
+  className?: string;
 }
 
 export function KanbanBoard({
@@ -95,6 +97,7 @@ export function KanbanBoard({
   onAiSuggest,
   isDragging = false,
   isReadOnly = false,
+  className,
 }: KanbanBoardProps) {
   // Generate columns including pipeline steps
   const columns = useMemo(() => getColumnsWithPipeline(pipelineConfig), [pipelineConfig]);
@@ -108,7 +111,14 @@ export function KanbanBoard({
   const { columnWidth, containerStyle } = useResponsiveKanban(columns.length);
 
   return (
-    <div className="flex-1 overflow-x-auto px-5 pt-4 pb-4 relative" style={backgroundImageStyle}>
+    <div
+      className={cn(
+        'flex-1 overflow-x-auto px-5 pt-4 pb-4 relative',
+        'transition-opacity duration-200',
+        className
+      )}
+      style={backgroundImageStyle}
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetectionStrategy}

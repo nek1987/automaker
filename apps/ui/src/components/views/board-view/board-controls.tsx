@@ -19,7 +19,7 @@ export function BoardControls({
 
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-5">
         {/* Board Background Button */}
         <Tooltip>
           <TooltipTrigger asChild>

@@ -1683,6 +1683,8 @@ export class HttpApiClient implements ElectronAPI {
       }),
     commit: (worktreePath: string, message: string) =>
       this.post('/api/worktree/commit', { worktreePath, message }),
+    generateCommitMessage: (worktreePath: string) =>
+      this.post('/api/worktree/generate-commit-message', { worktreePath }),
     push: (worktreePath: string, force?: boolean) =>
       this.post('/api/worktree/push', { worktreePath, force }),
     createPR: (worktreePath: string, options?: any) =>

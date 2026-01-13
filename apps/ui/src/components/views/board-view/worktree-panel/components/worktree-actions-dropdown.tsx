@@ -44,6 +44,8 @@ interface WorktreeActionsDropdownProps {
   isDevServerRunning: boolean;
   devServerInfo?: DevServerInfo;
   gitRepoStatus: GitRepoStatus;
+  /** When true, renders as a standalone button (not attached to another element) */
+  standalone?: boolean;
   onOpenChange: (open: boolean) => void;
   onPull: (worktree: WorktreeInfo) => void;
   onPush: (worktree: WorktreeInfo) => void;
@@ -71,6 +73,7 @@ export function WorktreeActionsDropdown({
   isDevServerRunning,
   devServerInfo,
   gitRepoStatus,
+  standalone = false,
   onOpenChange,
   onPull,
   onPush,
@@ -115,15 +118,17 @@ export function WorktreeActionsDropdown({
     <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant={isSelected ? 'default' : 'outline'}
+          variant={standalone ? 'outline' : isSelected ? 'default' : 'outline'}
           size="sm"
           className={cn(
-            'h-7 w-7 p-0 rounded-l-none',
-            isSelected && 'bg-primary text-primary-foreground',
-            !isSelected && 'bg-secondary/50 hover:bg-secondary'
+            'h-7 w-7 p-0',
+            !standalone && 'rounded-l-none',
+            standalone && 'h-8 w-8 shrink-0',
+            !standalone && isSelected && 'bg-primary text-primary-foreground',
+            !standalone && !isSelected && 'bg-secondary/50 hover:bg-secondary'
           )}
         >
-          <MoreHorizontal className="w-3 h-3" />
+          <MoreHorizontal className="w-3.5 h-3.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">

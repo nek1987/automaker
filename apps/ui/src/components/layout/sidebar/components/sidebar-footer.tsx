@@ -235,7 +235,7 @@ export function SidebarFooter({
           {sidebarOpen && (
             <span
               className={cn(
-                'hidden sm:flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-mono rounded-md transition-all duration-200',
+                'flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-mono rounded-md transition-all duration-200',
                 isActiveRoute('settings')
                   ? 'bg-brand-500/20 text-brand-400'
                   : 'bg-muted text-muted-foreground group-hover:bg-accent'

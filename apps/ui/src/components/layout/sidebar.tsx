@@ -253,26 +253,25 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile overlay backdrop */}
+      {/* Mobile backdrop overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
           onClick={toggleSidebar}
-          aria-hidden="true"
+          data-testid="sidebar-backdrop"
         />
       )}
       <aside
         className={cn(
-          'flex-shrink-0 flex flex-col z-50 relative',
+          'flex-shrink-0 flex flex-col z-30',
           // Glass morphism background with gradient
           'bg-gradient-to-b from-sidebar/95 via-sidebar/85 to-sidebar/90 backdrop-blur-2xl',
           // Premium border with subtle glow
           'border-r border-border/60 shadow-[1px_0_20px_-5px_rgba(0,0,0,0.1)]',
           // Smooth width transition
           'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-          // Mobile: hidden when closed, full width overlay when open
-          // Desktop: always visible, toggle between narrow and wide
-          sidebarOpen ? 'fixed lg:relative left-0 top-0 h-full w-72' : 'hidden lg:flex w-16'
+          // Mobile: overlay when open, collapsed when closed
+          sidebarOpen ? 'fixed inset-y-0 left-0 w-72 lg:relative lg:w-72' : 'relative w-16'
         )}
         data-testid="sidebar"
       >

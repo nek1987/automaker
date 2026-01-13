@@ -8,6 +8,7 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
+  useReactFlow,
   SelectionMode,
   ConnectionMode,
   Node,
@@ -243,6 +244,82 @@ function GraphCanvasInner({
     },
     []
   );
+
+  // Get fitView from React Flow for orientation change handling
+  const { fitView } = useReactFlow();
+
+  // Handle orientation changes on mobile devices
+  // When rotating from landscape to portrait, the view may incorrectly zoom in
+  // This effect listens for orientation changes and calls fitView to correct the viewport
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Track the previous orientation to detect changes
+    let previousWidth = window.innerWidth;
+    let previousHeight = window.innerHeight;
+
+    // Track timeout IDs for cleanup
+    let orientationTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let resizeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const handleOrientationChange = () => {
+      // Clear any pending timeout
+      if (orientationTimeoutId) {
+        clearTimeout(orientationTimeoutId);
+      }
+      // Small delay to allow the browser to complete the orientation change
+      orientationTimeoutId = setTimeout(() => {
+        fitView({ padding: 0.2, duration: 300 });
+        orientationTimeoutId = null;
+      }, 100);
+    };
+
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      const currentHeight = window.innerHeight;
+
+      // Detect orientation change by checking if width and height swapped significantly
+      // This happens when device rotates between portrait and landscape
+      const widthDiff = Math.abs(currentWidth - previousHeight);
+      const heightDiff = Math.abs(currentHeight - previousWidth);
+
+      // If the dimensions are close to being swapped (within 100px tolerance)
+      // it's likely an orientation change
+      const isOrientationChange = widthDiff < 100 && heightDiff < 100;
+
+      if (isOrientationChange) {
+        // Clear any pending timeout
+        if (resizeTimeoutId) {
+          clearTimeout(resizeTimeoutId);
+        }
+        // Delay fitView to allow browser to complete the layout
+        resizeTimeoutId = setTimeout(() => {
+          fitView({ padding: 0.2, duration: 300 });
+          resizeTimeoutId = null;
+        }, 150);
+      }
+
+      previousWidth = currentWidth;
+      previousHeight = currentHeight;
+    };
+
+    // Listen for orientation change event (mobile specific)
+    window.addEventListener('orientationchange', handleOrientationChange);
+    // Also listen for resize as a fallback (some browsers don't fire orientationchange)
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleResize);
+      // Clear any pending timeouts
+      if (orientationTimeoutId) {
+        clearTimeout(orientationTimeoutId);
+      }
+      if (resizeTimeoutId) {
+        clearTimeout(resizeTimeoutId);
+      }
+    };
+  }, [fitView]);
 
   // MiniMap node color based on status
   const minimapNodeColor = useCallback((node: Node<TaskNodeData>) => {
