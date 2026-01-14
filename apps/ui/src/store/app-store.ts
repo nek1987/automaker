@@ -601,6 +601,10 @@ export interface AppState {
     authenticated: boolean;
     authMethod?: string;
   }>; // Cached providers
+  opencodeModelsLoading: boolean; // Whether OpenCode models are being fetched
+  opencodeModelsError: string | null; // Error message if fetch failed
+  opencodeModelsLastFetched: number | null; // Timestamp of last successful fetch
+  opencodeModelsLastFailedAt: number | null; // Timestamp of last failed fetch
 
   // Claude Agent SDK Settings
   autoLoadClaudeMd: boolean; // Auto-load CLAUDE.md files using SDK's settingSources option
@@ -1182,6 +1186,9 @@ export interface AppActions {
     }>
   ) => void;
 
+  // OpenCode Models actions
+  fetchOpencodeModels: (forceRefresh?: boolean) => Promise<void>;
+
   // Init Script State actions (keyed by projectPath::branch to support concurrent scripts)
   setInitScriptState: (
     projectPath: string,
@@ -1253,6 +1260,10 @@ const initialState: AppState = {
   dynamicOpencodeModels: [], // Empty until fetched from OpenCode CLI
   enabledDynamicModelIds: [], // Empty until user enables dynamic models
   cachedOpencodeProviders: [], // Empty until fetched from OpenCode CLI
+  opencodeModelsLoading: false,
+  opencodeModelsError: null,
+  opencodeModelsLastFetched: null,
+  opencodeModelsLastFailedAt: null,
   autoLoadClaudeMd: false, // Default to disabled (user must opt-in)
   skipSandboxWarning: false, // Default to disabled (show sandbox warning dialog)
   mcpServers: [], // No MCP servers configured by default
@@ -3250,6 +3261,65 @@ export const useAppStore = create<AppState & AppActions>()((set, get) => ({
       codexModels: models,
       codexModelsLastFetched: Date.now(),
     }),
+
+  // OpenCode Models actions
+  fetchOpencodeModels: async (forceRefresh = false) => {
+    const FAILURE_COOLDOWN_MS = 30 * 1000; // 30 seconds
+    const SUCCESS_CACHE_MS = 5 * 60 * 1000; // 5 minutes
+
+    const { opencodeModelsLastFetched, opencodeModelsLoading, opencodeModelsLastFailedAt } = get();
+
+    // Skip if already loading
+    if (opencodeModelsLoading) return;
+
+    // Skip if recently failed and not forcing refresh
+    if (
+      !forceRefresh &&
+      opencodeModelsLastFailedAt &&
+      Date.now() - opencodeModelsLastFailedAt < FAILURE_COOLDOWN_MS
+    ) {
+      return;
+    }
+
+    // Skip if recently fetched successfully and not forcing refresh
+    if (
+      !forceRefresh &&
+      opencodeModelsLastFetched &&
+      Date.now() - opencodeModelsLastFetched < SUCCESS_CACHE_MS
+    ) {
+      return;
+    }
+
+    set({ opencodeModelsLoading: true, opencodeModelsError: null });
+
+    try {
+      const api = getElectronAPI();
+      if (!api.setup) {
+        throw new Error('Setup API not available');
+      }
+
+      const result = await api.setup.getOpencodeModels(forceRefresh);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch OpenCode models');
+      }
+
+      set({
+        dynamicOpencodeModels: result.models || [],
+        opencodeModelsLastFetched: Date.now(),
+        opencodeModelsLoading: false,
+        opencodeModelsError: null,
+        opencodeModelsLastFailedAt: null, // Clear failure on success
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      set({
+        opencodeModelsError: errorMessage,
+        opencodeModelsLoading: false,
+        opencodeModelsLastFailedAt: Date.now(), // Record failure time for cooldown
+      });
+    }
+  },
 
   // Pipeline actions
   setPipelineConfig: (projectPath, config) => {

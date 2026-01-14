@@ -166,6 +166,8 @@ export function PhaseModelSelector({
     codexModelsLoading,
     fetchCodexModels,
     dynamicOpencodeModels,
+    opencodeModelsLoading,
+    fetchOpencodeModels,
   } = useAppStore();
 
   // Detect mobile devices to use inline expansion instead of nested popovers
@@ -184,6 +186,15 @@ export function PhaseModelSelector({
       });
     }
   }, [codexModels.length, codexModelsLoading, fetchCodexModels]);
+
+  // Fetch OpenCode models on mount
+  useEffect(() => {
+    if (dynamicOpencodeModels.length === 0 && !opencodeModelsLoading) {
+      fetchOpencodeModels().catch(() => {
+        // Silently fail - user will see only static OpenCode models
+      });
+    }
+  }, [dynamicOpencodeModels.length, opencodeModelsLoading, fetchOpencodeModels]);
 
   // Close expanded group when trigger scrolls out of view
   useEffect(() => {
