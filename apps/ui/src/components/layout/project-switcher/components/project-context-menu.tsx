@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState, memo } from 'react';
+import { useEffect, useRef, useState, memo, useCallback } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Edit2, Trash2, Palette, ChevronRight, Moon, Sun, Monitor } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { type ThemeMode, useAppStore } from '@/store/app-store';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { Project } from '@/lib/electron';
 import { PROJECT_DARK_THEMES, PROJECT_LIGHT_THEMES } from '@/components/layout/sidebar/constants';
 import { useThemePreview } from '@/components/layout/sidebar/hooks';
+
+// Constant for "use global theme" option
+const USE_GLOBAL_THEME = '' as const;
 
 // Constants for z-index values
 const Z_INDEX = {
@@ -124,19 +128,26 @@ export function ProjectContextMenu({
   } = useAppStore();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [showThemeSubmenu, setShowThemeSubmenu] = useState(false);
+  const [removeConfirmed, setRemoveConfirmed] = useState(false);
   const themeSubmenuRef = useRef<HTMLDivElement>(null);
 
   const { handlePreviewEnter, handlePreviewLeave } = useThemePreview({ setPreviewTheme });
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
+      // Don't close if a confirmation dialog is open (dialog is in a portal)
+      if (showRemoveDialog) return;
+
+      if (menuRef.current && !menuRef.current.contains(event.target as globalThis.Node)) {
         setPreviewTheme(null);
         onClose();
       }
     };
 
-    const handleEscape = (event: KeyboardEvent) => {
+    const handleEscape = (event: globalThis.KeyboardEvent) => {
+      // Don't close if a confirmation dialog is open (let the dialog handle escape)
+      if (showRemoveDialog) return;
+
       if (event.key === 'Escape') {
         setPreviewTheme(null);
         onClose();
@@ -150,7 +161,7 @@ export function ProjectContextMenu({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [onClose, setPreviewTheme]);
+  }, [onClose, setPreviewTheme, showRemoveDialog]);
 
   const handleEdit = () => {
     onEdit(project);
@@ -160,166 +171,187 @@ export function ProjectContextMenu({
     setShowRemoveDialog(true);
   };
 
-  const handleThemeSelect = (value: ThemeMode | '') => {
-    setPreviewTheme(null);
-    if (value !== '') {
-      setTheme(value);
-    } else {
-      setTheme(globalTheme);
-    }
-    setProjectTheme(project.id, value === '' ? null : value);
-    setShowThemeSubmenu(false);
-  };
+  const handleThemeSelect = useCallback(
+    (value: ThemeMode | typeof USE_GLOBAL_THEME) => {
+      setPreviewTheme(null);
+      const isUsingGlobal = value === USE_GLOBAL_THEME;
+      setTheme(isUsingGlobal ? globalTheme : value);
+      setProjectTheme(project.id, isUsingGlobal ? null : value);
+      setShowThemeSubmenu(false);
+    },
+    [globalTheme, project.id, setPreviewTheme, setProjectTheme, setTheme]
+  );
 
-  const handleConfirmRemove = () => {
+  const handleConfirmRemove = useCallback(() => {
     moveProjectToTrash(project.id);
-    onClose();
-  };
+    toast.success('Project removed', {
+      description: `${project.name} has been removed from your projects list`,
+    });
+    setRemoveConfirmed(true);
+  }, [moveProjectToTrash, project.id, project.name]);
+
+  const handleDialogClose = useCallback(
+    (isOpen: boolean) => {
+      setShowRemoveDialog(isOpen);
+      // Close the context menu when dialog closes (whether confirmed or cancelled)
+      // This prevents the context menu from reappearing after dialog interaction
+      if (!isOpen) {
+        // Reset confirmation state
+        setRemoveConfirmed(false);
+        // Always close the context menu when dialog closes
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
   return (
     <>
-      <div
-        ref={menuRef}
-        className={cn(
-          'fixed min-w-48 rounded-lg',
-          'bg-popover text-popover-foreground',
-          'border border-border shadow-lg',
-          'animate-in fade-in zoom-in-95 duration-100'
-        )}
-        style={{
-          top: position.y,
-          left: position.x,
-          zIndex: Z_INDEX.CONTEXT_MENU,
-        }}
-        data-testid="project-context-menu"
-      >
-        <div className="p-1">
-          <button
-            onClick={handleEdit}
-            className={cn(
-              'w-full flex items-center gap-2 px-3 py-2 rounded-md',
-              'text-sm font-medium text-left',
-              'hover:bg-accent transition-colors',
-              'focus:outline-none focus:bg-accent'
-            )}
-            data-testid="edit-project-button"
-          >
-            <Edit2 className="w-4 h-4" />
-            <span>Edit Name & Icon</span>
-          </button>
-
-          {/* Theme Submenu Trigger */}
-          <div
-            className="relative"
-            onMouseEnter={() => setShowThemeSubmenu(true)}
-            onMouseLeave={() => {
-              setShowThemeSubmenu(false);
-              setPreviewTheme(null);
-            }}
-          >
+      {/* Hide context menu when confirm dialog is open */}
+      {!showRemoveDialog && (
+        <div
+          ref={menuRef}
+          className={cn(
+            'fixed min-w-48 rounded-lg',
+            'bg-popover text-popover-foreground',
+            'border border-border shadow-lg',
+            'animate-in fade-in zoom-in-95 duration-100'
+          )}
+          style={{
+            top: position.y,
+            left: position.x,
+            zIndex: Z_INDEX.CONTEXT_MENU,
+          }}
+          data-testid="project-context-menu"
+        >
+          <div className="p-1">
             <button
-              onClick={() => setShowThemeSubmenu(!showThemeSubmenu)}
+              onClick={handleEdit}
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 rounded-md',
                 'text-sm font-medium text-left',
                 'hover:bg-accent transition-colors',
                 'focus:outline-none focus:bg-accent'
               )}
-              data-testid="theme-project-button"
+              data-testid="edit-project-button"
             >
-              <Palette className="w-4 h-4" />
-              <span className="flex-1">Project Theme</span>
-              {project.theme && (
-                <span className="text-[10px] text-muted-foreground capitalize">
-                  {project.theme}
-                </span>
-              )}
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <Edit2 className="w-4 h-4" />
+              <span>Edit Name & Icon</span>
             </button>
 
-            {/* Theme Submenu */}
-            {showThemeSubmenu && (
-              <div
-                ref={themeSubmenuRef}
+            {/* Theme Submenu Trigger */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowThemeSubmenu(true)}
+              onMouseLeave={() => {
+                setShowThemeSubmenu(false);
+                setPreviewTheme(null);
+              }}
+            >
+              <button
+                onClick={() => setShowThemeSubmenu(!showThemeSubmenu)}
                 className={cn(
-                  'absolute left-full top-0 ml-1 min-w-[420px] rounded-lg',
-                  'bg-popover text-popover-foreground',
-                  'border border-border shadow-lg',
-                  'animate-in fade-in zoom-in-95 duration-100'
+                  'w-full flex items-center gap-2 px-3 py-2 rounded-md',
+                  'text-sm font-medium text-left',
+                  'hover:bg-accent transition-colors',
+                  'focus:outline-none focus:bg-accent'
                 )}
-                style={{ zIndex: Z_INDEX.THEME_SUBMENU }}
-                data-testid="project-theme-submenu"
+                data-testid="theme-project-button"
               >
-                <div className="p-2">
-                  {/* Use Global Option */}
-                  <button
-                    onPointerEnter={() => handlePreviewEnter(globalTheme)}
-                    onPointerLeave={handlePreviewLeave}
-                    onClick={() => handleThemeSelect('')}
-                    className={cn(
-                      'w-full flex items-center gap-2 px-3 py-2 rounded-md',
-                      'text-sm font-medium text-left',
-                      'hover:bg-accent transition-colors',
-                      'focus:outline-none focus:bg-accent',
-                      !project.theme && 'bg-accent'
-                    )}
-                    data-testid="project-theme-global"
-                  >
-                    <Monitor className="w-4 h-4" />
-                    <span>Use Global</span>
-                    <span className="text-[10px] text-muted-foreground ml-1 capitalize">
-                      ({globalTheme})
-                    </span>
-                  </button>
+                <Palette className="w-4 h-4" />
+                <span className="flex-1">Project Theme</span>
+                {project.theme && (
+                  <span className="text-[10px] text-muted-foreground capitalize">
+                    {project.theme}
+                  </span>
+                )}
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
 
-                  <div className="h-px bg-border my-2" />
+              {/* Theme Submenu */}
+              {showThemeSubmenu && (
+                <div
+                  ref={themeSubmenuRef}
+                  className={cn(
+                    'absolute left-full top-0 ml-1 min-w-[420px] rounded-lg',
+                    'bg-popover text-popover-foreground',
+                    'border border-border shadow-lg',
+                    'animate-in fade-in zoom-in-95 duration-100'
+                  )}
+                  style={{ zIndex: Z_INDEX.THEME_SUBMENU }}
+                  data-testid="project-theme-submenu"
+                >
+                  <div className="p-2">
+                    {/* Use Global Option */}
+                    <button
+                      onPointerEnter={() => handlePreviewEnter(globalTheme)}
+                      onPointerLeave={handlePreviewLeave}
+                      onClick={() => handleThemeSelect(USE_GLOBAL_THEME)}
+                      className={cn(
+                        'w-full flex items-center gap-2 px-3 py-2 rounded-md',
+                        'text-sm font-medium text-left',
+                        'hover:bg-accent transition-colors',
+                        'focus:outline-none focus:bg-accent',
+                        !project.theme && 'bg-accent'
+                      )}
+                      data-testid="project-theme-global"
+                    >
+                      <Monitor className="w-4 h-4" />
+                      <span>Use Global</span>
+                      <span className="text-[10px] text-muted-foreground ml-1 capitalize">
+                        ({globalTheme})
+                      </span>
+                    </button>
 
-                  {/* Two Column Layout - Using reusable ThemeColumn component */}
-                  <div className="flex gap-2">
-                    <ThemeColumn
-                      title="Dark"
-                      icon={Moon}
-                      themes={PROJECT_DARK_THEMES as ThemeOption[]}
-                      selectedTheme={project.theme as ThemeMode | null}
-                      onPreviewEnter={handlePreviewEnter}
-                      onPreviewLeave={handlePreviewLeave}
-                      onSelect={handleThemeSelect}
-                    />
-                    <ThemeColumn
-                      title="Light"
-                      icon={Sun}
-                      themes={PROJECT_LIGHT_THEMES as ThemeOption[]}
-                      selectedTheme={project.theme as ThemeMode | null}
-                      onPreviewEnter={handlePreviewEnter}
-                      onPreviewLeave={handlePreviewLeave}
-                      onSelect={handleThemeSelect}
-                    />
+                    <div className="h-px bg-border my-2" />
+
+                    {/* Two Column Layout - Using reusable ThemeColumn component */}
+                    <div className="flex gap-2">
+                      <ThemeColumn
+                        title="Dark"
+                        icon={Moon}
+                        themes={PROJECT_DARK_THEMES as ThemeOption[]}
+                        selectedTheme={project.theme as ThemeMode | null}
+                        onPreviewEnter={handlePreviewEnter}
+                        onPreviewLeave={handlePreviewLeave}
+                        onSelect={handleThemeSelect}
+                      />
+                      <ThemeColumn
+                        title="Light"
+                        icon={Sun}
+                        themes={PROJECT_LIGHT_THEMES as ThemeOption[]}
+                        selectedTheme={project.theme as ThemeMode | null}
+                        onPreviewEnter={handlePreviewEnter}
+                        onPreviewLeave={handlePreviewLeave}
+                        onSelect={handleThemeSelect}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <button
-            onClick={handleRemove}
-            className={cn(
-              'w-full flex items-center gap-2 px-3 py-2 rounded-md',
-              'text-sm font-medium text-left',
-              'text-destructive hover:bg-destructive/10',
-              'transition-colors',
-              'focus:outline-none focus:bg-destructive/10'
-            )}
-            data-testid="remove-project-button"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Remove Project</span>
-          </button>
+            <button
+              onClick={handleRemove}
+              className={cn(
+                'w-full flex items-center gap-2 px-3 py-2 rounded-md',
+                'text-sm font-medium text-left',
+                'text-destructive hover:bg-destructive/10',
+                'transition-colors',
+                'focus:outline-none focus:bg-destructive/10'
+              )}
+              data-testid="remove-project-button"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Remove Project</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <ConfirmDialog
         open={showRemoveDialog}
-        onOpenChange={setShowRemoveDialog}
+        onOpenChange={handleDialogClose}
         onConfirm={handleConfirmRemove}
         title="Remove Project"
         description={`Are you sure you want to remove "${project.name}" from the project list? This won't delete any files on disk.`}
