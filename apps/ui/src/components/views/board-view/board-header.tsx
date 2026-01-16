@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Wand2, GitBranch } from 'lucide-react';
+import { Wand2, GitBranch, ClipboardCheck } from 'lucide-react';
 import { UsagePopover } from '@/components/usage-popover';
 import { useAppStore } from '@/store/app-store';
 import { useSetupStore } from '@/store/setup-store';
@@ -25,6 +25,8 @@ interface BoardHeaderProps {
   isAutoModeRunning: boolean;
   onAutoModeToggle: (enabled: boolean) => void;
   onOpenPlanDialog: () => void;
+  hasPendingPlan?: boolean;
+  onOpenPendingPlan?: () => void;
   isMounted: boolean;
   // Search bar props
   searchQuery: string;
@@ -50,6 +52,8 @@ export function BoardHeader({
   isAutoModeRunning,
   onAutoModeToggle,
   onOpenPlanDialog,
+  hasPendingPlan,
+  onOpenPendingPlan,
   isMounted,
   searchQuery,
   onSearchChange,
@@ -192,6 +196,15 @@ export function BoardHeader({
         {/* Plan Button with Settings - only show on desktop, mobile has it in the menu */}
         {isMounted && !isMobile && (
           <div className={controlContainerClass} data-testid="plan-button-container">
+            {hasPendingPlan && (
+              <button
+                onClick={onOpenPendingPlan || onOpenPlanDialog}
+                className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-400 transition-colors"
+                data-testid="plan-review-button"
+              >
+                <ClipboardCheck className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={onOpenPlanDialog}
               className="flex items-center gap-1.5 hover:text-foreground transition-colors"

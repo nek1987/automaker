@@ -2325,8 +2325,32 @@ export class HttpApiClient implements ElectronAPI {
     stop: (): Promise<{ success: boolean; error?: string }> =>
       this.post('/api/backlog-plan/stop', {}),
 
-    status: (): Promise<{ success: boolean; isRunning?: boolean; error?: string }> =>
-      this.get('/api/backlog-plan/status'),
+    status: (
+      projectPath: string
+    ): Promise<{
+      success: boolean;
+      isRunning?: boolean;
+      savedPlan?: {
+        savedAt: string;
+        prompt: string;
+        model?: string;
+        result: {
+          changes: Array<{
+            type: 'add' | 'update' | 'delete';
+            featureId?: string;
+            feature?: Record<string, unknown>;
+            reason: string;
+          }>;
+          summary: string;
+          dependencyUpdates: Array<{
+            featureId: string;
+            removedDependencies: string[];
+            addedDependencies: string[];
+          }>;
+        };
+      } | null;
+      error?: string;
+    }> => this.get(`/api/backlog-plan/status?projectPath=${encodeURIComponent(projectPath)}`),
 
     apply: (
       projectPath: string,
@@ -2347,6 +2371,9 @@ export class HttpApiClient implements ElectronAPI {
       branchName?: string
     ): Promise<{ success: boolean; appliedChanges?: string[]; error?: string }> =>
       this.post('/api/backlog-plan/apply', { projectPath, plan, branchName }),
+
+    clear: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
+      this.post('/api/backlog-plan/clear', { projectPath }),
 
     onEvent: (callback: (data: unknown) => void): (() => void) => {
       return this.subscribeToEvent('backlog-plan:event', callback as EventCallback);

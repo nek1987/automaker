@@ -951,6 +951,32 @@ export function BoardView() {
     return unsubscribe;
   }, []);
 
+  // Load any saved plan from disk when opening the board
+  useEffect(() => {
+    if (!currentProject || pendingBacklogPlan) return;
+
+    let isActive = true;
+    const loadSavedPlan = async () => {
+      const api = getElectronAPI();
+      if (!api?.backlogPlan) return;
+
+      const result = await api.backlogPlan.status(currentProject.path);
+      if (
+        isActive &&
+        result.success &&
+        result.savedPlan?.result &&
+        result.savedPlan.result.changes?.length > 0
+      ) {
+        setPendingBacklogPlan(result.savedPlan.result);
+      }
+    };
+
+    loadSavedPlan();
+    return () => {
+      isActive = false;
+    };
+  }, [currentProject, pendingBacklogPlan]);
+
   useEffect(() => {
     logger.info(
       '[AutoMode] Effect triggered - isRunning:',
@@ -1384,6 +1410,8 @@ export function BoardView() {
           }
         }}
         onOpenPlanDialog={() => setShowPlanDialog(true)}
+        hasPendingPlan={Boolean(pendingBacklogPlan)}
+        onOpenPendingPlan={() => setShowPlanDialog(true)}
         isMounted={isMounted}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

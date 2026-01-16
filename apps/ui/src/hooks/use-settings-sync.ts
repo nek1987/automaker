@@ -52,6 +52,7 @@ const SETTINGS_FIELDS_TO_SYNC = [
   'enabledOpencodeModels',
   'opencodeDefaultModel',
   'enabledDynamicModelIds',
+  'disabledProviders',
   'autoLoadClaudeMd',
   'keyboardShortcuts',
   'mcpServers',
@@ -477,6 +478,7 @@ export async function refreshSettingsFromServer(): Promise<boolean> {
       enabledOpencodeModels: sanitizedEnabledOpencodeModels,
       opencodeDefaultModel: sanitizedOpencodeDefaultModel,
       enabledDynamicModelIds: sanitizedDynamicModelIds,
+      disabledProviders: serverSettings.disabledProviders ?? [],
       autoLoadClaudeMd: serverSettings.autoLoadClaudeMd ?? false,
       keyboardShortcuts: {
         ...currentAppState.keyboardShortcuts,

@@ -112,6 +112,7 @@ export function useBoardActions({
       planningMode: PlanningMode;
       requirePlanApproval: boolean;
       dependencies?: string[];
+      childDependencies?: string[]; // Feature IDs that should depend on this feature
       workMode?: 'current' | 'auto' | 'custom';
     }) => {
       const workMode = featureData.workMode || 'current';
@@ -189,6 +190,21 @@ export function useBoardActions({
       await persistFeatureCreate(createdFeature);
       saveCategory(featureData.category);
 
+      // Handle child dependencies - update other features to depend on this new feature
+      if (featureData.childDependencies && featureData.childDependencies.length > 0) {
+        for (const childId of featureData.childDependencies) {
+          const childFeature = features.find((f) => f.id === childId);
+          if (childFeature) {
+            const childDeps = childFeature.dependencies || [];
+            if (!childDeps.includes(createdFeature.id)) {
+              const newDeps = [...childDeps, createdFeature.id];
+              updateFeature(childId, { dependencies: newDeps });
+              persistFeatureUpdate(childId, { dependencies: newDeps });
+            }
+          }
+        }
+      }
+
       // Generate title in the background if needed (non-blocking)
       if (needsTitleGeneration) {
         const api = getElectronAPI();
@@ -230,6 +246,7 @@ export function useBoardActions({
       onWorktreeCreated,
       onWorktreeAutoSelect,
       currentWorktreeBranch,
+      features,
     ]
   );
 
@@ -250,6 +267,8 @@ export function useBoardActions({
         planningMode?: PlanningMode;
         requirePlanApproval?: boolean;
         workMode?: 'current' | 'auto' | 'custom';
+        dependencies?: string[];
+        childDependencies?: string[]; // Feature IDs that should depend on this feature
       },
       descriptionHistorySource?: 'enhance' | 'edit',
       enhancementMode?: 'improve' | 'technical' | 'simplify' | 'acceptance' | 'ux-reviewer',
@@ -303,8 +322,11 @@ export function useBoardActions({
         }
       }
 
+      // Separate child dependencies from the main updates (they affect other features)
+      const { childDependencies, ...restUpdates } = updates;
+
       const finalUpdates = {
-        ...updates,
+        ...restUpdates,
         title: updates.title,
         branchName: finalBranchName,
       };
@@ -317,6 +339,45 @@ export function useBoardActions({
         enhancementMode,
         preEnhancementDescription
       );
+
+      // Handle child dependency changes
+      // This updates other features' dependencies arrays
+      if (childDependencies !== undefined) {
+        // Find current child dependencies (features that have this feature in their dependencies)
+        const currentChildDeps = features
+          .filter((f) => f.dependencies?.includes(featureId))
+          .map((f) => f.id);
+
+        // Find features to add this feature as a dependency (new child deps)
+        const toAdd = childDependencies.filter((id) => !currentChildDeps.includes(id));
+        // Find features to remove this feature as a dependency (removed child deps)
+        const toRemove = currentChildDeps.filter((id) => !childDependencies.includes(id));
+
+        // Add this feature as a dependency to new child features
+        for (const childId of toAdd) {
+          const childFeature = features.find((f) => f.id === childId);
+          if (childFeature) {
+            const childDeps = childFeature.dependencies || [];
+            if (!childDeps.includes(featureId)) {
+              const newDeps = [...childDeps, featureId];
+              updateFeature(childId, { dependencies: newDeps });
+              persistFeatureUpdate(childId, { dependencies: newDeps });
+            }
+          }
+        }
+
+        // Remove this feature as a dependency from removed child features
+        for (const childId of toRemove) {
+          const childFeature = features.find((f) => f.id === childId);
+          if (childFeature) {
+            const childDeps = childFeature.dependencies || [];
+            const newDeps = childDeps.filter((depId) => depId !== featureId);
+            updateFeature(childId, { dependencies: newDeps });
+            persistFeatureUpdate(childId, { dependencies: newDeps });
+          }
+        }
+      }
+
       if (updates.category) {
         saveCategory(updates.category);
       }
@@ -330,6 +391,7 @@ export function useBoardActions({
       currentProject,
       onWorktreeCreated,
       currentWorktreeBranch,
+      features,
     ]
   );
 

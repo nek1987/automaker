@@ -639,7 +639,30 @@ export interface ElectronAPI {
       model?: string
     ) => Promise<{ success: boolean; error?: string }>;
     stop: () => Promise<{ success: boolean; error?: string }>;
-    status: () => Promise<{ success: boolean; isRunning?: boolean; error?: string }>;
+    status: (projectPath: string) => Promise<{
+      success: boolean;
+      isRunning?: boolean;
+      savedPlan?: {
+        savedAt: string;
+        prompt: string;
+        model?: string;
+        result: {
+          changes: Array<{
+            type: 'add' | 'update' | 'delete';
+            featureId?: string;
+            feature?: Record<string, unknown>;
+            reason: string;
+          }>;
+          summary: string;
+          dependencyUpdates: Array<{
+            featureId: string;
+            removedDependencies: string[];
+            addedDependencies: string[];
+          }>;
+        };
+      } | null;
+      error?: string;
+    }>;
     apply: (
       projectPath: string,
       plan: {
@@ -658,6 +681,7 @@ export interface ElectronAPI {
       },
       branchName?: string
     ) => Promise<{ success: boolean; appliedChanges?: string[]; error?: string }>;
+    clear: (projectPath: string) => Promise<{ success: boolean; error?: string }>;
     onEvent: (callback: (data: unknown) => void) => () => void;
   };
   // Setup API surface is implemented by the main process and mirrored by HttpApiClient.

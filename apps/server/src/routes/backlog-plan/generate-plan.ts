@@ -17,7 +17,7 @@ import { resolvePhaseModel } from '@automaker/model-resolver';
 import { FeatureLoader } from '../../services/feature-loader.js';
 import { ProviderFactory } from '../../providers/provider-factory.js';
 import { extractJsonWithArray } from '../../lib/json-extractor.js';
-import { logger, setRunningState, getErrorMessage } from './common.js';
+import { logger, setRunningState, getErrorMessage, saveBacklogPlan } from './common.js';
 import type { SettingsService } from '../../services/settings-service.js';
 import { getAutoLoadClaudeMdSetting, getPromptCustomization } from '../../lib/settings-helpers.js';
 
@@ -199,6 +199,13 @@ ${userPrompt}`;
 
     // Parse the response
     const result = parsePlanResponse(responseText);
+
+    await saveBacklogPlan(projectPath, {
+      savedAt: new Date().toISOString(),
+      prompt,
+      model: effectiveModel,
+      result,
+    });
 
     events.emit('backlog-plan:event', {
       type: 'backlog_plan_complete',

@@ -57,8 +57,7 @@ export function Sidebar() {
   } = useAppStore();
 
   // Environment variable flags for hiding sidebar items
-  const { hideTerminal, hideWiki, hideRunningAgents, hideContext, hideSpecEditor } =
-    SIDEBAR_FEATURE_FLAGS;
+  const { hideTerminal, hideRunningAgents, hideContext, hideSpecEditor } = SIDEBAR_FEATURE_FLAGS;
 
   // Get customizable keyboard shortcuts
   const shortcuts = useKeyboardShortcutsConfig();
@@ -297,7 +296,6 @@ export function Sidebar() {
           sidebarOpen={sidebarOpen}
           isActiveRoute={isActiveRoute}
           navigate={navigate}
-          hideWiki={hideWiki}
           hideRunningAgents={hideRunningAgents}
           runningAgentsCount={runningAgentsCount}
           shortcuts={{ settings: shortcuts.settings }}

@@ -418,6 +418,10 @@ export interface GlobalSettings {
   /** Which dynamic OpenCode models are enabled (empty = all discovered) */
   enabledDynamicModelIds?: string[];
 
+  // Provider Visibility Settings
+  /** Providers that are disabled and should not appear in model dropdowns */
+  disabledProviders?: ModelProvider[];
+
   // Input Configuration
   /** User's keyboard shortcut bindings */
   keyboardShortcuts: KeyboardShortcuts;
@@ -730,6 +734,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   enabledOpencodeModels: getAllOpencodeModelIds(),
   opencodeDefaultModel: DEFAULT_OPENCODE_MODEL,
   enabledDynamicModelIds: [],
+  disabledProviders: [],
   keyboardShortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
   projects: [],
   trashedProjects: [],

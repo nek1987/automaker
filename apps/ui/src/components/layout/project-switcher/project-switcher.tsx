@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Plus, Bug, FolderOpen } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+import { Plus, Bug, FolderOpen, BookOpen } from 'lucide-react';
+import { useNavigate, useLocation } from '@tanstack/react-router';
 import { cn } from '@/lib/utils';
 import { useAppStore, type ThemeMode } from '@/store/app-store';
 import { useOSDetection } from '@/hooks/use-os-detection';
@@ -10,6 +10,7 @@ import { EditProjectDialog } from './components/edit-project-dialog';
 import { NewProjectModal } from '@/components/dialogs/new-project-modal';
 import { OnboardingDialog } from '@/components/layout/sidebar/dialogs';
 import { useProjectCreation, useProjectTheme } from '@/components/layout/sidebar/hooks';
+import { SIDEBAR_FEATURE_FLAGS } from '@/components/layout/sidebar/constants';
 import type { Project } from '@/lib/electron';
 import { getElectronAPI } from '@/lib/electron';
 import { initializeProject, hasAppSpec, hasAutomakerDir } from '@/lib/project-init';
@@ -31,6 +32,9 @@ function getOSAbbreviation(os: string): string {
 
 export function ProjectSwitcher() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { hideWiki } = SIDEBAR_FEATURE_FLAGS;
+  const isWikiActive = location.pathname === '/wiki';
   const {
     projects,
     currentProject,
@@ -123,6 +127,10 @@ export function ProjectSwitcher() {
     const api = getElectronAPI();
     api.openExternalLink('https://github.com/AutoMaker-Org/automaker/issues');
   }, []);
+
+  const handleWikiClick = useCallback(() => {
+    navigate({ to: '/wiki' });
+  }, [navigate]);
 
   /**
    * Opens the system folder selection dialog and initializes the selected project.
@@ -405,8 +413,37 @@ export function ProjectSwitcher() {
           )}
         </div>
 
-        {/* Bug Report Button at the very bottom */}
-        <div className="p-2 border-t border-border/40">
+        {/* Wiki and Bug Report Buttons at the very bottom */}
+        <div className="p-2 border-t border-border/40 space-y-2">
+          {/* Wiki Button */}
+          {!hideWiki && (
+            <button
+              onClick={handleWikiClick}
+              className={cn(
+                'w-full aspect-square rounded-xl flex items-center justify-center',
+                'transition-all duration-200 ease-out',
+                isWikiActive
+                  ? [
+                      'bg-gradient-to-r from-brand-500/20 via-brand-500/15 to-brand-600/10',
+                      'text-foreground',
+                      'border border-brand-500/30',
+                      'shadow-md shadow-brand-500/10',
+                    ]
+                  : [
+                      'text-muted-foreground hover:text-foreground',
+                      'hover:bg-accent/50 border border-transparent hover:border-border/40',
+                      'hover:shadow-sm hover:scale-105 active:scale-95',
+                    ]
+              )}
+              title="Wiki"
+              data-testid="wiki-button"
+            >
+              <BookOpen
+                className={cn('w-5 h-5', isWikiActive && 'text-brand-500 drop-shadow-sm')}
+              />
+            </button>
+          )}
+          {/* Bug Report Button */}
           <button
             onClick={handleBugReportClick}
             className={cn(

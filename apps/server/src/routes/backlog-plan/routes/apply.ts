@@ -5,7 +5,7 @@
 import type { Request, Response } from 'express';
 import type { BacklogPlanResult, BacklogChange, Feature } from '@automaker/types';
 import { FeatureLoader } from '../../../services/feature-loader.js';
-import { getErrorMessage, logError, logger } from '../common.js';
+import { clearBacklogPlan, getErrorMessage, logError, logger } from '../common.js';
 
 const featureLoader = new FeatureLoader();
 
@@ -151,6 +151,8 @@ export function createApplyHandler() {
         success: true,
         appliedChanges,
       });
+
+      await clearBacklogPlan(projectPath);
     } catch (error) {
       logError(error, 'Apply backlog plan failed');
       res.status(500).json({ success: false, error: getErrorMessage(error) });

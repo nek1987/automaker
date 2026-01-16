@@ -160,6 +160,7 @@ export function parseLocalStorageSettings(): Partial<GlobalSettings> | null {
       opencodeDefaultModel: state.opencodeDefaultModel as GlobalSettings['opencodeDefaultModel'],
       enabledDynamicModelIds:
         state.enabledDynamicModelIds as GlobalSettings['enabledDynamicModelIds'],
+      disabledProviders: (state.disabledProviders ?? []) as GlobalSettings['disabledProviders'],
       autoLoadClaudeMd: state.autoLoadClaudeMd as boolean,
       keyboardShortcuts: state.keyboardShortcuts as GlobalSettings['keyboardShortcuts'],
       mcpServers: state.mcpServers as GlobalSettings['mcpServers'],
@@ -574,6 +575,7 @@ export function hydrateStoreFromSettings(settings: GlobalSettings): void {
     enabledOpencodeModels: sanitizedEnabledOpencodeModels,
     opencodeDefaultModel: sanitizedOpencodeDefaultModel,
     enabledDynamicModelIds: sanitizedDynamicModelIds,
+    disabledProviders: settings.disabledProviders ?? [],
     autoLoadClaudeMd: settings.autoLoadClaudeMd ?? false,
     skipSandboxWarning: settings.skipSandboxWarning ?? false,
     keyboardShortcuts: {
@@ -628,6 +630,7 @@ function buildSettingsUpdateFromStore(): Record<string, unknown> {
     validationModel: state.validationModel,
     phaseModels: state.phaseModels,
     enabledDynamicModelIds: state.enabledDynamicModelIds,
+    disabledProviders: state.disabledProviders,
     autoLoadClaudeMd: state.autoLoadClaudeMd,
     skipSandboxWarning: state.skipSandboxWarning,
     keyboardShortcuts: state.keyboardShortcuts,

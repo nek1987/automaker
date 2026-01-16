@@ -606,6 +606,9 @@ export interface AppState {
   opencodeModelsLastFetched: number | null; // Timestamp of last successful fetch
   opencodeModelsLastFailedAt: number | null; // Timestamp of last failed fetch
 
+  // Provider Visibility Settings
+  disabledProviders: ModelProvider[]; // Providers that are disabled and hidden from dropdowns
+
   // Claude Agent SDK Settings
   autoLoadClaudeMd: boolean; // Auto-load CLAUDE.md files using SDK's settingSources option
   skipSandboxWarning: boolean; // Skip the sandbox environment warning dialog on startup
@@ -1021,6 +1024,11 @@ export interface AppActions {
     providers: Array<{ id: string; name: string; authenticated: boolean; authMethod?: string }>
   ) => void;
 
+  // Provider Visibility Settings actions
+  setDisabledProviders: (providers: ModelProvider[]) => void;
+  toggleProviderDisabled: (provider: ModelProvider, disabled: boolean) => void;
+  isProviderDisabled: (provider: ModelProvider) => boolean;
+
   // Claude Agent SDK Settings actions
   setAutoLoadClaudeMd: (enabled: boolean) => Promise<void>;
   setSkipSandboxWarning: (skip: boolean) => Promise<void>;
@@ -1264,6 +1272,7 @@ const initialState: AppState = {
   opencodeModelsError: null,
   opencodeModelsLastFetched: null,
   opencodeModelsLastFailedAt: null,
+  disabledProviders: [], // No providers disabled by default
   autoLoadClaudeMd: false, // Default to disabled (user must opt-in)
   skipSandboxWarning: false, // Default to disabled (show sandbox warning dialog)
   mcpServers: [], // No MCP servers configured by default
@@ -2153,6 +2162,16 @@ export const useAppStore = create<AppState & AppActions>()((set, get) => ({
         (provider) => provider.id !== OPENCODE_BEDROCK_PROVIDER_ID
       ),
     }),
+
+  // Provider Visibility Settings actions
+  setDisabledProviders: (providers) => set({ disabledProviders: providers }),
+  toggleProviderDisabled: (provider, disabled) =>
+    set((state) => ({
+      disabledProviders: disabled
+        ? [...state.disabledProviders, provider]
+        : state.disabledProviders.filter((p) => p !== provider),
+    })),
+  isProviderDisabled: (provider) => get().disabledProviders.includes(provider),
 
   // Claude Agent SDK Settings actions
   setAutoLoadClaudeMd: async (enabled) => {

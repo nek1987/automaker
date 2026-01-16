@@ -168,6 +168,7 @@ export function PhaseModelSelector({
     dynamicOpencodeModels,
     opencodeModelsLoading,
     fetchOpencodeModels,
+    disabledProviders,
   } = useAppStore();
 
   // Detect mobile devices to use inline expansion instead of nested popovers
@@ -278,8 +279,8 @@ export function PhaseModelSelector({
 
   // Filter Cursor models to only show enabled ones
   const availableCursorModels = CURSOR_MODELS.filter((model) => {
-    const cursorId = stripProviderPrefix(model.id) as CursorModelId;
-    return enabledCursorModels.includes(cursorId);
+    // Compare model.id directly since both model.id and enabledCursorModels use full IDs with prefix
+    return enabledCursorModels.includes(model.id as CursorModelId);
   });
 
   // Helper to find current selected model details
@@ -298,9 +299,7 @@ export function PhaseModelSelector({
       };
     }
 
-    const cursorModel = availableCursorModels.find(
-      (m) => stripProviderPrefix(m.id) === selectedModel
-    );
+    const cursorModel = availableCursorModels.find((m) => m.id === selectedModel);
     if (cursorModel) return { ...cursorModel, icon: CursorIcon };
 
     // Check if selectedModel is part of a grouped model
@@ -400,7 +399,7 @@ export function PhaseModelSelector({
     return [...staticModels, ...uniqueDynamic];
   }, [dynamicOpencodeModels]);
 
-  // Group models
+  // Group models (filtering out disabled providers)
   const { favorites, claude, cursor, codex, opencode } = useMemo(() => {
     const favs: typeof CLAUDE_MODELS = [];
     const cModels: typeof CLAUDE_MODELS = [];
@@ -408,41 +407,54 @@ export function PhaseModelSelector({
     const codModels: typeof transformedCodexModels = [];
     const ocModels: ModelOption[] = [];
 
-    // Process Claude Models
-    CLAUDE_MODELS.forEach((model) => {
-      if (favoriteModels.includes(model.id)) {
-        favs.push(model);
-      } else {
-        cModels.push(model);
-      }
-    });
+    const isClaudeDisabled = disabledProviders.includes('claude');
+    const isCursorDisabled = disabledProviders.includes('cursor');
+    const isCodexDisabled = disabledProviders.includes('codex');
+    const isOpencodeDisabled = disabledProviders.includes('opencode');
 
-    // Process Cursor Models
-    availableCursorModels.forEach((model) => {
-      if (favoriteModels.includes(model.id)) {
-        favs.push(model);
-      } else {
-        curModels.push(model);
-      }
-    });
+    // Process Claude Models (skip if provider is disabled)
+    if (!isClaudeDisabled) {
+      CLAUDE_MODELS.forEach((model) => {
+        if (favoriteModels.includes(model.id)) {
+          favs.push(model);
+        } else {
+          cModels.push(model);
+        }
+      });
+    }
 
-    // Process Codex Models
-    transformedCodexModels.forEach((model) => {
-      if (favoriteModels.includes(model.id)) {
-        favs.push(model);
-      } else {
-        codModels.push(model);
-      }
-    });
+    // Process Cursor Models (skip if provider is disabled)
+    if (!isCursorDisabled) {
+      availableCursorModels.forEach((model) => {
+        if (favoriteModels.includes(model.id)) {
+          favs.push(model);
+        } else {
+          curModels.push(model);
+        }
+      });
+    }
 
-    // Process OpenCode Models (including dynamic)
-    allOpencodeModels.forEach((model) => {
-      if (favoriteModels.includes(model.id)) {
-        favs.push(model);
-      } else {
-        ocModels.push(model);
-      }
-    });
+    // Process Codex Models (skip if provider is disabled)
+    if (!isCodexDisabled) {
+      transformedCodexModels.forEach((model) => {
+        if (favoriteModels.includes(model.id)) {
+          favs.push(model);
+        } else {
+          codModels.push(model);
+        }
+      });
+    }
+
+    // Process OpenCode Models (skip if provider is disabled)
+    if (!isOpencodeDisabled) {
+      allOpencodeModels.forEach((model) => {
+        if (favoriteModels.includes(model.id)) {
+          favs.push(model);
+        } else {
+          ocModels.push(model);
+        }
+      });
+    }
 
     return {
       favorites: favs,
@@ -451,7 +463,13 @@ export function PhaseModelSelector({
       codex: codModels,
       opencode: ocModels,
     };
-  }, [favoriteModels, availableCursorModels, transformedCodexModels, allOpencodeModels]);
+  }, [
+    favoriteModels,
+    availableCursorModels,
+    transformedCodexModels,
+    allOpencodeModels,
+    disabledProviders,
+  ]);
 
   // Group OpenCode models by model type for better organization
   const opencodeSections = useMemo(() => {
